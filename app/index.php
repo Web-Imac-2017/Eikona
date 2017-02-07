@@ -7,7 +7,7 @@
 
 	<body>
 	
-		HELLO WORLD
+		<a href="inscription.php">S'inscrire</a>
 
 	</body>
 
