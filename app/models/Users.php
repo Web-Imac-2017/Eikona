@@ -29,6 +29,5 @@ class Users{
 	public function getPasswd(){
 		return $this->passwd;
 	}
-
 }
 
