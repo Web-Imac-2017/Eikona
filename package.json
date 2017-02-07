@@ -1,0 +1,25 @@
+{
+  "name": "web-s2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web-Imac-2017/Groupe1.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Web-Imac-2017/Groupe1/issues"
+  },
+  "homepage": "https://github.com/Web-Imac-2017/Groupe1#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-livereload": "^3.8.1",
+    "gulp-util": "^3.0.8",
+    "run-sequence": "^1.2.2"
+  }
+}
