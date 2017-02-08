@@ -1,7 +1,7 @@
 <?php
-require_once "../DBInterface.php";
+require_once "class.dbinterface.php";
 
-class Profile
+class Profile extends DBInterface
 {
     private $pID; //ID of the profile
     private $p;
@@ -9,10 +9,19 @@ class Profile
     public function __construct($profileID)
     {
         //confirm the id before doing anything
-        //
+        $stmt = $cnx->prepare("SELECT COUNT(profile_id) FROM profiles WHERE profile_id == :pID");
+        $stmt->execute([":pID" => $profileID]);
         
+        //Profile ID not found
+        if($stmt->fetchColumn() == 0)
+            return null;
+
+        //profile found
+        $stmt = $cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private WHERE profile_id = :pID");
+        $stmt->execute([":pID" => $profileID]);
         
         $this->pID = profileID;
+        $this->p = $stmt->fetchAll();
     }
     
     //Retriving informations
@@ -33,53 +42,37 @@ class Profile
     
     public function getName()       //Return the name of the profile
     {
-        $sql = "SELECT profile_name FROM profiles WHERE profile_id = :pID";
-        $name = DBInterface::request($sql, [":pID" => $this->pID])->fetchColumn();
-        
-        return $name;
+        return $p['profile_name'];
     }
     
     public function getDesc() //Return the descrioption of the profile
     {
-        $sql = "SELECT profile_desc FROM profiles WHERE profile_id = :pID";
-        $desc = DBInterface::request($sql, [":pID" => $this->pID])->fetchColumn();
-        
-        return $desc;
+        return $p['profile_desc'];
     }    
     
     public function getViews() //Return the number of times the profile has been viewed
     {
-        $sql = "SELECT profile_views FROM profiles WHERE profile_id = :pID";
-        $views = DBInterface::request($sql, [":pID" => $this->pID])->fetchColumn();
-        
-        return $views;
+        return $p['profile_views'];
     }
     
     public function isPrivate() //Return true if the profile is private, false otherwise
     {
-        $sql = "SELECT profile_views FROM profiles WHERE profile_id = :pID";
-        $isPrivate = DBInterface::request($sql, [":pID" => $this->pID])->fetchColumn();
-        
-        return $isPrivate;   
+        return $p['profile_private'];
     }
     
     public function getOwner($returnID = false)//return a class User of the owner of the profile, or juste the ID of the profile if
     {
-        $sql = "SELECT user_id FROM profiles WHERE profile_id = :pID";
-        $uID = DBInterface::request($sql, [":pID" => $this->pID])->fetchColumn();
-        
         if($returnID)
         {
-            return $uID;
+            return $p['profile_id'];
         }
         
-        return new Users($uID);
+        return new Users($p['profile_id']);
     }
     
     public function getPosts($limit = 30)//Return the last 30 posts (or the given number) for this profile. They are ordered by date desc.
     {
-        $limit = $limit == 0 ? 
-        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID LIMIT :limit ORDER BY post_publish_time DESC";
+        $stmt = $cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID LIMIT :limit ORDER BY post_publish_time DESC");
         $posts = DBInterface::request($sql, [":pID" => $this->pID, "limit" => $limit])->fetchAll();
         
         return $posts;
