@@ -14,7 +14,9 @@
 			<input type="submit" value="ACTIVER">
 		</form>
 
-		<h4><?php echo $log; ?></h4>
+		<?php if(isset($log)): ?>
+		<h4><?php echo $log; ?></h4> 
+		<?php endif; ?>
 
 	</body>
 </html>
