@@ -1,8 +1,8 @@
 <?php
 
-require_once 'models/class.dbinterface.php';
-require_once 'models/class.inscription.php';
-require_once 'models/class.user.php';
+require_once '../models/class.dbinterface.php';
+require_once '../models/class.inscription.php';
+require_once '../models/class.user.php';
 
 $Inscription = new Inscription();
 
@@ -23,6 +23,6 @@ if(isset($log)){
 }
 
 
-require_once 'views/inscription.php';
+require_once '../views/inscription.php';
 
 ?>

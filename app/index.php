@@ -7,7 +7,8 @@
 
 	<body>
 	
-		<a href="inscription.php">S'inscrire</a>
+		<a href="controllers/inscription.php">S'inscrire</a>
+		<a href="controllers/connection.php">Connexion</a>
 
 	</body>
 
