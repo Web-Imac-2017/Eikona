@@ -22,6 +22,5 @@ class Autoloader
 
         if(file_exists("models/class.".$class.".php"))
             require_once "models/class.".$class.".php";
-        else throw new Exception("The class ".$class." could not be loaded : File not found");
     }
 }
