@@ -20,9 +20,12 @@ class Autoloader
     {
         $class = strtolower($class);
 
-        if(file_exists("models/class.".$class.".php"))
+        if(file_exists("models/class.".strtolower($class).".php"))
+            require_once "models/class.".strtolower($class).".php";
+        else if(file_exists("models/class.".$class.".php"))
             require_once "models/class.".$class.".php";
-        else
-            return;
+        else if(file_exists("controllers/".$class.".php"))
+            require_once "controllers/".$class.".php";
+        else return;
     }
 }
