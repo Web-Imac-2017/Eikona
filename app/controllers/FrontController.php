@@ -60,10 +60,28 @@ class FrontController
     protected function setController($controller)
     {
         $controller .= "Controller";
+
         if(class_exists($controller))
             $this->controller = $controller;
-        else throw new InvalidArgumentException("The controller ".$controller." could not be found.\n");
+        else throw new InvalidArgumentException("The controller ".$controller." could not be found.");
     }
 
+    protected function setAction($action)
+    {
+        $reflector = new reflectionclass($this->controller);
 
+        if($reflector->hasMethod($action))
+            $this->action = $action;
+        else throw new InvalidArgumentException("The action ".$action." is not a method of the ".$this->controller.".");
+    }
+
+    protected function setParams(array $params)
+    {
+        $this->params = $params;
+    }
+
+    public function run()
+    {
+        call_user_func_array(array(new $this->controller, $this->action), $this->params);
+    }
 }
