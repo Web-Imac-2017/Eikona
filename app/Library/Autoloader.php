@@ -10,7 +10,6 @@ class Autoloader
     public static function register()
     {
         spl_autoload_register(array(__CLASS__, 'autoload'));
-        $this->staticLoads();
     }
 
     /**
@@ -21,12 +20,12 @@ class Autoloader
     {
         $class = strtolower($class);
 
-        if(file_exists("models/.".$class."Model.php"))
-            require_once "models/.".$class."Model.php";
-        else if(file_exists("views/class.".$class."View.php"))
-            require_once "models/views.".$class."View.php";
-        else if(file_exists("controllers/".$class."Controller.php"))
-            require_once "controllers/".$class."Controller.php";
+        if(file_exists("models/.".$class.".php"))
+            require_once "models/.".$class.".php";
+        else if(file_exists("views/class.".$class.".php"))
+            require_once "models/views.".$class.".php";
+        else if(file_exists("controllers/".$class.".php"))
+            require_once "controllers/".$class.".php";
         else return;
     }
 
@@ -35,6 +34,6 @@ class Autoloader
      */
     static function staticLoads()
     {
-        require_once "../DBInterface.php";
+        require_once "Library/DBInterface.php";
     }
 }
