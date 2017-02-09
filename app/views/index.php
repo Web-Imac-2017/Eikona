@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title></title>
-</head>
-<body>
-	<h1>TU ES CONNECTE</h1>
-</body>
+	<head>
+		<title>Connecté</title>
+		<meta charset="utf-8">
+	</head>
+
+	<body>
+
+		<h1>Bonjour <?php echo $_SESSION['user']->getName(); ?>, tu es connecté.</h1>
+		
+	</body>
 </html>

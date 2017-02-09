@@ -8,7 +8,7 @@ class Login extends DBInterface{
 		$res = $this->cnx->query($sql);
 		if($res->rowCount() == 1){
 			$u = $res->fetch(PDO::FETCH_ASSOC);
-			$User = new User($u['user_id'], $u['user_name'], $u['user_email'], $u['user_passwd']);
+			$User = new User($u['user_id'], $u['user_name'], $u['user_email'], $u['user_passwd'], $u['user_activated']);
 			return $User;
 		}else{
 			return null;
