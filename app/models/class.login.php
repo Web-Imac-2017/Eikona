@@ -2,6 +2,12 @@
 
 class Login extends DBInterface{
 
+	/**
+	 * Fonction qui va checker la combinaison email / mot de passe pour la connection
+	 * @param  text $email  Email de l'user
+	 * @param  text $passwd Mot de passe (non crypté) de l'user
+	 * @return boolean / User         class User si oui, null sinon
+	 */
 	public function checkAuthentification($email, $passwd){
 		$pwd = hash('sha256', $passwd);
 		$sql = "SELECT * FROM users WHERE '$email' = user_email AND '$pwd' = user_passwd";

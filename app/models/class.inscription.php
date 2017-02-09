@@ -4,8 +4,8 @@ class Inscription extends DBInterface{
 
 	/**
 	 * Vérifie si l'utilisateur (email) n'est pas présent dans la database (mail unique)
-	 * @param   $email email à vérifier]=
-	 * @return         [true si utilsateur ]
+	 * @param   $email email à vérifier
+	 * @return         true si utilisateur unique, false sinon
 	 */
 	public function uniqueUser($email){
 		$sql = "SELECT user_email FROM users WHERE user_email = '$email'";
@@ -17,12 +17,24 @@ class Inscription extends DBInterface{
 		}
 	}
 	
+	/**
+	 * Ajoute un nouvel utilisateur dans la database
+	 * @param text $name   Le nom de l'utilisateur
+	 * @param text $email  L'email de l'utilisateur
+	 * @param text $passwd Le mot de passe non crypté de l'utilisateur
+	 * @param time $time   L'heure (tout en seconde) de son inscription
+	 */
 	public function addUser($name, $email, $passwd, $time){
 		$pass = hash('sha256', $passwd);		
 		$sql = "INSERT INTO users (user_name, user_email, user_passwd, user_register_time) VALUES('$name', '$email', '$pass', '$time')";
 		$res = $this->cnx->query($sql);
 	}
 
+	/**
+	 * Envoi un mail d'activation à l'utilisateur
+	 * @param  text $email L'email de l'utilisateur sur lequel envoyé le mail
+	 * @param  time $time  L'heure d'inscription (va permettre à générer une clé de vérification)
+	 */
 	public function sendMail($email, $time){
 		$subject = 'Activez votre compte Ekona';
 
@@ -51,7 +63,12 @@ class Inscription extends DBInterface{
 		mail($email, $subject, $content, $headers);
 	}
 
-	
+	/**
+	 * Vérifie di l'utilisateur existe bel est bien dans la database
+	 * @param  int $id  id de l'utilisateur
+	 * @param  text $key clé pour une meilleur sécurité
+	 * @return boolean      true si oui, false sinon
+	 */
 	public function checkUserExists($id, $key){
 		$sql = "SELECT user_id, user_register_time, user_activated FROM users WHERE '$id' = user_id AND '$key' = sha1(user_register_time)";
 		$res = $this->cnx->query($sql);
@@ -61,10 +78,4 @@ class Inscription extends DBInterface{
 			return false;
 		}
 	}
-
-	public function updateUserActivated($id){
-		$sql = "UPDATE users SET user_activated = 1 WHERE '$id' = user_id";
-		$this->cnx->query($sql);
-	}
-
 }
