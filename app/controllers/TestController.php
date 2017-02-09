@@ -1,9 +1,9 @@
 <?php
 class TestController
 {
-    public function update()
+    public function update($new)
     {
-
+        echo $new;
     }
 
     public function get()
