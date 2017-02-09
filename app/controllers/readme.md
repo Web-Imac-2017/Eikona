@@ -14,5 +14,7 @@ Les fichiers doivent se nommer : **<Nomdelaclass>Controller.php**
 Les classes controllers doivent toutes avoir le suffixe **Controller**
 
 **Exemple** pour *Users*
+```
     UsersController.php
     class UsersController { }
+```
