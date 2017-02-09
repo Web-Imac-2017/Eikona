@@ -22,5 +22,7 @@ class Autoloader
 
         if(file_exists("models/class.".$class.".php"))
             require_once "models/class.".$class.".php";
+        else
+            return;
     }
 }
