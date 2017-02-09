@@ -7,7 +7,7 @@ class FrontController
     /**
      * Set default values
      */
-    protected $controller  = "index";
+    protected $controller  = "IndexController";
     protected $action      = "index";
     protected $params      = [];
 
@@ -56,4 +56,14 @@ class FrontController
         if(isset($params))
             $this->setParams(explode("/", $params));
     }
+
+    protected function setController($controller)
+    {
+        $controller .= "Controller";
+        if(class_exists($controller))
+            $this->controller = $controller;
+        else throw new InvalidArgumentException("The controller ".$controller." could not be found.\n");
+    }
+
+
 }
