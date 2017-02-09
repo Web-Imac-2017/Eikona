@@ -9,5 +9,6 @@ Autoloader::register();
 Autoloader::staticLoads();
 
 $frontController = new FrontController();
+$frontController->run();
 
 ?>
