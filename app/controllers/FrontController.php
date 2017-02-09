@@ -19,15 +19,23 @@ class FrontController
     /**
      * Init the FrontController
      *
-     * @param $args array
+     * @param $args array Must respect this format to work : ["controller" => "", "action" => "", "params" => []]
      */
     public function __construct(array $args = NULL)
     {
         if($args == NULL)
-        {
             $this->parseURI();
+        else
+        {
+            if(isset($options['controller']))
+                $this->setController($options['controller']);
+
+            if(isset($options['action']))
+                $this->setAction($options['action']);
+
+            if(isset($options['params']))
+                $this->setParams($options['params']);
         }
-        else { }
     }
 
     /**
@@ -47,6 +55,7 @@ class FrontController
         //Get all given variables
         @list($controller, $action, $params) = explode("/", $path, 3);
 
+        //Assing new values
         if(isset($controller))
             $this->setController($controller);
 
