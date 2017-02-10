@@ -20,13 +20,16 @@ class Autoloader
     {
         $class = strtolower($class);
 
-        if(file_exists("models/.".$class.".php"))
-            require_once "models/.".$class.".php";
-        else if(file_exists("views/class.".$class.".php"))
-            require_once "models/views.".$class.".php";
+        if(file_exists("models/".$class.".php"))
+            require_once "models/".$class.".php";
+        else if(file_exists("views/".$class.".php"))
+            require_once "models/".$class.".php";
         else if(file_exists("controllers/".$class.".php"))
             require_once "controllers/".$class.".php";
-        else return;
+        else if(file_exists("Library/".$class.".php"))
+            require_once "Library/".$class.".php";
+        else
+            return;
     }
 
     /**
@@ -34,6 +37,5 @@ class Autoloader
      */
     static function staticLoads()
     {
-        require_once "Library/DBInterface.php";
     }
 }
