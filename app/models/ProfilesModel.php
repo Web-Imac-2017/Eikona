@@ -1,14 +1,25 @@
-<?php-
-class Profile extends DBInterface-
+<?php
+class Profile extends DBInterface
 {
-    private $pID; //ID of the profile
+    /**
+     * Internal varibales
+     */
+    private $pID;
     private $p;
 
+
+
+
+    /**
+     * Class constructor
+     *
+     * @param $profileID Profile to be used unique ID
+     */
     public function __construct($profileID)
     {
         parent::__construct();
 
-        //confirm the id before doing anything
+        //Confirm the id before doing anything
         $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $profileID]);
 
@@ -24,13 +35,21 @@ class Profile extends DBInterface-
         $this->p = $stmt->fetch();
     }
 
-    //Retriving informations
-    public function getID()         //Return the ID of the profile
+
+
+
+    /**
+     * Return the ID of the profile
+     */
+    public function getID()
     {
         return $this->pID;
     }
 
-    public function getPic()        //Return path to the profile picture
+    /**
+     * Return the path to the profile picture
+     */
+    public function getPic()
     {
         if(file_exists("PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg"))
         {
@@ -40,27 +59,42 @@ class Profile extends DBInterface-
         return "PATH/TO/DEFAULT/PROFILE/PICTURE";
     }
 
-    public function getName()       //Return the name of the profile
+    /**
+     * Return the name of the profile
+     */
+    public function getName()
     {
         return $this->p['profile_name'];
     }
 
-    public function getDesc() //Return the descrioption of the profile
+    /**
+     * Return the Description of the profile
+     */
+    public function getDesc()
     {
         return $this->p['profile_desc'];
     }
 
-    public function getViews() //Return the number of times the profile has been viewed
+    /**
+     * Return the number of times the profile has beed viewed
+     */
+    public function getViews()
     {
         return $this->p['profile_views'];
     }
 
-    public function isPrivate() //Return true if the profile is private, false otherwise
+    /**
+     * Return true if the profile is private, false otherwise
+     */
+    public function isPrivate()
     {
         return $this->p['profile_private'];
     }
 
-    public function getOwner($returnID = false)//return a class User of the owner of the profile, or juste the ID of the profile if
+    /**
+     * Return the ID of the owner of the profile
+     */
+    public function getOwner($returnID = false)
     {
         if($returnID)
         {
@@ -70,13 +104,21 @@ class Profile extends DBInterface-
         return new Users($this->p['user_id']);
     }
 
-    public function getPosts($limit = 30)//Return the last 30 posts (or the given number) for this profile. They are ordered by date desc.
+    /**
+     * Return the last X posts published by the profile
+     *
+     * @param $limit int Number of posts to return. Defautl 30.
+     */
+    public function getPosts($limit = 30)
     {
         $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID LIMIT :limit ORDER BY post_publish_time DESC");
-        $posts = DBInterface::request($sql, [":pID" => $this->pID, "limit" => $limit])->fetchAll();
+        $posts = $stmt->execute([":pID" => $this->pID, "limit" => $limit])->fetchAll();
 
         return $posts;
     }
+
+
+
 
     //updating informations
     public function updateName($newName) {}
