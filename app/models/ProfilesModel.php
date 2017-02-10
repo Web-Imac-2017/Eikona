@@ -4,8 +4,8 @@ class ProfilesModel extends DBInterface
     /**
      * Internal varibales
      */
-    private $pID;
-    private $p;
+    private $pID = NULL;
+    private $p   = NULL;
 
 
 
@@ -15,12 +15,17 @@ class ProfilesModel extends DBInterface
      *
      * @param $profileID Profile to be used unique ID
      */
-    public function __construct($profileID)
+    public function __construct($profileID = 0)
     {
         parent::__construct();
 
-        if(!ctype_digit(strval($profileID)) || $profileID < 1)
-            return null;
+        $this->setProfile($profileID);
+    }
+
+    public function setProfile($profileID)
+    {
+        if(!ctype_digit(strval($profileID)) || $profileID < 1 || $profileID == $this->pID)
+            return 0;
 
         //Confirm the id before doing anything
         $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_id = :pID");
@@ -28,7 +33,7 @@ class ProfilesModel extends DBInterface
 
         //Profile ID not found
         if($stmt->fetchColumn() == 0)
-            return null;
+            return 0;
 
         //profile found
         $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
