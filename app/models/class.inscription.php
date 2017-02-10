@@ -8,8 +8,9 @@ class Inscription extends DBInterface{
 	 * @return         true si utilisateur unique, false sinon
 	 */
 	public function uniqueUser($email){
-		$sql = "SELECT user_email FROM users WHERE user_email = '$email'";
-		$res = $this->cnx->query($sql);
+        $res = $this->cnx->prepare("SELECT user_email FROM users WHERE user_email = :email");
+		$res->execute([":email" => $email]);
+
 		if($res->rowCount() == 0){
 			return true;
 		}else{
@@ -26,8 +27,11 @@ class Inscription extends DBInterface{
 	 */
 	public function addUser($name, $email, $passwd, $time){
 		$pass = hash('sha256', $passwd);		
-		$sql = "INSERT INTO users (user_name, user_email, user_passwd, user_register_time) VALUES('$name', '$email', '$pass', '$time')";
-		$res = $this->cnx->query($sql);
+		$res = $this->cnx->prepare("INSERT INTO users (user_name, user_email, user_passwd, user_register_time) VALUES(:name, :email, :pass, :time)");
+		$res->execute([":name" => $name,
+                       ":email" => $email,
+                       ":pass" => $pass,
+                       ":time" => $time]);
 	}
 
 	/**
@@ -70,8 +74,9 @@ class Inscription extends DBInterface{
 	 * @return boolean      true si oui, false sinon
 	 */
 	public function checkUserExists($id, $key){
-		$sql = "SELECT user_id, user_register_time, user_activated FROM users WHERE '$id' = user_id AND '$key' = sha1(user_register_time)";
-		$res = $this->cnx->query($sql);
+		$res = $this->cnx->preapre("SELECT user_id, user_register_time, user_activated FROM users WHERE :uID = user_id AND :key = sha1(user_register_time)");
+		$res->execute([":uID" => $id,
+                       ":key" => $key]);
 		if($res->rowCount() == 1){
 			return true; 
 		}else{
