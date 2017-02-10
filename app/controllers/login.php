@@ -11,9 +11,13 @@ $Login = new Login();
 if(!isset($_SESSION['user'])){
 	if(isset($_POST["user_email"]) && !empty($_POST["user_email"]) && !empty($_POST["user_passwd"])){
 		$user = $Login->checkAuthentification($_POST["user_email"], $_POST["user_passwd"]);
-		if($user != null && $user->getActivated() == true){
-			$_SESSION['user'] = $user;
-			header("LOCATION: index.php");
+		if($user != null){
+			if(!$user->getActivated()){
+				$log = "Votre compte n'est pas activé";
+			}else{
+				$_SESSION['user'] = $user;
+				header("LOCATION: index.php");
+			}			
 		}
 	}
 }

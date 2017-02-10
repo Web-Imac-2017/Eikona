@@ -11,7 +11,7 @@ class Login extends DBInterface{
 	public function checkAuthentification($email, $passwd){
 		$pwd = hash('sha256', $passwd);
 		$res = $this->cnx->prepare("SELECT * FROM users WHERE :email = user_email AND :passwd = user_passwd");
-		$res->execute([":email" => $email,
+		$res->execute([":email"  => $email,
                        ":passwd" => $pwd]);
 		if($res->rowCount() == 1){
 			$u = $res->fetch(PDO::FETCH_ASSOC);

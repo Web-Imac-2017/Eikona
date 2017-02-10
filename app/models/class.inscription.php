@@ -10,7 +10,6 @@ class Inscription extends DBInterface{
 	public function uniqueUser($email){
         $res = $this->cnx->prepare("SELECT user_email FROM users WHERE user_email = :email");
 		$res->execute([":email" => $email]);
-
 		if($res->rowCount() == 0){
 			return true;
 		}else{
@@ -28,10 +27,11 @@ class Inscription extends DBInterface{
 	public function addUser($name, $email, $passwd, $time){
 		$pass = hash('sha256', $passwd);		
 		$res = $this->cnx->prepare("INSERT INTO users (user_name, user_email, user_passwd, user_register_time) VALUES(:name, :email, :pass, :time)");
-		$res->execute([":name" => $name,
+		$res->execute([":name"  => $name,
                        ":email" => $email,
-                       ":pass" => $pass,
-                       ":time" => $time]);
+                       ":pass"  => $pass,
+                       ":time"  => $time]);
+		return $this->cnx->lastInsertId();
 	}
 
 	/**
@@ -39,7 +39,7 @@ class Inscription extends DBInterface{
 	 * @param  text $email L'email de l'utilisateur sur lequel envoyé le mail
 	 * @param  time $time  L'heure d'inscription (va permettre à générer une clé de vérification)
 	 */
-	public function sendMail($email, $time){
+	public function sendMail($email, $time, $id){
 		$subject = 'Activez votre compte Ekona';
 
 		$content = "
@@ -52,11 +52,11 @@ class Inscription extends DBInterface{
 			<body>
 				<h2>Pour activer votre compte, veuillez appuyer sur le bouton ci-dessous</h2>
 				<form method='POST' action='localhost/Groupe1/app/controllers/activation.php'>
-					<input type='hidden' value='".$this->cnx->lastInsertId()."' name='id'>
+					<input type='hidden' value='".$id."' name='id'>
 					<input type='hidden' value='".sha1($time)."' name='key'>
 					<input type='submit' value='ACTIVER'>
 				</form>	
-				<h3>Si le formulaire ne s'affiche pas correctement, <a href='localhost/Groupe1/app/controllers/activation.php?id=".$this->cnx->lastInsertId()."&key=".sha1($time)."'>veuillez suivre ce lien.</a>	
+				<h3>Si le formulaire ne s'affiche pas correctement, <a href='localhost/Groupe1/app/controllers/activation.php?id=".$id."&key=".sha1($time)."'>veuillez suivre ce lien.</a>	
 			</body>
 		</html>";
 
@@ -74,7 +74,7 @@ class Inscription extends DBInterface{
 	 * @return boolean      true si oui, false sinon
 	 */
 	public function checkUserExists($id, $key){
-		$res = $this->cnx->preapre("SELECT user_id, user_register_time, user_activated FROM users WHERE :uID = user_id AND :key = sha1(user_register_time)");
+		$res = $this->cnx->prepare("SELECT user_id, user_register_time, user_activated FROM users WHERE :uID = user_id AND :key = sha1(user_register_time)");
 		$res->execute([":uID" => $id,
                        ":key" => $key]);
 		if($res->rowCount() == 1){
@@ -82,5 +82,14 @@ class Inscription extends DBInterface{
 		}else{
 			return false;
 		}
+	}
+
+	/**
+	 * Active le compte du l'utilisateur
+	 * @param  int $id id de l'utilisateur
+	 */
+	public function updateUserActivated($id){
+		$res = $this->cnx->prepare("UPDATE users SET user_activated = 1 WHERE :uID = user_id");
+		$res->execute([":uID" => $id]);
 	}
 }
