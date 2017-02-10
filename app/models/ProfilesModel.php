@@ -35,6 +35,19 @@ class Profile extends DBInterface
         $this->p = $stmt->fetch();
     }
 
+    /**
+     * Create a new profile
+     *
+     * @param $userID ID of the user
+     * @param $name Name of the new profile
+     * @param $desc Description of the new profile
+     * @param $private bool Privacy setting for the new profile
+     */
+    public function create($userID, $name, $desc, $private)
+    {
+
+    }
+
 
 
 
@@ -129,5 +142,7 @@ class Profile extends DBInterface
 
     public function setPrivate() {}
     public function setPublic() {}
+
+    public function removeProfile($profileID) {}
 }
 ?>
