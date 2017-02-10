@@ -2,6 +2,14 @@
 
 class ProfilesController
 {
+    private $model;
+    private $view;
+
+    public function __construct()
+    {
+        $this->model = new ProfilesModel();
+    }
+
     /**
      * Create a new profile for the current user
      */
@@ -66,7 +74,32 @@ class ProfilesController
      * @param $field Field to be updated
      * @param $profileID ID of the profile
      */
-    public function update($field, $profileID){ }
+    public function update($field, $profileID)
+    {
+        /*
+         * Only allow users who have authority on this profile to update
+         */
+
+        $this->model->setProfile($profileID);
+
+        switch($field)
+        {
+            case "name":
+                $this->model->updateName($_POST['newValue']);
+            break;
+            case "description":
+                $this->model->updateDesc($_POST['newValue']);
+            break;
+            case "setPrivate":
+                    $this->model->setPrivate();
+            break;
+            case "setPublic":
+                    $this->model->setPublic();
+            break;
+            default;
+                throw new InvalidArgumentException ("The field '".$field."'Is invalid.");
+        }
+    }
     /**
      * Increment by one (or more) the view counter of the specified profile
      *
