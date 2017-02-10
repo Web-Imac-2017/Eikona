@@ -73,6 +73,8 @@ class FrontController
         if(class_exists($controller))
             $this->controller = $controller;
         else throw new InvalidArgumentException("The controller ".$controller." could not be found.");
+
+        return $this;
     }
 
     protected function setAction($action)
@@ -82,11 +84,15 @@ class FrontController
         if($reflector->hasMethod($action))
             $this->action = $action;
         else throw new InvalidArgumentException("The action ".$action." is not a method of the ".$this->controller.".");
+
+        return $this;
     }
 
     protected function setParams(array $params)
     {
         $this->params = $params;
+
+        return $this;
     }
 
     public function run()
