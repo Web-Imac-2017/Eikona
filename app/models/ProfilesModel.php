@@ -1,5 +1,5 @@
 <?php
-class Profile extends DBInterface
+class ProfilesModel extends DBInterface
 {
     /**
      * Internal varibales
@@ -18,6 +18,9 @@ class Profile extends DBInterface
     public function __construct($profileID)
     {
         parent::__construct();
+
+        if(!ctype_digit(strval($profileID)) || $profileID < 1)
+            return null;
 
         //Confirm the id before doing anything
         $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_id = :pID");
@@ -134,15 +137,87 @@ class Profile extends DBInterface
 
 
     //updating informations
-    public function updateName($newName) {}
-    public function updateDesc($newDesc) {}
-    public function updatePic($newPic) {}
 
-    public function addView($nbr = 1) {}
+    /**
+     * Update the name of the profile
+     *
+     * @param $newName New name of the new profile
+     */
+    public function updateName($newName)
+    {
+        $name = Secure::string($newName);
 
-    public function setPrivate() {}
-    public function setPublic() {}
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_name = :name WHERE profile_id = :pID");
+        $stmt->execute([":name" => $name,
+                        ":pID" => $this->pID]);
 
-    public function removeProfile($profileID) {}
+        echo $name."<br>".$this->pID."<br>";
+
+        print_r($this->cnx->errorInfo());
+
+        $this->p['profile_name'] = $name;
+    }
+
+    /**
+     * Update the description of the profile
+     *
+     * @param $newDesc New description of the new profile
+     */
+    public function updateDesc($newDesc)
+    {
+        $desc = Secure::string($newDesc);
+
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_desc = :desc WHERE profile_id = :pID");
+        $stmt->execute([":desc" => $desc,
+                        ":pID" => $this->pID]);
+
+        $this->p['profile_desc'] = $desc;
+    }
+
+    /**
+     * Add views to the profile
+     *
+     * @param $nbr Number of views to add
+     */
+    public function addView($nbr = 1)
+    {
+        if(!ctype_digit(strval($nbr)) || $nbr < 1)
+            $nbr = 1;
+
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_views = profile_views + :nbr WHERE profile_id = :pID");
+        $stmt->execute([":nbr" => $nbr,
+                        ":pID" => $this->pID]);
+
+        $this->p['profile_views'] += $nbr;
+    }
+
+
+    /**
+     * Update privacy setting to private
+     */
+    public function setPrivate()
+    {
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 1 WHERE profile_id = :pID");
+        $stmt->execute([":pID" => $this->pID]);
+
+        $this->p['profile_private'] = 1;
+    }
+
+    /**
+     * Update privacy setting to public
+     */
+    public function setPublic()
+    {
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 0 WHERE profile_id = :pID");
+        $stmt->execute([":pID" => $this->pID]);
+
+        $this->p['profile_private'] = 0;
+    }
+
+
+    /**
+     * Delete the profile
+     */
+    public function deleteProfile() {}
 }
 ?>
