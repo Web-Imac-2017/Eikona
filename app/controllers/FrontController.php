@@ -21,9 +21,9 @@ class FrontController
      *
      * @param $args array Must respect this format to work : ["controller" => "", "action" => "", "params" => []]
      */
-    public function __construct(array $args = NULL)
+    public function __construct(array $args = [])
     {
-        if($args == NULL)
+        if(empty($args))
             $this->parseURI();
         else
         {
@@ -47,7 +47,7 @@ class FrontController
         $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
         //Remove basepath
-        if(strpos($path, $this->basePath) == 0)
+        if(strpos($path, $this->basePath) === 0)
         {
             $path = substr($path, strlen($this->basePath));
         }
