@@ -161,7 +161,7 @@ class ProfilesModel extends DBInterface
         if($this->pID == NULL)
             return;
 
-        $name = Secure::string($newName);
+        Sanitize::string($newName);
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_name = :name WHERE profile_id = :pID");
         $stmt->execute([":name" => $name,
@@ -184,7 +184,7 @@ class ProfilesModel extends DBInterface
         if($this->pID == NULL)
             return;
 
-        $desc = Secure::string($newDesc);
+        Sanitize::string($newDesc);
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_desc = :desc WHERE profile_id = :pID");
         $stmt->execute([":desc" => $desc,
