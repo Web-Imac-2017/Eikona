@@ -1,5 +1,6 @@
 <?php
 session_start();
+setlocale(LC_ALL, "fr_FR.utf8");
 /**
  * Do.php recoit les appels aux controlleurs et les rediriges vers le controlleur concerné.
  */
