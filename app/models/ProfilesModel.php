@@ -24,7 +24,9 @@ class ProfilesModel extends DBInterface
 
     public function setProfile($profileID)
     {
-        if(!ctype_digit(strval($profileID)) || $profileID < 1 || $profileID == $this->pID)
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID < 1 || $profileID == $this->pID)
         {
             $this->p = NULL;
             $this->pID = NULL;
@@ -61,7 +63,26 @@ class ProfilesModel extends DBInterface
      */
     public function create($userID, $name, $desc, $private)
     {
+        $uID = Sanitize::int($integer);
+        $name = Sanitize::string($name, true);
+        $desc = Sanitize::string($desc);
+        $private = Sanitize::boolean($private);
 
+        if($uID < 1)
+            return 0;
+
+        $stmt = $this->cnx->prepare("INSERT INTO profiles(user_id, profile_name, profile_desc, profile_private, profile_create_time) VALUES(:uID, :name, :desc, :private, :create)");
+        $stmt->execute([":uID" => $uID,
+                        ":name" => $name,
+                        ":desc" => $desc,
+                        ":private" => $private,
+                        ":create" => time()]);
+
+        $pID = $this->cnx->lastInsertId();
+
+        $this->setProfile($pID);
+
+        return $pID;
     }
 
 

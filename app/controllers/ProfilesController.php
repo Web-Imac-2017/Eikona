@@ -12,10 +12,27 @@ class ProfilesController
 
     /**
      * Create a new profile for the current user
+     *
+     * @return ID of the newly created profile, 0 if it fails.
      */
     public function create()
     {
+        /**
+         * Verify if user is connected
+         */
 
+        if(empty($_POST['profileName']))
+            return;
+
+        $name = $_POST['profileName'];
+        $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
+        $isPrivate = isset($_POST['profilePrivate']) ? true : false;
+
+        $uID = 1; //Get current user ID
+
+        $pID = $this->model->create($uID, $name, $desc, $private);
+
+        return $pID;
     }
 
     /**
