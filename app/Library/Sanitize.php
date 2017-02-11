@@ -46,11 +46,24 @@ class Sanitize
     static public function int($integer)
     {
         if(!ctype_digit(strval($integer))
-           $integer = 0;
-        else
-           $integer = intval($integer);
+           return 0;
 
-        return $integer;
+        return intval($integer)
+    }
+
+    static public function boolean($bool)
+    {
+        switch (strtolower($var))
+        {
+            case '1':
+            case 'true':
+            case 'on':
+            case 'yes':
+            case 'y':
+                return true;
+            default:
+                return false;
+        }
     }
 }
 
