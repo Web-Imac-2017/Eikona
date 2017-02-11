@@ -12,7 +12,7 @@ class Sanitize
         $string = htmlspecialchars($string, ENT_QUOTES);
 
         if($removeEmojis)
-            $string = Sanitize::removeEmojis($string);
+            $string = self::removeEmojis($string);
 
         return $string;
     }
@@ -43,6 +43,11 @@ class Sanitize
 
     }
 
+    /**
+     * Validate $integer to be a integer. return value as integer if true, 0 otherwise.
+     *
+     * @param $integer The string to be parsed
+     */
     static public function int($integer)
     {
         if(!ctype_digit(strval($integer))
@@ -51,6 +56,11 @@ class Sanitize
         return intval($integer)
     }
 
+    /**
+     * Validate $boolean to be a boolean. return the value of the boolean if true, false otherwise.
+     *
+     * @param $boolean The string to be parsed
+     */
     static public function boolean($bool)
     {
         switch (strtolower($var))
@@ -65,5 +75,24 @@ class Sanitize
                 return false;
         }
     }
-}
 
+    /**
+     * Format the given string to an acceptable string for profiles
+     *
+     * @param $boolean The string to be parsed
+     */
+    static public function profileName($pName)
+    {
+        //replace accented characters
+        $name = iconv('UTF-8', 'ASCII//TRANSLIT', $pName);
+
+        //Remove unwanted characters
+        $name = filter_var($name, FILTER_SANITIZE_URL);
+
+        $name = preg_replace('/[\$+!*\'(),\{\}\|\\\^~[\]`<>#%";/?:@&=\s]/', '', $name);
+        //make sure the string is not too long
+        $name = substr($name, 0, 30);
+
+        return $pName;
+    }
+}

@@ -182,7 +182,7 @@ class ProfilesModel extends DBInterface
         if($this->pID == NULL)
             return;
 
-        $name = Sanitize::string($newName, true);
+        $name = Sanitize::profileName($newName);
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_name = :name WHERE profile_id = :pID");
         $stmt->execute([":name" => $name,
