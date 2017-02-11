@@ -25,7 +25,11 @@ class ProfilesModel extends DBInterface
     public function setProfile($profileID)
     {
         if(!ctype_digit(strval($profileID)) || $profileID < 1 || $profileID == $this->pID)
-            return 0;
+        {
+            $this->p = NULL;
+            $this->pID = NULL;
+            return;
+        }
 
         //Confirm the id before doing anything
         $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_id = :pID");
@@ -33,7 +37,11 @@ class ProfilesModel extends DBInterface
 
         //Profile ID not found
         if($stmt->fetchColumn() == 0)
-            return 0;
+        {
+            $this->p = NULL;
+            $this->pID = NULL;
+            return;
+        }
 
         //profile found
         $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
@@ -150,6 +158,9 @@ class ProfilesModel extends DBInterface
      */
     public function updateName($newName)
     {
+        if($this->pID == NULL)
+            return;
+
         $name = Secure::string($newName);
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_name = :name WHERE profile_id = :pID");
@@ -170,6 +181,9 @@ class ProfilesModel extends DBInterface
      */
     public function updateDesc($newDesc)
     {
+        if($this->pID == NULL)
+            return;
+
         $desc = Secure::string($newDesc);
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_desc = :desc WHERE profile_id = :pID");
@@ -186,6 +200,9 @@ class ProfilesModel extends DBInterface
      */
     public function addView($nbr = 1)
     {
+        if($this->pID == NULL)
+            return;
+
         if(!ctype_digit(strval($nbr)) || $nbr < 1)
             $nbr = 1;
 
@@ -202,6 +219,9 @@ class ProfilesModel extends DBInterface
      */
     public function setPrivate()
     {
+        if($this->pID == NULL)
+            return;
+
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 1 WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
 
@@ -213,6 +233,9 @@ class ProfilesModel extends DBInterface
      */
     public function setPublic()
     {
+        if($this->pID == NULL)
+            return;
+
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 0 WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
 
