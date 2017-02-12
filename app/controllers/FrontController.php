@@ -21,9 +21,9 @@ class FrontController
      *
      * @param $args array Must respect this format to work : ["controller" => "", "action" => "", "params" => []]
      */
-    public function __construct(array $args = NULL)
+    public function __construct(array $args = [])
     {
-        if($args == NULL)
+        if(empty($args))
             $this->parseURI();
         else
         {
@@ -47,7 +47,7 @@ class FrontController
         $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
         //Remove basepath
-        if(strpos($path, $this->basePath) == 0)
+        if(strpos($path, $this->basePath) === 0)
         {
             $path = substr($path, strlen($this->basePath));
         }
@@ -73,6 +73,8 @@ class FrontController
         if(class_exists($controller))
             $this->controller = $controller;
         else throw new InvalidArgumentException("The controller ".$controller." could not be found.");
+
+        return $this;
     }
 
     protected function setAction($action)
@@ -82,11 +84,15 @@ class FrontController
         if($reflector->hasMethod($action))
             $this->action = $action;
         else throw new InvalidArgumentException("The action ".$action." is not a method of the ".$this->controller.".");
+
+        return $this;
     }
 
     protected function setParams(array $params)
     {
         $this->params = $params;
+
+        return $this;
     }
 
     public function run()
