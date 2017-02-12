@@ -50,10 +50,10 @@ class Sanitize
      */
     static public function int($integer)
     {
-        if(!ctype_digit(strval($integer))
+        if(!ctype_digit(strval($integer)))
            return 0;
 
-        return intval($integer)
+        return intval($integer);
     }
 
     /**
@@ -63,7 +63,7 @@ class Sanitize
      */
     static public function boolean($bool)
     {
-        switch (strtolower($var))
+        switch (strtolower($bool))
         {
             case '1':
             case 'true':
@@ -87,12 +87,13 @@ class Sanitize
         $name = iconv('UTF-8', 'ASCII//TRANSLIT', $pName);
 
         //Remove unwanted characters
+        $name = preg_replace('/[\$+!*\'(),\{\}\|\\\^~[\]`<>\#%";\/\?:@&=\s+]/', '', $name);
+
         $name = filter_var($name, FILTER_SANITIZE_URL);
 
-        $name = preg_replace('/[\$+!*\'(),\{\}\|\\\^~[\]`<>#%";/?:@&=\s]/', '', $name);
         //make sure the string is not too long
         $name = substr($name, 0, 30);
 
-        return $pName;
+        return strtolower($name);
     }
 }
