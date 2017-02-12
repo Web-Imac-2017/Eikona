@@ -22,6 +22,14 @@ class ProfilesModel extends DBInterface
         $this->setProfile($profileID);
     }
 
+
+
+
+    /**
+     * Class initializer. Tries to load informations on the given profile
+     *
+     * @param $profileID Profile to be used unique ID
+     */
     public function setProfile($profileID)
     {
         $profileID = Sanitize::int($profileID);
@@ -53,6 +61,10 @@ class ProfilesModel extends DBInterface
         $this->p = $stmt->fetch();
     }
 
+
+
+
+
     /**
      * Create a new profile
      *
@@ -63,8 +75,8 @@ class ProfilesModel extends DBInterface
      */
     public function create($userID, $name, $desc, $private)
     {
-        $uID = Sanitize::int($integer);
-        $name = Sanitize::string($name, true);
+        $uID = Sanitize::int($userID);
+        $name = Sanitize::profileName($name, true);
         $desc = Sanitize::string($desc);
         $private = Sanitize::boolean($private);
 
@@ -176,11 +188,15 @@ class ProfilesModel extends DBInterface
      */
     public function getPosts($limit = 30)
     {
-        if($this->pID == 0)
+        $limit = Sanitize::int($limit);
+
+        if($this->pID == 0 || $limit == 0)
             return;
 
-        $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID LIMIT :limit ORDER BY post_publish_time DESC");
-        $posts = $stmt->execute([":pID" => $this->pID, "limit" => $limit])->fetchAll();
+        $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID ORDER BY post_publish_time DESC LIMIT :limit");
+        $posts = $stmt->execute([":pID" => $this->pID,
+                                 ":limit" => $limit]);
+        var_dump($posts);
 
         return $posts;
     }
@@ -206,11 +222,8 @@ class ProfilesModel extends DBInterface
         $stmt->execute([":name" => $name,
                         ":pID" => $this->pID]);
 
-        echo $name."<br>".$this->pID."<br>";
-
-        print_r($this->cnx->errorInfo());
-
         $this->p['profile_name'] = $name;
+        return $name;
     }
 
     /**
@@ -230,6 +243,8 @@ class ProfilesModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_desc'] = $desc;
+
+        return $desc;
     }
 
     /**
@@ -255,6 +270,7 @@ class ProfilesModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_views'] += $nbr;
+        return $this->p['profile_views'];
     }
 
 
@@ -290,6 +306,13 @@ class ProfilesModel extends DBInterface
     /**
      * Delete the profile
      */
-    public function deleteProfile() {}
+    public function delete()
+    {
+        if($this->pID == 0)
+            return 0;
+
+        $stmt = $this->cnx->prepare("DELETE FROM profiles WHERE profile_id = :pID");
+        $stmt->execute([":pID" => $this->pID]);
+    }
 }
 ?>

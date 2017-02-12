@@ -30,7 +30,7 @@ class ProfilesController
 
         $uID = 1; //Get current user ID
 
-        $pID = $this->model->create($uID, $name, $desc, $private);
+        $pID = $this->model->create($uID, $name, $desc, $isPrivate);
 
         /**
          * Handle profile picture
@@ -122,7 +122,7 @@ class ProfilesController
      * @param $profileID ID of the profile
      * @param $limit number of posts to return
      */
-    public function posts($profileID, $limit = 987654321)
+    public function posts($profileID, $limit = 30)
     {
         $this->model->setProfile($profileID);
 
@@ -148,16 +148,16 @@ class ProfilesController
         switch($field)
         {
             case "name":
-                $this->model->updateName($_POST['newValue']);
+                echo $this->model->updateName($_POST['newValue']);
             break;
             case "description":
-                $this->model->updateDesc($_POST['newValue']);
+                echo $this->model->updateDesc($_POST['newValue']);
             break;
             case "setPrivate":
-                    $this->model->setPrivate();
+                echo $this->model->setPrivate();
             break;
             case "setPublic":
-                    $this->model->setPublic();
+                echo $this->model->setPublic();
             break;
             default;
                 throw new InvalidArgumentException ("The field '".$field."'Is invalid.");
@@ -180,6 +180,23 @@ class ProfilesController
      *
      * @param $profileToDelete
      */
-    public function delete($profileID){ }
+    public function delete($profileID)
+    {
+        /*
+         * Only allow users who have authority on this profile to delete
+         */
+
+        /*
+         * Remove dependants data like posts, comments, likes, etc...
+         */
+
+        $this->model->setProfile($profileID);
+        $this->model->delete($profileID);
+
+        if(file_exists("PATH/TO/PROFILE/PICTURE/".$profileID.".jpg"))
+        {
+            unlink("PATH/TO/PROFILE/PICTURE/".$profileID.".jpg");
+        }
+    }
 }
 ?>
