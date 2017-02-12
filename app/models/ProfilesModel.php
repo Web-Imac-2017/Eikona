@@ -4,7 +4,7 @@ class ProfilesModel extends DBInterface
     /**
      * Internal varibales
      */
-    private $pID = NULL;
+    private $pID = 0;
     private $p   = NULL;
 
 
@@ -28,7 +28,7 @@ class ProfilesModel extends DBInterface
 
         if($profileID < 1 || $profileID == $this->pID)
         {
-            $this->p = NULL;
+            $this->p = 0;
             $this->pID = NULL;
             return;
         }
@@ -40,7 +40,7 @@ class ProfilesModel extends DBInterface
         //Profile ID not found
         if($stmt->fetchColumn() == 0)
         {
-            $this->p = NULL;
+            $this->p = 0;
             $this->pID = NULL;
             return;
         }
@@ -114,6 +114,9 @@ class ProfilesModel extends DBInterface
      */
     public function getName()
     {
+        if($this->pID == 0)
+            return;
+
         return $this->p['profile_name'];
     }
 
@@ -122,6 +125,9 @@ class ProfilesModel extends DBInterface
      */
     public function getDesc()
     {
+        if($this->pID == 0)
+            return;
+
         return $this->p['profile_desc'];
     }
 
@@ -130,6 +136,9 @@ class ProfilesModel extends DBInterface
      */
     public function getViews()
     {
+        if($this->pID == 0)
+            return;
+
         return $this->p['profile_views'];
     }
 
@@ -138,6 +147,9 @@ class ProfilesModel extends DBInterface
      */
     public function isPrivate()
     {
+        if($this->pID == 0)
+            return;
+
         return $this->p['profile_private'];
     }
 
@@ -146,6 +158,9 @@ class ProfilesModel extends DBInterface
      */
     public function getOwner($returnID = false)
     {
+        if($this->pID == 0)
+            return;
+
         if($returnID)
         {
             return $this->p['user_id'];
@@ -161,6 +176,9 @@ class ProfilesModel extends DBInterface
      */
     public function getPosts($limit = 30)
     {
+        if($this->pID == 0)
+            return;
+
         $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID LIMIT :limit ORDER BY post_publish_time DESC");
         $posts = $stmt->execute([":pID" => $this->pID, "limit" => $limit])->fetchAll();
 
@@ -179,7 +197,7 @@ class ProfilesModel extends DBInterface
      */
     public function updateName($newName)
     {
-        if($this->pID == NULL)
+        if($this->pID == 0)
             return;
 
         $name = Sanitize::profileName($newName);
@@ -202,7 +220,7 @@ class ProfilesModel extends DBInterface
      */
     public function updateDesc($newDesc)
     {
-        if($this->pID == NULL)
+        if($this->pID == 0)
             return;
 
         $desc = Sanitize::string($newDesc);
@@ -215,13 +233,18 @@ class ProfilesModel extends DBInterface
     }
 
     /**
+     * Update the profile picture
+     */
+    public function updatePic() { }
+
+    /**
      * Add views to the profile
      *
      * @param $nbr Number of views to add
      */
     public function addView($nbr = 1)
     {
-        if($this->pID == NULL)
+        if($this->pID == 0)
             return;
 
         if(!ctype_digit(strval($nbr)) || $nbr < 1)
@@ -240,7 +263,7 @@ class ProfilesModel extends DBInterface
      */
     public function setPrivate()
     {
-        if($this->pID == NULL)
+        if($this->pID == 0)
             return;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 1 WHERE profile_id = :pID");
@@ -254,7 +277,7 @@ class ProfilesModel extends DBInterface
      */
     public function setPublic()
     {
-        if($this->pID == NULL)
+        if($this->pID == 0)
             return;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 0 WHERE profile_id = :pID");

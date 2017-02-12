@@ -32,6 +32,10 @@ class ProfilesController
 
         $pID = $this->model->create($uID, $name, $desc, $private);
 
+        /**
+         * Handle profile picture
+         */
+
         return $pID;
     }
 
@@ -47,35 +51,70 @@ class ProfilesController
      *
      * @param $profileID ID of the profile
      */
-    public function name($profileID){ }
+    public function name($profileID)
+    {
+        $this->model->setProfile($profileID);
+
+        $name = $this->model->getName();
+
+        return $name;
+    }
 
     /**
      * Return the description of the specified profile
      *
      * @param $profileID ID of the profile
      */
-    public function description($profileID){ }
+    public function description($profileID)
+    {
+        $this->model->setProfile($profileID);
+
+        $desc = $this->model->getDesc();
+
+        return $desc;
+    }
 
     /**
      * Return the link to the profile picture of the specified profile
      *
      * @param $profileID ID of the profile
      */
-    public function picture($profileID){ }
+    public function picture($profileID)
+    {
+        $this->model->setProfile($profileID);
+
+        $pic = $this->model->getPic();
+
+        return $pic;
+    }
 
     /**
      * Return the number of views of the specified profile
      *
      * @param $profileID ID of the profile
      */
-    public function views($profileID){ }
+    public function views($profileID)
+    {
+        $this->model->setProfile($profileID);
+
+        $views = $this->model->getViews();
+
+        return $views;
+    }
 
     /**
      * Return the number of views of the specified profile
      *
      * @param $profileID ID of the profile
      */
-    public function isPrivate($profileID){ }
+    public function isPrivate($profileID)
+    {
+        $this->model->setProfile($profileID);
+
+        $isPrivate = $this->model->isPrivate();
+
+        return $isPrivate;
+    }
 
     /**
      * Return the number of views of the specified profile
@@ -83,7 +122,14 @@ class ProfilesController
      * @param $profileID ID of the profile
      * @param $limit number of posts to return
      */
-    public function posts($profileID, $limit = 987654321){ }
+    public function posts($profileID, $limit = 987654321)
+    {
+        $this->model->setProfile($profileID);
+
+        $posts = $this->model->getPosts();
+
+        return $posts;
+    }
 
     /**
      * Update the specified element of the profile
@@ -123,7 +169,11 @@ class ProfilesController
      * @param $porfileID ID of the profile
      * @param $nbr Number of view to add.
      */
-    public function addView($profileID, $nbr = 1){ }
+    public function addView($profileID, $nbr = 1)
+    {
+        $this->model->setProfile($profileID);
+        $this->model->addView($nbr);
+    }
 
     /**
      * Delete the specified profile and all its dependecies
