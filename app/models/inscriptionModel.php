@@ -2,6 +2,11 @@
 
 class Inscription extends DBInterface{
 
+
+    public function __construct()
+    {
+        parent::__construct();
+    }
 	/**
 	 * Vérifie si l'utilisateur (email) n'est pas présent dans la database (mail unique)
 	 * @param   $email email à vérifier
@@ -16,7 +21,7 @@ class Inscription extends DBInterface{
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Ajoute un nouvel utilisateur dans la database
 	 * @param text $name   Le nom de l'utilisateur
@@ -25,7 +30,7 @@ class Inscription extends DBInterface{
 	 * @param time $time   L'heure (tout en seconde) de son inscription
 	 */
 	public function addUser($name, $email, $passwd, $time){
-		$pass = hash('sha256', $passwd);		
+		$pass = hash('sha256', $passwd);
 		$res = $this->cnx->prepare("INSERT INTO users (user_name, user_email, user_passwd, user_register_time) VALUES(:name, :email, :pass, :time)");
 		$res->execute([":name"  => $name,
                        ":email" => $email,
@@ -55,8 +60,8 @@ class Inscription extends DBInterface{
 					<input type='hidden' value='".$id."' name='id'>
 					<input type='hidden' value='".sha1($time)."' name='key'>
 					<input type='submit' value='ACTIVER'>
-				</form>	
-				<h3>Si le formulaire ne s'affiche pas correctement, <a href='localhost/Groupe1/app/controllers/activation.php?id=".$id."&key=".sha1($time)."'>veuillez suivre ce lien.</a>	
+				</form>
+				<h3>Si le formulaire ne s'affiche pas correctement, <a href='localhost/Groupe1/app/controllers/activation.php?id=".$id."&key=".sha1($time)."'>veuillez suivre ce lien.</a>
 			</body>
 		</html>";
 
@@ -78,7 +83,7 @@ class Inscription extends DBInterface{
 		$res->execute([":uID" => $id,
                        ":key" => $key]);
 		if($res->rowCount() == 1){
-			return true; 
+			return true;
 		}else{
 			return false;
 		}

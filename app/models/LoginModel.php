@@ -1,14 +1,20 @@
 <?php
 
-class Login extends DBInterface{
+class LoginModel extends DBInterface
+{
 
+    public function __construct($profileID = 0)
+    {
+        parent::__construct();
+    }
 	/**
 	 * Fonction qui va checker la combinaison email / mot de passe pour la connection
 	 * @param  text $email  Email de l'user
 	 * @param  text $passwd Mot de passe (non crypté) de l'user
 	 * @return boolean / User         class User si oui, null sinon
 	 */
-	public function checkAuthentification($email, $passwd){
+	public function checkAuthentification($email, $passwd)
+    {
 		$pwd = hash('sha256', $passwd);
 		$res = $this->cnx->prepare("SELECT * FROM users WHERE :email = user_email AND :passwd = user_passwd");
 		$res->execute([":email"  => $email,
