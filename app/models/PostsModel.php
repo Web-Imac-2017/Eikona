@@ -1,11 +1,9 @@
 <?php
 
-// Manque les commentaires + des fonctions + prendre en compte la variable avec les infos de l'instance actuel
-
 class PostsModel extends DBInterface
 {
     private $postID = 0;
-    private $postDatas = NULL;
+    private $postDatas = null;
 
     public function __construct($postID = 0)
     {
@@ -13,7 +11,6 @@ class PostsModel extends DBInterface
 
         $this->setPost($postID);
     }
-
 
     /**
      * Class initializer. Tries to load informations on the given post
@@ -27,7 +24,7 @@ class PostsModel extends DBInterface
         if($postID < 1 || $postID == $this->postID)
         {
             $this->postDatas = 0;
-            $this->postID = NULL;
+            $this->postID = null;
             return;
         }
 
@@ -35,19 +32,19 @@ class PostsModel extends DBInterface
         $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE post_id = :pID");
         $stmt->execute([":postID" => $postID]);
 
-        //Profile ID not found
+        //Post ID not found
         if($stmt->fetchColumn() == 0)
         {
-            $this->p = 0;
-            $this->pID = NULL;
+            $this->postDatas = 0;
+            $this->postID = null;
             return;
         }
 
         //Post found
-        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
-        $stmt->execute([":pID" => $profileID]);
+        $stmt = $this->cnx->prepare("SELECT post_id, post_type, post_extension, post_description, post_publish_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
+        $stmt->execute([":postID" => postID]);
 
-        $this->postID = $profileID;
+        $this->postID = $postID;
         $this->postDatas = $stmt->fetch();
     }
 
@@ -62,11 +59,13 @@ class PostsModel extends DBInterface
     */
     public function create($type, $extension, $description, $time)
     {
-        //Wait for the upgarde of the Sanitize function
+        $this->returnIfNull();
+
+        //Wait for the upgrade of the Sanitize function
         //$this->extension = Sanitize::string($extension);
         //$this->type = Sanitize::string($type);
 
-        $this->description = Sanitize::string($description);
+        $description = Sanitize::string($description);
 
         $stmt = $this->cnx->prepare("INSERT INTO posts(post_type, post_extension, post_description, post_publish_time) VALUES (:type, :extension, :description, :time)");
         $stmt->execute([ ":type" => $type,
@@ -82,96 +81,248 @@ class PostsModel extends DBInterface
         return $postID;
     }
 
+    /**
+     * Set the geo datas
+     *
+     * @param $latitude Latitude of the location of the post
+     * @param $longitude Longitude of the location of the post
+     * @param $name Name of the location of the post
+     *
+    */
     public function setGeo($latitude, $longitude, $name)
     {
-        //latitude = Sanitize::string($latitude);
-        //longitude = Sanitize::string($longitude);
-        name = Sanitize::string($name);
+        $this->returnIfNull();
 
-        $stmt = $this->cnx->prepare("INSERT INTO posts(post_geo_lat, post_geo_lnt) VALUES (:latitude, :longitude, :name)");
+        //$latitude = Sanitize::latitude($latitude);
+        //$longitude = Sanitize::longitude($longitude);
+        $name = Sanitize::string($name);
 
+        $stmt = $this->cnx->prepare("INSERT INTO posts(post_geo_lat, post_geo_lnt, post_geo_name) VALUES (:latitude, :longitude, :name) WHERE post_id = :postID");
+
+        $stmt->execute([ ":latitude" => $latitude,
+                         ":longitude" => $longitude,
+                         ":name" => $name
+                       ]);
+
+        $this->postDatas['post_geo_lat'] = $latitude;
+        $this->postDatas['post_geo_lng'] = $longitude;
+        $this->postDatas['post_geo_lng'] = $name;
     }
 
 
-//    public function update($description, $time)
-//    {
-//        $this->description = Sanitize::string($description);
-//        $stmt = $this->cnx->prepare("UPDATE posts SET post_description = :description, post_edit_time = :time");
-//        $stmt->execute([
-//            ":description" => $description,
-//            ":time" => $time
-//        ]);
-//    }
-
-    public function updateDescription()
-    {
-
-    }
-
-    public function updateTime()
-    {
-
-    }
-
-    public function updateState()
-    {
-
-    }
-
-    public function updateLatitude()
-    {
-
-    }
-
-    public function updateLongitude()
-    {
-
-    }
-
-    public function updateGeo()
-    {
-
-    }
-
-    public function allowComments()
-    {
-
-    }
-
-    public function updatePostApproved()
-    {
-
-    }
-
-    public function getPublishTime()
-    {
-
-    }
-
+    /*
+     * Get the state of the post
+     *
+     */
     public function getState()
     {
+        $this->returnIfNull();
 
+        return $this->postDatas['post_state'];
     }
 
+    /*
+     * Get the Geo latitude of the post
+     *
+     */
     public function getLatitude()
     {
+        $this->returnIfNull();
 
+        return $this->postDatas['post_geo_lat'];
     }
 
+    /*
+     * Get the longitude of the post
+     *
+     */
     public function getLongitude()
     {
+        $this->returnIfNull();
 
+        return $this->postDatas['post_geo_lng'];
     }
 
+    /*
+     * Get the Geo name of the post
+     *
+     */
     public function getGeoName()
     {
+        $this->returnIfNull();
 
+        return $this->postDatas['post_geo_name'];
     }
 
-    public function delete($id){
-        $stmt = $this->cnx->prepare("DELETE FROM posts WHERE post_id = :id");
+    /*
+     * Get the time when the post was published
+     *
+     */
+    public function getTime()
+    {
+        $this->returnIfNull();
+
+        $stmt = $this->cnx->prepare("SELECT post_publish_time FROM posts WHERE post_id = :postID");
+        $stmt->execute([":postID" => $this->postID]);
+    }
+
+    /*
+     * Get the time when the post was edited
+     *
+     */
+    public function getUpdateTime()
+    {
+        $this->returnIfNull();
+
+        $stmt = $this->cnx->prepare("SELECT post_edit_time FROM posts WHERE post_id = :postID");
+        $stmt->execute([":postID" => $this->postID]);
+    }
+
+    /**
+     * Update the description of the post
+     *
+     * @param $description Of the given post
+     *
+    */
+    public function updateDescription($description)
+    {
+        $this->returnIfNull();
+
+        $description = Sanitize::string($description);
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_description = :description WHERE post_id = :postID");
         $stmt->execute([
-            ":id" => $id
+           ":description" => $description,
+            ":pID" => $this->postID
         ]);
+
+        $this->postDatas['description'] = $description;
+
+        return $description;
+    }
+
+    /*
+     * Update the state of the post
+     *
+     */
+    public function updateState($state)
+    {
+        $this->returnIfNull();
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_state = :state WHERE post_id = :postID");
+        $stmt->execute([":state" => $state,
+                      ":postID" => $this->postID]);
+
+        $this->postDatas['post_state'] = $state;
+    }
+
+    /*
+     * Update the latitude of the post with the given $latitude
+     *
+     */
+    public function updateLatitude($latitude)
+    {
+        $this->returnIfNull();
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lat = :latitude WHERE post_id = :postID");
+        $stmt->execute([":latitude" => $latitude,
+                         ":postID" => $this->postID]);
+
+        $this->postDatas['post_geo_lat'] = $latitude;
+    }
+
+    /*
+     * Update the longitude of the post with the given $longitude
+     *
+     */
+    public function updateLongitude($longitude)
+    {
+        $this->returnIfNull();
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lng = :longitude WHERE post_id = :postID");
+        $stmt->execute([":longitude" => $longitude,
+                         ":postID" => $this->postID]);
+
+        $this->postDatas['post_geo_lng'] = $longitude;
+    }
+
+    /*
+     * Update the geoname of the post with the given $name
+     *
+     */
+    public function updateGeoName($name)
+    {
+        $this->returnIfNull();
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lat = :name WHERE post_id = :postID");
+        $stmt->execute([":name" => $name,
+                         ":postID" => $this->postID]);
+
+        $this->postDatas['post_geo_name'] = $name;
+    }
+
+    /*
+     * Allow comments for the post
+     *
+     */
+    public function allowComments()
+    {
+        $this->returnIfNull();
+
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_allow_comments = 1 WHERE post_id = :pID");
+        $stmt->execute([":postID" => $this->postID]);
+
+        $this->postDatas['post_state'] = 1;
+    }
+
+    /*
+     * Disable comments for the post
+     *
+     */
+    public function disableComments()
+    {
+        $this->returnIfNull();
+
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_allow_comments = 0 WHERE post_id = :postID");
+        $stmt->execute([":postID" => $this->postID]);
+
+        $this->postDatas['post_state'] = 0;
+    }
+
+    /*
+     * Update the post, now it's approved
+     *
+     */
+    public function updatePostApproved()
+    {
+        $this->returnIfNull();
+
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_approved = 1 WHERE post_id = postID");
+        $stmt->execute([":postID" => $this->postID]);
+
+        $this->postDatas['post_approved'] = 1;
+    }
+
+    /*
+     * Delete the post
+     *
+     */
+    public function delete()
+    {
+        $this->returnIfNull();
+
+        $stmt = $this->cnx->prepare("DELETE FROM posts WHERE post_id = :id");
+        $stmt->execute([":postID" => $this->postID]);
+    }
+
+    public function returnIfNull()
+    {
+        if($this->pID == 0)
+        {
+            return 0;
+        }
     }
 }
