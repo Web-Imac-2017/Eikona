@@ -1,4 +1,11 @@
 <?php
+/**
+ * Session more security to the basic PHP sessions.
+ * Session are validated before beiing used to prevent session theft.
+ * Data stored in session are encrypted to ensure nobody except the session owner can read them.
+ *
+ * TODO : Handle generating new session ID and AJAX
+ */
 
 class Session
 {
@@ -227,6 +234,3 @@ class Session
     }
 }
 
-Session::open();
-
-echo Session::read("hi");
