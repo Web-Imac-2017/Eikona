@@ -17,13 +17,17 @@ class ProfilesController
      */
     public function create()
     {
+        $rsp = new Response();
         /**
          * Verify if user is connected
          */
 
         if(empty($_POST['profileName']))
+        {
+            $rsp->setFailure(400);
+            $rsp->send();
             return;
-
+        }
         $name = $_POST['profileName'];
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
@@ -36,15 +40,12 @@ class ProfilesController
          * Handle profile picture
          */
 
-        return $pID;
+        //Send JSON response
+        $rsp->setSuccess(201)
+            ->bindValue("profileID", $pID)
+            ->send();
     }
 
-    /**
-     * Return the profile sheet to display
-     *
-     * @param $profileID ID of the profile to display
-     */
-    public function display($profileID){ }
 
     /**
      * Return the description of the specified profile
@@ -57,7 +58,12 @@ class ProfilesController
 
         $name = $this->model->getName();
 
-        return $name;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileName", $name)
+            ->send();
     }
 
     /**
@@ -71,7 +77,12 @@ class ProfilesController
 
         $desc = $this->model->getDesc();
 
-        return $desc;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profiledesc", $desc)
+            ->send();
     }
 
     /**
@@ -85,7 +96,12 @@ class ProfilesController
 
         $pic = $this->model->getPic();
 
-        return $pic;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profilePicture", $pic)
+            ->send();
     }
 
     /**
@@ -99,7 +115,12 @@ class ProfilesController
 
         $views = $this->model->getViews();
 
-        return $views;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileViews", $views)
+            ->send();
     }
 
     /**
@@ -113,7 +134,31 @@ class ProfilesController
 
         $isPrivate = $this->model->isPrivate();
 
-        return $isPrivate;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileIsPrivate", $isPrivate)
+            ->send();
+    }
+
+    /**
+     * Return the number of views of the specified profile
+     *
+     * @param $profileID ID of the profile
+     */
+    public function owner($profileID)
+    {
+        $this->model->setProfile($profileID);
+
+        $owner = $this->model->getOwner();
+
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileOwner", $owner)
+            ->send();
     }
 
     /**
@@ -143,25 +188,59 @@ class ProfilesController
          * Only allow users who have authority on this profile to update
          */
 
+        //Init JSON Response
+        $rsp = new Response();
+        $rsp->setFailure(400)
+            ->bindValue("profileID", $profileID);
+
         $this->model->setProfile($profileID);
 
         switch($field)
         {
             case "name":
-                echo $this->model->updateName($_POST['newValue']);
+
+                if($this->model->updateName($_POST['newValue']))
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileName", $this->model->getName());
+                }
+
             break;
             case "description":
-                echo $this->model->updateDesc($_POST['newValue']);
+
+                if($this->model->updateDesc($_POST['newValue']))
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileDesc", $this->model->getDesc());
+                }
+
             break;
             case "setPrivate":
-                echo $this->model->setPrivate();
+
+                if($this->model->setPrivate())
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileIsPrivate", 1);
+                }
+
             break;
             case "setPublic":
-                echo $this->model->setPublic();
+
+                if($this->model->setPublic())
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileIsPrivate", 0);
+                }
+
             break;
             default;
-                throw new InvalidArgumentException ("The field '".$field."'Is invalid.");
+                $rsp->setFailure(405);
         }
+
+
+        //Send JSON response
+        $rsp->send();
+
     }
     /**
      * Increment by one (or more) the view counter of the specified profile
@@ -172,7 +251,22 @@ class ProfilesController
     public function addView($profileID, $nbr = 1)
     {
         $this->model->setProfile($profileID);
-        $this->model->addView($nbr);
+
+        //Init JSON Response
+        $rsp = new Response();
+        $rsp->bindValue("profileID", $profileID);
+
+        if($this->model->addView($nbr))
+        {
+            $rsp->setSuccess(200)
+                ->bindValue("profileViews", $this->model->getViews());
+        }
+        else
+        {
+            $rsp->setFailure(400);
+        }
+
+        $rsp->send();
     }
 
     /**

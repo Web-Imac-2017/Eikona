@@ -178,7 +178,7 @@ class ProfilesModel extends DBInterface
             return $this->p['user_id'];
         }
 
-        return new Users($this->p['user_id']);
+        return $this->p['user_id'];
     }
 
     /**
@@ -196,7 +196,6 @@ class ProfilesModel extends DBInterface
         $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID ORDER BY post_publish_time DESC LIMIT :limit");
         $posts = $stmt->execute([":pID" => $this->pID,
                                  ":limit" => $limit]);
-        var_dump($posts);
 
         return $posts;
     }
@@ -214,7 +213,7 @@ class ProfilesModel extends DBInterface
     public function updateName($newName)
     {
         if($this->pID == 0)
-            return;
+            return false;
 
         $name = Sanitize::profileName($newName);
 
@@ -223,7 +222,8 @@ class ProfilesModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_name'] = $name;
-        return $name;
+
+        return true;
     }
 
     /**
@@ -234,7 +234,7 @@ class ProfilesModel extends DBInterface
     public function updateDesc($newDesc)
     {
         if($this->pID == 0)
-            return;
+            return false;
 
         $desc = Sanitize::string($newDesc);
 
@@ -244,7 +244,7 @@ class ProfilesModel extends DBInterface
 
         $this->p['profile_desc'] = $desc;
 
-        return $desc;
+        return true;
     }
 
     /**
@@ -260,7 +260,7 @@ class ProfilesModel extends DBInterface
     public function addView($nbr = 1)
     {
         if($this->pID == 0)
-            return;
+            return false;
 
         if(!ctype_digit(strval($nbr)) || $nbr < 1)
             $nbr = 1;
@@ -270,7 +270,8 @@ class ProfilesModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_views'] += $nbr;
-        return $this->p['profile_views'];
+
+        return true;
     }
 
 
@@ -280,12 +281,14 @@ class ProfilesModel extends DBInterface
     public function setPrivate()
     {
         if($this->pID == 0)
-            return;
+            return false;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 1 WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
 
         $this->p['profile_private'] = 1;
+
+        return true;
     }
 
     /**
@@ -294,12 +297,14 @@ class ProfilesModel extends DBInterface
     public function setPublic()
     {
         if($this->pID == 0)
-            return;
+            return false;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 0 WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
 
         $this->p['profile_private'] = 0;
+
+        return true;
     }
 
 
@@ -309,10 +314,12 @@ class ProfilesModel extends DBInterface
     public function delete()
     {
         if($this->pID == 0)
-            return 0;
+            return false;
 
         $stmt = $this->cnx->prepare("DELETE FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
+
+        return true;
     }
 }
 ?>
