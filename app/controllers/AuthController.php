@@ -33,7 +33,7 @@ class AuthController{
 
 	public function activate()
 	{
-
+		
 	} 
 
 }
