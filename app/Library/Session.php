@@ -39,7 +39,7 @@ class Session
             $_SESSION['USER_INFOS'] = self::encrypt(json_encode($userInfos));
 
             //And renew the current key for more safety
-            self::renewKey();
+            self::renewKey(falsev);
         }
         else
         {
@@ -55,7 +55,7 @@ class Session
     /**
      * Create a new key for the current session
      */
-    public static function renewKey($destroyOldSession = false)
+    public static function renewKey($destroyOldSession = true)
     {
         //Create a new key
         session_regenerate_id($destroyOldSession);
