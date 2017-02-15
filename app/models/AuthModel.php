@@ -87,7 +87,6 @@ class AuthModel extends DBInterface{
 	/**
 	 * Active le compte de l'utilisateeur
 	 * @param  int $id user_id 	
-	 * @return [type]     [description]
 	 */
 	public function updateUserActivated($id)
 	{	
@@ -106,7 +105,7 @@ class AuthModel extends DBInterface{
 	 * Connexion (ou non) de l'utilisateur
 	 * @param  text $email  user_email
 	 * @param  text $passwd user_passwd
-	 * @return [type]         [description]
+	 * @return boolean      user_id / null
 	 */
 	public function checkAuth($email, $passwd)
 	{
@@ -122,7 +121,9 @@ class AuthModel extends DBInterface{
 		//S'il y a une seule réponse (donc un seul user)
 		if($res->rowCount() == 1){
 			$u = $stmt->fetch(PDO::FETCH_ASSOC);
-			
+			return new User($u['user_id']);
+		}else{
+			return null;
 		}
 	}
 }
