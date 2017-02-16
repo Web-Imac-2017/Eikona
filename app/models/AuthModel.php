@@ -59,7 +59,7 @@ class AuthModel extends DBInterface{
 	 */
 	public function sendMail($id, $email, $time)
 	{
-
+		
 	}
 
 	/**********************/

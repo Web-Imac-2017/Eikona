@@ -92,7 +92,7 @@ class Response
      */
     public function setCode($code)
     {
-        if(in_array($code, $this-> allowedCodes))
+        if(in_array($code, $this->allowedCodes))
         {
             $this->code = $code;
         }

@@ -35,14 +35,15 @@ class AuthController{
 						$_POST['user_email'],
 						$user_register_time,
 						$id);
+					$resp->setSuccess("user ajouté");
 				}else{
-					$resp->setFailure();
+					$resp->setFailure("L'utilisateur existe déjà");
 				}				
 			}else{
-				$resp->setFailure();
+				$resp->setFailure("user_passwd et user_passwd_confirm ne sont pas les mêmes");
 			}
 		}else{
-			$resp->setFailure();
+			$resp->setFailure("Tous les champs ne sont pas remplis");
 		}
 		
 		//envoi de la réponse	
