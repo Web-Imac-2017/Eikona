@@ -19,11 +19,11 @@ class AuthModel extends DBInterface{
 	public function uniqueUser($email)	
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT user_email FROM users
+			SELECT COUNT(*) FROM users
 			WHERE user_email = :email");	
 		$stmt->execute([":email" => $email]);
 
-		return ($stmt->rowCount == 0) ? true : false;
+		return ($stmt->fetchColumn() == 0) ? true : false;
 	}
 
 	/**
