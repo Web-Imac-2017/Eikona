@@ -12,6 +12,9 @@ class Session
     public static $key;
     public static $age;
 
+    //Track action
+    public static $action;
+
     //Cipher informations
     public static $cipher = 'aes-256-ctr';
     public static $hash = 'sha256';
@@ -27,24 +30,49 @@ class Session
         session_set_cookie_params(0, '/', null, false, true);
         session_start();
 
-        if(!self::keyIsValid())
+        self::$key = session_id();
+
+        if(self::sessionIsValid())
         {
-            //The session is not valid. Empty everything stored
-            $_SESSION = array();
+            if(!self::keyIsValid())
+            {
+                self::initSession();
 
-            //Set users infos
-            $userInfos = ["IPadress" => $_SERVER['REMOTE_ADDR'],
-                          "userAgent" => $_SERVER['HTTP_USER_AGENT']];
+                self::$action = "INVALID KEY";
 
-            $_SESSION['USER_INFOS'] = self::encrypt(json_encode($userInfos));
-
-            //And renew the current key for more safety
-            self::renewKey(falsev);
+                //And renew the current key for more safety
+                self::renewKey();
+            }
+            else if(rand(1, 100) <= 5)
+            {
+                //Has 5% of chance of renewing the key at anytime
+                self::renewKey();
+                self::$action = "RANDOM RENEW";
+            }
         }
         else
         {
-            self::$key = session_id();
+            //The session is obsolete, let's destroy it
+            $_SESSION = array();
+            session_destroy();
+            session_start();
+
+            self::$action = "INVALID SESSION";
         }
+
+        self::$key = session_id();
+    }
+
+    public static function initSession()
+    {
+        //The session is not valid. Empty everything stored
+        $_SESSION = array();
+
+        //Set users infos
+        $userInfos = ["IPadress" => $_SERVER['REMOTE_ADDR'],
+                      "userAgent" => $_SERVER['HTTP_USER_AGENT']];
+
+        $_SESSION['USER_INFOS'] = self::encrypt(json_encode($userInfos));
     }
 
 
@@ -55,23 +83,87 @@ class Session
     /**
      * Create a new key for the current session
      */
-    public static function renewKey($destroyOldSession = true)
+    public static function renewKey()
     {
-        //Create a new key
-        session_regenerate_id($destroyOldSession);
+        // If this session is obsolete it means there already is a new id
+	    if(isset($_SESSION['OBSOLETE']))
+            return;
 
-        self::$key = session_id();
+        if(!self::$action)
+            self::$action = "FORCED RENEW";
+
+
+        // Set current session to expire in 10 seconds
+	    $_SESSION['OBSOLETE'] = true;
+	    $_SESSION['EXPIRES'] = time() + 10;
+
+        //Keep old key for later
+        $oldKey = session_id();
+
+        session_regenerate_id(false);
+
+        // Grab current session ID and close both sessions to allow other scripts to use them
+	    self::$key = session_id();
+        session_write_close();
+
+	    // Set session ID to the new one, and start it back up again
+	    session_id(self::$key);
+	    session_start();
+
+	    // Now we unset the obsolete and expiration values for the session we want to keep
+	    unset($_SESSION['OBSOLETE']);
+	    unset($_SESSION['EXPIRES']);
+
+        $newSession = [];
+
+        //And we re-encode all stored data in the session
+        foreach($_SESSION as $var => $value)
+        {
+            if($var == 'USER_INFOS')
+            {
+                $newVar = $var;
+                $uncryptedVar = $var;
+            }
+            else
+            {
+                //Use old key to decrypt data and reencode them with the new key
+                $newVar = self::encrypt(self::decrypt($var, false, $oldKey), false);
+            }
+
+            $newValue = self::encrypt(self::decrypt($value, false, $oldKey), false);
+
+            //Assign newly encrypted value
+            $newSession[$newVar] = $newValue;
+
+        }
+
+        $_SESSION = $newSession;
+
     }
 
     /**
-     * Confirm the given key belong to the current user
+     * Confirm the current session is not obsolete
+     */
+    private static function sessionIsValid()
+    {
+        if(isset($_SESSION['OBSOLETE']) && !isset($_SESSION['EXPIRES']) )
+            return false;
+
+        if(isset($_SESSION['EXPIRES']) && $_SESSION['EXPIRES'] < time())
+            return false;
+
+	   return true;
+    }
+
+    /**
+     * Confirm the current session belong to the user
      */
     private static function keyIsValid()
     {
         if(empty($_SESSION['USER_INFOS']))
             return false;
 
-        //First, we try to decode the user infos with the given key
+        //First, we try to decode the user infos with the current key
         $userInfos = self::decrypt($_SESSION['USER_INFOS'], true);
 
         if($userInfos === false)
@@ -98,13 +190,16 @@ class Session
      *
      * @param String $value What to encrypt
      */
-    public static function encrypt($string, $silent = false)
+    public static function encrypt($string, $silent = false, $key = false)
     {
         //Get vector
         //$iv = mcrypt_create_iv(self::$ivLength);
 
+        if($key == false)
+            $key = self::$key;
+
         //Hash the key
-        $keyHash = openssl_digest(self::$key, self::$hash, true);
+        $keyHash = openssl_digest($key, self::$hash, true);
 
         //Crypt the string
         $opts =  OPENSSL_RAW_DATA;
@@ -132,8 +227,11 @@ class Session
      *
      * @param String $vName What to decrypt
      */
-    public static function decrypt($string, $silent = false)
+    public static function decrypt($string, $silent = false, $key = false)
     {
+        if($key == false)
+            $key = self::$key;
+
         //Get raw data from hex
         $raw = pack('H*', $string);
 
@@ -150,7 +248,7 @@ class Session
         $raw = substr($raw, self::$ivLength);
 
         // Hash the key
-        $keyHash = openssl_digest(self::$key, self::$hash, true);
+        $keyHash = openssl_digest($key, self::$hash, true);
 
         // and decrypt.the string
         $opts = OPENSSL_RAW_DATA;
@@ -181,7 +279,7 @@ class Session
     public static function read($vName)
     {
         //USER_INFOS is a restricted value
-        if($vName == 'USER_INFOS')
+        if($vName == 'USER_INFOS' || $vName == 'OBSOLETE' || $vName == 'EXPIRES')
             return;
 
         $encName = self::encrypt($vName);
@@ -203,7 +301,7 @@ class Session
     public static function write($vName, $value)
     {
         //USER_INFOS is a restricted value
-        if($vName == 'USER_INFOS')
+        if($vName == 'USER_INFOS' || $vName == 'OBSOLETE' || $vName == 'EXPIRES')
             return;
 
         $encName = self::encrypt($vName);
@@ -211,26 +309,14 @@ class Session
 
         $_SESSION[$encName] = $encValue;
     }
-
-    /**
-     * Remove a key from the session
-     *
-     * @param String $vName Name of the key to be removed
-     */
-    public static function remove($vName) {}
-
-    /**
-     * Empty the session
-     */
-    public static function destroy()
-    {
-        //Destroy the session cookie
-        $params = session_get_cookie_params();
-
-        setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-
-        //and finally, destroy the session
-        session_destroy();
-    }
 }
 
+/*header('Content-Type: application/json');
+Session::open();
+Session::renewKey();
+
+echo json_encode(["SESSION" => $_SESSION,
+                  "TEST" => Session::read("TEST"),
+                  "SESSION_ID" => session_id(),
+                  "ACTION" => Session::$action]);
+                  */
