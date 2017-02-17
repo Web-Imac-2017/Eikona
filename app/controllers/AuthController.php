@@ -2,7 +2,7 @@
 
 class AuthController{
 
-	private $model;
+	private $model;	
 
 	public function __construct()
 	{
@@ -35,19 +35,21 @@ class AuthController{
 						$_POST['user_email'],
 						$user_register_time,
 						$id);
-					$resp->setSuccess("user ajouté");
+					$resp->setSuccess(200, "Utilisateur ajouté");
 				}else{
-					$resp->setFailure("L'utilisateur existe déjà");
+					$resp->setFailure(403, "L'utilisateur existe déjà");
 				}				
 			}else{
-				$resp->setFailure("user_passwd et user_passwd_confirm ne sont pas les mêmes");
+				$resp->setFailure(404, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
+				$resp->send();
 			}
-		}else{
-			$resp->setFailure("Tous les champs ne sont pas remplis");
-		}
+		}/*else{
+			$resp->setFailure(400, "Tous les champs ne sont pas remplis");
+			$resp->send();
+		}*/
 		
 		//envoi de la réponse	
-		$resp->send();
+		
 	}
 
 	public function activate()
