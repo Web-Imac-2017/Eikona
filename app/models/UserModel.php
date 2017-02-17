@@ -3,17 +3,25 @@
 class User extends DBInterface{
 
 	private $id;
+	private $u = NULL;
 
 	public function __construct($_id)
 	{
 		parent::__construct();
 
-		$this->id = $_id;
+		$this->setUser($_id);
+	}
+
+	public function setUser($userID)
+	{
+		$userID = Sanitize::int($userID);
+
+		
 	}
 
 	public function getActivated()
 	{
-		var_dump($this->id);
+	
 	}
 
 }

@@ -35,7 +35,8 @@ class AuthController{
 						$_POST['user_email'],
 						$user_register_time,
 						$id);
-					$resp->setSuccess(200, "user added");
+					$resp->setSuccess(200, "user added")
+					     ->bindValue("email", $_POST['user_email']);
 				}else{
 					$resp->setFailure(403, "user already exists");
 				}				
@@ -80,8 +81,8 @@ class AuthController{
 			$user = $this->model->checkAuth($_POST['user_email'], $_POST['user_passwd']);
 			if($user != null){
 				//si le compte est activé
-				if(!$user->getActivated()){
-
+				if($user->getActivated()){
+					$resp->setSuccess(200, "user connected");
 				}else{
 
 				}
@@ -89,7 +90,7 @@ class AuthController{
 
 			}
 		}else{
-			$resp->setFailure(401);
+			$resp->setFailure(401, "Tous les champs ne sont pas remplis");
 		}
 
 		//envoi de la réponse
