@@ -69,7 +69,9 @@ class AuthModel extends DBInterface{
                    'MIME-Version: 1.0' . "\r\n" .
                    'Content-type: text/html; charset=utf-8';
 
-	}
+        mail($email, $subject);
+
+    }
 
 	/**********************/
 	/***** ACTIVATION *****/
@@ -121,15 +123,16 @@ class AuthModel extends DBInterface{
 		//cryptage du passwd
 		$pwd = hash('sha256', $passwd);
 		$stmt = $this->cnx->prepare("
-			SELECT * FROM  users
+			SELECT user_id FROM  users
 			WHERE :email = user_email
-			AND :pwd = user_passwd");
+			AND :passwd = user_passwd");
 		$stmt->execute([":email"  => $email,
 			            ":passwd" => $pwd]);
 
 		//S'il y a une seule réponse (donc un seul user)
-		if($res->rowCount() == 1){
+		if($stmt->fetchColumn() == 1){
 			$u = $stmt->fetch(PDO::FETCH_ASSOC);
+			var_dump($u);
 			return new User($u['user_id']);
 		}else{
 			return null;

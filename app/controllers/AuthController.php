@@ -44,7 +44,7 @@ class AuthController{
 				$resp->setFailure(404, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
 			}
 		}else{
-			$resp->setFailure(400, "Tous les champs ne sont pas remplis");
+			$resp->setFailure(400, "tous les champs ne sont pas remplis");
 		}
 		
 		//envoi de la réponse	
@@ -74,23 +74,23 @@ class AuthController{
 		$resp = new Response();
 
 		//si les deux champs de connexion sont remplis
-		if(!empty($_POST['user_email']) &&
-		   !empty($_POST['user_passwd'])){
+		if(!empty($_GET['user_email']) &&
+		   !empty($_GET['user_passwd'])){
 
 		   	//Si la combinaison email / password est correcte
-			$user = $this->model->checkAuth($_POST['user_email'], $_POST['user_passwd']);
+			$user = $this->model->checkAuth($_GET['user_email'], $_GET['user_passwd']);
 			if($user != null){
 				//si le compte est activé
 				if($user->getActivated()){
 					$resp->setSuccess(200, "user connected");
 				}else{
-
+					$resp->setFailure(401, "account not yet activated");
 				}
 			}else{
-
+				$resp->setFailure(404, "combinaison incorrecte");
 			}
 		}else{
-			$resp->setFailure(401, "Tous les champs ne sont pas remplis");
+			$resp->setFailure(400, "tous les champs ne sont pas remplis");
 		}
 
 		//envoi de la réponse
