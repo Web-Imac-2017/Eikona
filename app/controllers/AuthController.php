@@ -35,21 +35,19 @@ class AuthController{
 						$_POST['user_email'],
 						$user_register_time,
 						$id);
-					$resp->setSuccess(200, "Utilisateur ajouté");
+					$resp->setSuccess(200, "user added");
 				}else{
-					$resp->setFailure(403, "L'utilisateur existe déjà");
+					$resp->setFailure(403, "user already exists");
 				}				
 			}else{
 				$resp->setFailure(404, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
-				$resp->send();
 			}
-		}/*else{
+		}else{
 			$resp->setFailure(400, "Tous les champs ne sont pas remplis");
-			$resp->send();
-		}*/
+		}
 		
 		//envoi de la réponse	
-		
+		$resp->send();
 	}
 
 	public function activate()

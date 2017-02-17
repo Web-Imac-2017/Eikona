@@ -59,7 +59,16 @@ class AuthModel extends DBInterface{
 	 */
 	public function sendMail($id, $email, $time)
 	{
-		
+		require_once 'Library/Mail.php';
+
+		$subject = "ACTIVER VOTRE COMPTE EIKONA";
+
+		//TODO 
+		//CHANGER L'ADRESSE D'ENVOI POUR LA MISE EN PROD
+		$headers = 'From: zobeleflorian@gmail.com' . "\r\n" .
+                   'MIME-Version: 1.0' . "\r\n" .
+                   'Content-type: text/html; charset=utf-8';
+
 	}
 
 	/**********************/
