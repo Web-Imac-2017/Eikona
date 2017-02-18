@@ -36,9 +36,9 @@ class ProfilesModel extends DBInterface
 
         if($profileID < 1 || $profileID == $this->pID)
         {
-            $this->p = 0;
-            $this->pID = NULL;
-            return;
+            $this->p = NULL;
+            $this->pID = 0;
+            return "wrongFormat";
         }
 
         //Confirm the id before doing anything
@@ -48,9 +48,9 @@ class ProfilesModel extends DBInterface
         //Profile ID not found
         if($stmt->fetchColumn() == 0)
         {
-            $this->p = 0;
-            $this->pID = NULL;
-            return;
+            $this->p = NULL;
+            $this->pID = 0;
+            return "notFound";
         }
 
         //profile found
@@ -59,6 +59,8 @@ class ProfilesModel extends DBInterface
 
         $this->pID = $profileID;
         $this->p = $stmt->fetch();
+
+        return "success";
     }
 
 

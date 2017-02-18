@@ -39,7 +39,7 @@ class Session
             $_SESSION['USER_INFOS'] = self::encrypt(json_encode($userInfos));
 
             //And renew the current key for more safety
-            self::renewKey(falsev);
+            self::renewKey(false);
         }
         else
         {

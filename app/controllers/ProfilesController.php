@@ -46,6 +46,31 @@ class ProfilesController
             ->send();
     }
 
+    private function setProfile($profileID)
+    {
+        $result = $this->model->setProfile($profileID);
+
+        if($result != "success")
+        {
+            $rsp = new Response();
+
+            if($result == "wrongFormat")
+            {
+                $rsp->setFailure(400, "Wrong format. This is not a profile ID.");
+            }
+            else if($result == "notFound")
+            {
+                $rsp->setFailure(404, "Given profile ID does not exist.");
+            }
+
+            $rsp->send();
+
+            return false;
+        }
+
+        return true;
+    }
+
 
     /**
      * Return the description of the specified profile
@@ -54,7 +79,8 @@ class ProfilesController
      */
     public function name($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $name = $this->model->getName();
 
@@ -73,7 +99,8 @@ class ProfilesController
      */
     public function description($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $desc = $this->model->getDesc();
 
@@ -92,7 +119,8 @@ class ProfilesController
      */
     public function picture($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $pic = $this->model->getPic();
 
@@ -111,7 +139,8 @@ class ProfilesController
      */
     public function views($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $views = $this->model->getViews();
 
@@ -130,7 +159,8 @@ class ProfilesController
      */
     public function isPrivate($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $isPrivate = $this->model->isPrivate();
 
@@ -149,7 +179,8 @@ class ProfilesController
      */
     public function owner($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $owner = $this->model->getOwner();
 
@@ -169,7 +200,8 @@ class ProfilesController
      */
     public function posts($profileID, $limit = 30)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $posts = $this->model->getPosts();
 
@@ -188,12 +220,18 @@ class ProfilesController
          * Only allow users who have authority on this profile to update
          */
 
+        if(!$this->setProfile($profileID))
+            return;
+
         //Init JSON Response
         $rsp = new Response();
-        $rsp->setFailure(400)
-            ->bindValue("profileID", $profileID);
 
-        $this->model->setProfile($profileID);
+        if(!isset($_POST['newValue']))
+        {
+            $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
+            $rsp->send();
+            return;
+        }
 
         switch($field)
         {
@@ -237,9 +275,9 @@ class ProfilesController
                 $rsp->setFailure(405);
         }
 
-
         //Send JSON response
-        $rsp->send();
+        $rsp->bindValue("profileID", $profileID)
+            ->send();
 
     }
     /**
@@ -250,7 +288,8 @@ class ProfilesController
      */
     public function addView($profileID, $nbr = 1)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         //Init JSON Response
         $rsp = new Response();
@@ -283,14 +322,19 @@ class ProfilesController
         /*
          * Remove dependants data like posts, comments, likes, etc...
          */
+        if(!$this->setProfile($profileID))
+            return;
 
-        $this->model->setProfile($profileID);
         $this->model->delete($profileID);
 
         if(file_exists("PATH/TO/PROFILE/PICTURE/".$profileID.".jpg"))
         {
             unlink("PATH/TO/PROFILE/PICTURE/".$profileID.".jpg");
         }
+
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->send();
     }
 }
 ?>
