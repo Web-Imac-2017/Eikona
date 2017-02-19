@@ -3,8 +3,11 @@
 class ProfilesController
 {
     private $model;
-    private $view;
 
+    /**
+     * Init the constructor and link the model
+     * @private
+     */
     public function __construct()
     {
         $this->model = new ProfilesModel();
@@ -18,11 +21,12 @@ class ProfilesController
     public function create()
     {
         $rsp = new Response();
+
         /**
-         * Verify if user is connected
+         * TODO: Verify if user is connected and can add a new profile
          */
 
-        if(empty($_POST['profileName']))
+        if (empty($_POST['profileName']))
         {
             $rsp->setFailure(400);
             $rsp->send();
@@ -46,6 +50,11 @@ class ProfilesController
             ->send();
     }
 
+    /**
+     * Set the profile to use with the model
+     * @param  integer $profileID Profile ID to use with the model
+     * @return boolean  true on success, false on failure
+     */
     private function setProfile($profileID)
     {
         $result = $this->model->setProfile($profileID);
@@ -182,6 +191,10 @@ class ProfilesController
         if(!$this->setProfile($profileID))
             return;
 
+        /**
+         * TODO: confirm current user is moderator or profile owner
+         */
+
         $owner = $this->model->getOwner();
 
         //Send JSON response
@@ -193,17 +206,17 @@ class ProfilesController
     }
 
     /**
-     * Return the number of views of the specified profile
-     *
-     * @param $profileID ID of the profile
-     * @param $limit number of posts to return
+     * Return the posts of the specified profile
+     * @param  integer $profileID ID of the profile
+     * @param  integer $limit     Number of posts to return
+     * @return void
      */
     public function posts($profileID, $limit = 30)
     {
-        if(!$this->setProfile($profileID))
+        if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts())
             return;
 
-        $posts = $this->model->getPosts();
+        $posts = $this->model->getPosts($limit);
 
         return $posts;
     }
@@ -216,15 +229,23 @@ class ProfilesController
      */
     public function update($field, $profileID)
     {
-        /*
-         * Only allow users who have authority on this profile to update
-         */
-
-        if(!$this->setProfile($profileID))
-            return;
-
         //Init JSON Response
         $rsp = new Response();
+
+
+        //Exclude all failure possibilities
+        if(!isAuthorized::updateProfile())
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!$this->setProfile($profileID))
+        {
+            return;
+        }
 
         if(!isset($_POST['newValue']))
         {
@@ -233,6 +254,7 @@ class ProfilesController
             return;
         }
 
+        //Now, do the update
         switch($field)
         {
             case "name":
@@ -280,6 +302,9 @@ class ProfilesController
             ->send();
 
     }
+
+
+
     /**
      * Increment by one (or more) the view counter of the specified profile
      *
@@ -312,16 +337,22 @@ class ProfilesController
      * Delete the specified profile and all its dependecies
      *
      * @param $profileToDelete
+     * @return void
      */
     public function delete($profileID)
     {
-        /*
-         * Only allow users who have authority on this profile to delete
-         */
+        if(!isAuthorized::updateProfile())
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
 
         /*
-         * Remove dependants data like posts, comments, likes, etc...
+         * TODO: Remove dependants data like posts, comments, likes, etc...
          */
+
         if(!$this->setProfile($profileID))
             return;
 

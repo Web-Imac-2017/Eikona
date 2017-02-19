@@ -11,6 +11,18 @@ class isAuthorized
     static public function isAdmin() {}
 
     /***** Profiles verifications *****/
-    static public function canUpdateProfile() {}
-    static public function canDeleteProfile() {}
+    static public function updateProfile()
+    {
+        return true;
+    }
+
+    static public function deleteProfile()
+    {
+        return true;
+    }
+
+    static public function getProfilePosts()
+    {
+        return true;
+    }
 }
