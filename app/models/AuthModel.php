@@ -129,13 +129,7 @@ class AuthModel extends DBInterface{
 		$stmt->execute([":email"  => $email,
 			            ":passwd" => $pwd]);
 
-		//S'il y a une seule réponse (donc un seul user)
-		if($stmt->fetchColumn() == 1){
-			$u = $stmt->fetch(PDO::FETCH_ASSOC);
-			var_dump($u);
-			return new User($u['user_id']);
-		}else{
-			return null;
-		}
+		$u = $stmt->fetch(PDO::FETCH_ASSOC);
+		return new UserModel($u['user_id']);
 	}
 }
