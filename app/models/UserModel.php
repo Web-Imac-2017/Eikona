@@ -20,7 +20,7 @@ class UserModel extends DBInterface{
 		{
 			$this->id = 0;
 			$this->u = NULL;
-			return;
+			return "wrongFormat";
 		}
 
 		//Confrim the id before doing anything
@@ -34,7 +34,7 @@ class UserModel extends DBInterface{
 		{
 			$this->id = 0;
 			$this->u = NULL;
-			return;
+			return "notFound";
 		}
 
 		//profile found
@@ -47,6 +47,8 @@ class UserModel extends DBInterface{
 
 		$this->id = $userID;
 		$this->u = $stmt->fetch();
+
+		return "success";
 	}
 
 	/**
