@@ -69,6 +69,7 @@ class AuthController{
 		$resp->send();
 	}
 
+
 	public function signIn()
 	{
 		$resp = new Response();
@@ -79,6 +80,7 @@ class AuthController{
 
 		   	//Si la combinaison email / password est correcte
 			$user = $this->model->checkAuth($_GET['user_email'], $_GET['user_passwd']);
+			print_r($user);
 			if($user != null){
 				//si le compte est activé
 				if($user->getActivated()){

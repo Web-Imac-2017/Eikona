@@ -2,8 +2,8 @@
 
 class UserModel extends DBInterface{
 
-	private $id;
-	private $u;
+	private $id = 0;
+	private $u = NULL;
 
 	public function __construct($_id)
 	{
