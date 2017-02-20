@@ -26,7 +26,7 @@ class UserModel extends DBInterface{
 		{
 			$this->id = 0;
 			$this->u = NULL;
-			return "wrongFormat";
+			return;
 		}
 
 		//Confirm the id before doing anything
@@ -40,7 +40,7 @@ class UserModel extends DBInterface{
 		{
 			$this->id = 0;
 			$this->u = NULL;
-			return "notFound";
+			return;
 		}
 
 		//profile found
@@ -54,7 +54,7 @@ class UserModel extends DBInterface{
 		$this->id = $userID;
 		$this->u = $stmt->fetch();
 
-		return "success";
+		return;
 	}
 
 	/**
@@ -64,6 +64,15 @@ class UserModel extends DBInterface{
 	public function getID()
 	{
 		return $this->id;
+	}
+
+	/**
+	 * Return user email
+	 * @return text user_email
+	 */
+	public function getEmail()
+	{
+		return $this->u['user_email'];
 	}
 
 	/**

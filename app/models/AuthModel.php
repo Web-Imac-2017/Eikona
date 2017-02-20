@@ -118,7 +118,7 @@ class AuthModel extends DBInterface{
 	 * @param  text $passwd user_passwd
 	 * @return boolean      user_id / null
 	 */
-	public function checkAuth($email, $passwd)
+	public function checkAuthOld($email, $passwd)
 	{
 		//cryptage du passwd
 		$pwd = hash('sha256', $passwd);
@@ -130,6 +130,21 @@ class AuthModel extends DBInterface{
 			            ":passwd" => $pwd]);
 
 		$u = $stmt->fetch(PDO::FETCH_ASSOC);
+		return new UserModel($u['user_id']);
+	}
+
+	public function checkAuth($email, $passwd)
+	{
+		$pwd = hash('sha256', $passwd);
+
+		//Savoir si luser est inscrit
+		$stmt = $this->cnx->prepare("
+			SELECT user_id FROM users
+			WHERE :email = user_email");
+		$stmt->execute([":email" => $email]);
+
+		$u = $stmt->rowCount();
+		print_r($u);
 		return new UserModel($u['user_id']);
 	}
 }
