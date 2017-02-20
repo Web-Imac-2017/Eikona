@@ -338,7 +338,8 @@ class ProfilesController
 
             return;
         }
-        $source = $_FILES['img']['tmp_name'];
+
+        $source = $_FILES['profilePicture']['tmp_name'];
         $format = getimagesize($source);
         $tab;
 
@@ -349,15 +350,25 @@ class ProfilesController
                 $tab[1] = "jpg";
             $extension = $tab[1];
         }
+        else
+        {
+            $rsp->setFailure(406, "Picture format (".$tab.") is not supported.")
+                ->send();
+
+            return;
+        }
+
         if($format['mime'] == "image/png")
         {
             $extension = 'jpg';
         }
-        /*appel du model*/
-        $postID = $this->model->create($type, $extension, $desc, $time);
 
         /*enregistrement de l'image*/
-        imagejpeg($imSource, 'medias/img/' . $postID . '.' . $extension);
+        imagejpeg($imSource, 'medias/profilesPictures/' . $profileID . '.' . $extension);
+
+        $rsp->setSuccess(200)
+            ->bindValue("ProfilePicture", "/app/medias/profilesPictures/".$profileID.".jpg'")
+            ->send();
     }
 
 
