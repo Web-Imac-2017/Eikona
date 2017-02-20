@@ -87,13 +87,32 @@ class PostsController
 		$this->model->delete();
 	}
 
-	/* Prendre en exemple ProfilesController de Valentin,
-	 * pour tous les updates
-	 */
-	public function updateDescription()
+	public function update($field, $postID)
 	{
-		$newDesc = $_POST['desc'];
-		$this->model->updateDescrption($newDesc);
+		switch($field)
+		{
+			case "description" :
+				if(isset($_POST['desc']))
+				{
+					if($this->model->updateDescrption($_POST['desc']))
+					{
+						$rsp->setSuccess(200)
+							->bindValue("postDescription", $this->model->getDescription);
+					}
+				}
+			break;
+
+			case "geo" :
+				if(isset($_POST['geo']))
+				{
+					if($this->model->updateDescrption($_POST['geo']))
+					{
+						$rsp->setSuccess(200)
+							->bindValue("postGeo", $this->model->getGeo);
+					}
+				}
+			break;
+		}
 	}
 
 	/*
