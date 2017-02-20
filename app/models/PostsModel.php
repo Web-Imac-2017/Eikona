@@ -25,7 +25,7 @@ class PostsModel extends DBInterface
         {
             $this->postDatas = 0;
             $this->postID = null;
-            return;
+            return "wrongFormat";
         }
 
         //Confirm the id before doing anything
@@ -37,7 +37,7 @@ class PostsModel extends DBInterface
         {
             $this->postDatas = 0;
             $this->postID = null;
-            return;
+            return "notFound";
         }
 
         //Post found
@@ -46,6 +46,8 @@ class PostsModel extends DBInterface
 
         $this->postID = $postID;
         $this->postDatas = $stmt->fetch();
+
+		return "success";
     }
 
     /**
@@ -155,7 +157,9 @@ class PostsModel extends DBInterface
         {
             return 0;
         }
-        return $postDatas['post_description'];
+
+        return $this->postDatas['post_description'];
+
     }
 
     /*
@@ -168,7 +172,7 @@ class PostsModel extends DBInterface
         {
             return 0;
         }
-        return $postDatas['post_publish_time'];
+        return $this->postDatas['post_publish_time'];
     }
 
     /*
@@ -181,7 +185,7 @@ class PostsModel extends DBInterface
         {
             return 0;
         }
-        return $postDatas['post_allow_comments'];
+        return $this->postDatas['post_allow_comments'];
     }
 
     /*
@@ -194,7 +198,7 @@ class PostsModel extends DBInterface
         {
             return 0;
         }
-        return $postDatas['post_allow_comments'];
+        return $this->postDatas['post_allow_comments'];
     }
 
     /*

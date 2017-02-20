@@ -51,6 +51,31 @@ class PostsController
 		}
 	}
 
+	private function setPost($postID)
+	{
+		$result = $this->model->setPost($postID);
+
+		if($result != "success")
+		{
+			$rsp = new Response();
+
+			if($result == "wrongFormat")
+			{
+				$rsp->setFailure(400, "Wrong format. This is not a post ID.");
+			}
+			else if($result == "notFound")
+			{
+				$rsp->setFailure(404, "Given post ID does not exist.");
+			}
+
+			$rsp->send();
+
+			return false;
+		}
+
+		return true;
+	}
+
 	/*
 	 * Suppression d'un post
 	 *
@@ -62,12 +87,18 @@ class PostsController
 		$this->model->delete();
 	}
 
+	/* Prendre en exemple ProfilesController de Valentin,
+	 * pour tous les updates
+	 */
 	public function updateDescription()
 	{
 		$newDesc = $_POST['desc'];
 		$this->model->updateDescrption($newDesc);
 	}
 
+	/*
+	 * Pour les update style boolean, fonctions à part
+	 */
 	public function updateState()
 	{
 		$newState = $_POST['state'];
@@ -174,9 +205,6 @@ class PostsController
 			->bindValue("approved", $approved)
 			->send();
 	}
-
-
-
 }
 
 
