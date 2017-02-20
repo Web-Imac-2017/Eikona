@@ -27,3 +27,4 @@ class BlockModel extends DBInterface{
 
 		return ($stmt->fetchColumn() == 0) ? true : false;
 	}
+}
