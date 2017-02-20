@@ -10,14 +10,13 @@ class ProfilesController
 		$this->model = new PostsModel();
 	}
 
-	public function create($postId)
+	public function create()
 	{
 		$type = $_POST['postType'];
 		$desc = isset($_POST['postDescription']) ? $_POST['postDescription'] : "";
 		$time = $_POST['postTime'];
 
 		/*gestion de l'image*/
-
 		if(is_uploaded_file($_FILES['img']['tmp_name']))
 		{
 			$source = $_FILES['img']['tmp_name'];
@@ -42,20 +41,33 @@ class ProfilesController
 			
 			/*$imdest = imagecreatetruecolor(120, 120);
 			imagecopyresampled($imdest, $imSource, 0, 0, 0, 0, 120, 120, $format[0], $format[1]);*/
-			
-			'image'.$tab[1]($source, '../medias/img/'.$postId.'.'.$format);
 
+			/*appel du model*/
+			$postId = $this->model->create($type, $extension, $desc, $time);
+			
+			/*enregistrement de l'image*/
+			/*'image'.$tab[1]($source, '../medias/img/'.$postId.'.'.$format);*/
+			imagejpeg($source, '../medias/img/'.$postId.'.'.$format);
 		}
 
-
-		/*appel du model*/
-		$this->model->create($type, $extension, $desc, $time);
 	}
 
-	public function delete(){
+	public function delete()
+	{
 		$this->model->delete();
 	}
 
+	public function updateDescrption()
+	{
+		$newDesc = $_POST['desc'];
+		$this->model->updateDescrption($newDesc);
+	}
+
+	public function updateState()
+	{
+		$newState = $_POST['state'];
+		$this->model->updateState($newState);
+	}
 
 
 
