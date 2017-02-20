@@ -67,7 +67,7 @@ class AuthController{
 		   !empty($_POST['user_key'])){
 
 			//activation du compte
-			$this->model->updateUserActivated($_POST['user_id']);
+			$this->model->checkActivation($_POST['user_id']);
 			$resp->setSuccess();
 		}else{
 			$resp->setFailure();
@@ -86,15 +86,21 @@ class AuthController{
 		if(!empty($_GET['user_email']) &&
 		   !empty($_GET['user_passwd'])){
 
-		   	//Si la combinaison email / password est correcte
-			$user = $this->model->checkAuth($_GET['user_email'], $_GET['user_passwd']);
-			//Si l'ID est valide
-			if($user->getID() != 0){
-				//Si le compte est activé
-				if($user->getActivated()){
-					$resp->setSuccess(200, "user connected");
+			$email = $this->model->checkEmail($_GET['user_email']);
+		
+			//Si l'user est inscrit dans la bdd
+			if($email){
+				$user = $this->model->checkConnection($_GET['user_email'], $_GET['user_passwd']);
+				//Si la combinaison email /pwd est correcte
+				if($user->getID() != 0){
+					//Si le compte est activé
+					if($user->getActivated()){
+						$resp->setSuccess(200, "user connected");
+					}else{
+						$resp->setFailure(401, "account not yet activated");
+					}
 				}else{
-					$resp->setFailure(401, "account not yet activated");
+					$resp->setFailure(401, "wrong password");
 				}
 			}else{
 				$resp->setFailure(404, "unknown user");

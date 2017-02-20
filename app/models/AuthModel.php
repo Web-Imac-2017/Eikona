@@ -83,7 +83,7 @@ class AuthModel extends DBInterface{
 	 * @param  int  $key clé_cryptée
 	 * @return boolean   true / false
 	 */
-	public function checkUserExists($id, $key)
+	public function checkActivation($id, $key)
 	{
 		$stmt = $this->cnx->prepare("
 			SELECT user_id, user_register_time, user_activated FROM users
@@ -113,14 +113,29 @@ class AuthModel extends DBInterface{
 	/*********************/
 
 	/**
-	 * Connexion (ou non) de l'utilisateur
+	 * Return if email exists in database
+	 * @param  text $email user_email
+	 * @return boolean        true / false
+	 */
+	public function checkEmail($email)
+	{
+		//Savoir si luser est inscrit
+		$stmt = $this->cnx->prepare("
+			SELECT user_id FROM users
+			WHERE :email = user_email");
+		$stmt->execute([":email" => $email]);
+
+		return ($stmt->fetchColumn() != null) ? true : false;
+	}
+
+	/**
+	 * Return User (qu'il existe ou non)
 	 * @param  text $email  user_email
 	 * @param  text $passwd user_passwd
-	 * @return boolean      user_id / null
+	 * @return User         
 	 */
-	public function checkAuthOld($email, $passwd)
+	public function checkConnection($email, $passwd)
 	{
-		//cryptage du passwd
 		$pwd = hash('sha256', $passwd);
 		$stmt = $this->cnx->prepare("
 			SELECT user_id FROM  users
@@ -133,18 +148,4 @@ class AuthModel extends DBInterface{
 		return new UserModel($u['user_id']);
 	}
 
-	public function checkAuth($email, $passwd)
-	{
-		$pwd = hash('sha256', $passwd);
-
-		//Savoir si luser est inscrit
-		$stmt = $this->cnx->prepare("
-			SELECT user_id FROM users
-			WHERE :email = user_email");
-		$stmt->execute([":email" => $email]);
-
-		$u = $stmt->rowCount();
-		print_r($u);
-		return new UserModel($u['user_id']);
-	}
 }

@@ -67,15 +67,6 @@ class UserModel extends DBInterface{
 	}
 
 	/**
-	 * Return user email
-	 * @return text user_email
-	 */
-	public function getEmail()
-	{
-		return $this->u['user_email'];
-	}
-
-	/**
 	 * Return if user account is activated
 	 * @return boolean true(1) / false(0)
 	 */
