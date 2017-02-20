@@ -52,16 +52,20 @@ class UserModel extends DBInterface{
 	}
 
 	/**
+	 * Return user ID
+	 * @return int user_id
+	 */
+	public function getID()
+	{
+		return $this->id;
+	}
+
+	/**
 	 * Return if user account is activated
 	 * @return boolean true(1) / false(0)
 	 */
 	public function getActivated()
 	{
-		var_dump($this->id);
-		// var_dump($this->id);
-		if($this->id == 0)
-			return;
-
 		return $this->u['user_activated'];
 	}
 }

@@ -80,16 +80,16 @@ class AuthController{
 
 		   	//Si la combinaison email / password est correcte
 			$user = $this->model->checkAuth($_GET['user_email'], $_GET['user_passwd']);
-			print_r($user);
-			if($user != null){
-				//si le compte est activé
+			//Si l'ID est valide
+			if($user->getID() != 0){
+				//Si le compte est activé
 				if($user->getActivated()){
 					$resp->setSuccess(200, "user connected");
 				}else{
 					$resp->setFailure(401, "account not yet activated");
 				}
 			}else{
-				$resp->setFailure(404, "combinaison incorrecte");
+				$resp->setFailure(404, "unknown user");
 			}
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
