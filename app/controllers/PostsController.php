@@ -1,6 +1,6 @@
 <?php
 
-class ProfilesController
+class PostsController
 {
 	private $model;
 	private $view;
@@ -57,7 +57,7 @@ class ProfilesController
 		$this->model->delete();
 	}
 
-	public function updateDescrption()
+	public function updateDescription()
 	{
 		$newDesc = $_POST['desc'];
 		$this->model->updateDescrption($newDesc);
@@ -69,8 +69,40 @@ class ProfilesController
 		$this->model->updateState($newState);
 	}
 
+	public function display($profileId)
+	{
 
+	}
 
+	public function getGeo()
+	{
+		$geo = $this->model->getGeo();
+	}
+
+	public function getDescription()
+	{
+		$desc = $this->model->getDescription();
+	}
+
+	public function getPublishTime()
+	{
+		$publishTime = $this->model->getPublishTime();
+	}
+
+	public function getState()
+	{
+		$state = $this->model->getState();
+	}
+	
+	public function getAllowComments()
+	{
+		$allowComments = $this->model->getAllowComments();
+	}
+
+	public function getApproved()
+	{
+		$approved = $this->model->getApproved();
+	}
 
 
 

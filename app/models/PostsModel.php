@@ -59,7 +59,10 @@ class PostsModel extends DBInterface
     */
     public function create($type, $extension, $description, $time)
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         //Wait for the upgrade of the Sanitize function
         //$this->extension = Sanitize::string($extension);
@@ -91,7 +94,10 @@ class PostsModel extends DBInterface
     */
     public function setGeo($latitude, $longitude, $name)
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         //$latitude = Sanitize::latitude($latitude);
         //$longitude = Sanitize::longitude($longitude);
@@ -116,54 +122,82 @@ class PostsModel extends DBInterface
      */
     public function getState()
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         return $this->postDatas['post_state'];
     }
 
     /*
-     * Get the Geo latitude of the post
+     * Get the Geo latitude, longitude and position of the post
      *
      */
-    public function getLatitude()
+    public function getGeo()
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
-        return $this->postDatas['post_geo_lat'];
+        $tabGeo[0] = $this->postDatas['post_geo_lat'];
+        $tabGeo[1] = $this->postDatas['post_geo_lng'];
+        $tabGeo[2] = $this->postDatas['post_geo_name'];
+
+        return $tabGeo;
     }
 
     /*
-     * Get the longitude of the post
+     * Get the description of the post
      *
      */
-    public function getLongitude()
+    public function getDescription()
     {
-        $this->returnIfNull();
-
-        return $this->postDatas['post_geo_lng'];
-    }
-
-    /*
-     * Get the Geo name of the post
-     *
-     */
-    public function getGeoName()
-    {
-        $this->returnIfNull();
-
-        return $this->postDatas['post_geo_name'];
+        if($this->pID == 0)
+        {
+            return 0;
+        }
+        return $postDatas['post_description'];
     }
 
     /*
      * Get the time when the post was published
      *
      */
-    public function getTime()
+    public function getPublishTime()
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
+        return $postDatas['post_publish_time'];
+    }
 
-        $stmt = $this->cnx->prepare("SELECT post_publish_time FROM posts WHERE post_id = :postID");
-        $stmt->execute([":postID" => $this->postID]);
+    /*
+     * Get the state of enableness of the comments
+     *
+     */
+    public function getAllowComments()
+    {
+        if($this->pID == 0)
+        {
+            return 0;
+        }
+        return $postDatas['post_allow_comments'];
+    }
+
+    /*
+     * Get the state of approvment of the post
+     *
+     */
+    public function getApproved()
+    {
+        if($this->pID == 0)
+        {
+            return 0;
+        }
+        return $postDatas['post_allow_comments'];
     }
 
     /*
@@ -172,7 +206,10 @@ class PostsModel extends DBInterface
      */
     public function getUpdateTime()
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         $stmt = $this->cnx->prepare("SELECT post_edit_time FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
@@ -186,7 +223,10 @@ class PostsModel extends DBInterface
     */
     public function updateDescription($description)
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         $description = Sanitize::string($description);
 
@@ -207,7 +247,10 @@ class PostsModel extends DBInterface
      */
     public function updateState($state)
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_state = :state WHERE post_id = :postID");
         $stmt->execute([":state" => $state,
@@ -222,7 +265,10 @@ class PostsModel extends DBInterface
      */
     public function updateLatitude($latitude)
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lat = :latitude WHERE post_id = :postID");
         $stmt->execute([":latitude" => $latitude,
@@ -237,7 +283,10 @@ class PostsModel extends DBInterface
      */
     public function updateLongitude($longitude)
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lng = :longitude WHERE post_id = :postID");
         $stmt->execute([":longitude" => $longitude,
@@ -252,7 +301,10 @@ class PostsModel extends DBInterface
      */
     public function updateGeoName($name)
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lat = :name WHERE post_id = :postID");
         $stmt->execute([":name" => $name,
@@ -267,7 +319,10 @@ class PostsModel extends DBInterface
      */
     public function allowComments()
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_allow_comments = 1 WHERE post_id = :pID");
@@ -282,7 +337,10 @@ class PostsModel extends DBInterface
      */
     public function disableComments()
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_allow_comments = 0 WHERE post_id = :postID");
@@ -297,7 +355,10 @@ class PostsModel extends DBInterface
      */
     public function updatePostApproved()
     {
-        $this->returnIfNull();
+        if($this->pID == 0)
+        {
+            return 0;
+        }
 
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_approved = 1 WHERE post_id = postID");
@@ -312,8 +373,10 @@ class PostsModel extends DBInterface
      */
     public function delete()
     {
-        $this->returnIfNull();
-
+        if($this->pID == 0)
+        {
+            return 0;
+        }
         $stmt = $this->cnx->prepare("DELETE FROM posts WHERE post_id = :id");
         $stmt->execute([":postID" => $this->postID]);
     }
