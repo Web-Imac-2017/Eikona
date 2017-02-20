@@ -23,7 +23,7 @@ class UserModel extends DBInterface{
 			return "wrongFormat";
 		}
 
-		//Confrim the id before doing anything
+		//Confirm the id before doing anything
 		$stmt = $this->cnx->prepare("
 			SELECT COUNT(user_id) FROM users
 			WHERE user_id = :id");
@@ -58,11 +58,10 @@ class UserModel extends DBInterface{
 	public function getActivated()
 	{
 		var_dump($this->id);
-		//var_dump($this->id);
+		// var_dump($this->id);
 		if($this->id == 0)
 			return;
 
 		return $this->u['user_activated'];
 	}
-
 }
