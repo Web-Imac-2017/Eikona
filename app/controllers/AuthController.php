@@ -83,14 +83,14 @@ class AuthController{
 		$resp = new Response();
 
 		//si les deux champs de connexion sont remplis
-		if(!empty($_GET['user_email']) &&
-		   !empty($_GET['user_passwd'])){
+		if(!empty($_POST['user_email']) &&
+		   !empty($_POST['user_passwd'])){
 
-			$email = $this->model->checkEmail($_GET['user_email']);
-		
+			$email = $this->model->checkEmail($_POST['user_email']);
+
 			//Si l'user est inscrit dans la bdd
 			if($email){
-				$user = $this->model->checkConnection($_GET['user_email'], $_GET['user_passwd']);
+				$user = $this->model->checkConnection($_POST['user_email'], $_POST['user_passwd']);
 				//Si la combinaison email /pwd est correcte
 				if($user->getID() != 0){
 					//Si le compte est activé
