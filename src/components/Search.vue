@@ -1,14 +1,19 @@
 <template lang="html">
   <form id="search-bar">
     <button @click="search"></button>
+    <input type="text" placeholder="Mots-clés" />
   </form>
 </template>
 
 <script>
 export default {
-  name : "search"
+  methods : {
+    search () {
+      console.log("Search");
+    }
+  }
 };
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 </style>

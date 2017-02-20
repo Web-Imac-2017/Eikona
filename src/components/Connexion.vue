@@ -1,5 +1,5 @@
 <template lang="html">
-  <form id="connexion-bar">
+  <form>
     <button @click="connexion">Connexion</button>
     <button @click="inscription">Inscription</button>
   </form>
@@ -7,9 +7,19 @@
 
 <script>
 export default {
-  name: "connexion"
+  methods : {
+    connexion () {
+      console.log("connexion");
+    },
+    inscription () {
+      console.log("inscription");
+    }
+  }
 };
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
+  form > * {
+    display : inline-block;
+  }
 </style>
