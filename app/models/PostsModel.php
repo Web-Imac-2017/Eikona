@@ -377,12 +377,4 @@ class PostsModel extends DBInterface
         $stmt = $this->cnx->prepare("DELETE FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
     }
-
-    public function returnIfNull()
-    {
-        if($this->postID == 0)
-        {
-            return 0;
-        }
-    }
 }

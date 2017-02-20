@@ -44,10 +44,10 @@ class PostsController
 			}
 
 			/*appel du model*/
-			$postId = $this->model->create($type, $extension, $desc, $time);
+			$postID = $this->model->create($type, $extension, $desc, $time);
 			
 			/*enregistrement de l'image*/
-			imagejpeg($imSource, 'medias/img/' . $postId . '.' . $extension);
+			imagejpeg($imSource, 'medias/img/' . $postID . '.' . $extension);
 		}
 	}
 
@@ -57,6 +57,7 @@ class PostsController
 	 */
 	public function delete($postID)
 	{
+		unlink("medias/img/".$postID.".jpg");
 		$this->model->setPost($postID);
 		$this->model->delete();
 	}
@@ -73,39 +74,105 @@ class PostsController
 		$this->model->updateState($newState);
 	}
 
-	public function display($profileId)
+	public function display($postID)
 	{
 
 	}
 
-	public function getGeo()
+	public function getGeo($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
 		$geo = $this->model->getGeo();
+
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postID", $postID)
+			->bindValue("geo", $geo)
+			->send();
 	}
 
-	public function getDescription()
+	public function getDescription($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
 		$desc = $this->model->getDescription();
+
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postID", $postID)
+			->bindValue("desc", $desc)
+			->send();
 	}
 
-	public function getPublishTime()
+	public function getPublishTime($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
 		$publishTime = $this->model->getPublishTime();
+
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postID", $postID)
+			->bindValue("publishTime", $publishTime)
+			->send();
 	}
 
-	public function getState()
+	public function getState($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
 		$state = $this->model->getState();
+
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postID", $postID)
+			->bindValue("state", $state)
+			->send();
 	}
 	
-	public function getAllowComments()
+	public function getAllowComments($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
 		$allowComments = $this->model->getAllowComments();
+
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postID", $postID)
+			->bindValue("allowComments", $allowComments)
+			->send();
 	}
 
-	public function getApproved()
+	public function getApproved($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
 		$approved = $this->model->getApproved();
+
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postID", $postID)
+			->bindValue("approved", $approved)
+			->send();
 	}
 
 
