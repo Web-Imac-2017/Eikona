@@ -5,6 +5,7 @@ class UserModel extends DBInterface{
 	private $id = 0;
 	private $u = NULL;
 
+
 	public function __construct($_id)
 	{
 		parent::__construct();
@@ -12,6 +13,11 @@ class UserModel extends DBInterface{
 		$this->setUser($_id);
 	}
 
+
+	/**
+	 * Instancie la classe User
+	 * @param int $userID user_id
+	 */
 	public function setUser($userID)
 	{
 		$userID = Sanitize::int($userID);

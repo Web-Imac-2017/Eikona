@@ -9,6 +9,10 @@ class AuthController{
 		$this->model = new AuthModel();
 	}
 
+	/**
+	 * Inscription de l'user
+	 * @return Response JSON
+	 */
 	public function register()
 	{
 		$resp = new Response();
@@ -51,6 +55,10 @@ class AuthController{
 		$resp->send();
 	}
 
+	/**
+	 * Activation du compte
+	 * @return Response JSON
+	 */
 	public function activate()
 	{
 		$resp = new Response();
