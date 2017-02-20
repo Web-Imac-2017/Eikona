@@ -83,7 +83,13 @@ class ProfilesModel extends DBInterface
         $private = Sanitize::boolean($private);
 
         if($uID < 1)
-            return 0;
+            return "badUserID";
+
+        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_name = :pName");
+        $stmt->execute([":pName" => $name]);
+
+        if($stmt->fetchColumn() != 0)
+            return "userNameAlreadyExists";
 
         $stmt = $this->cnx->prepare("INSERT INTO profiles(user_id, profile_name, profile_desc, profile_private, profile_create_time) VALUES(:uID, :name, :desc, :private, :create)");
         $stmt->execute([":uID" => $uID,

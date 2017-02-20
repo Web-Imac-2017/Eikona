@@ -38,16 +38,30 @@ class ProfilesController
 
         $uID = 1; //Get current user ID
 
-        $pID = $this->model->create($uID, $name, $desc, $isPrivate);
+        $result = $this->model->create($uID, $name, $desc, $isPrivate);
+
+        $rsp = new Response();
+
+        if($result == "badUserID")
+        {
+            $rsp->setFailure(400, "Given user ID is not valid.");
+        }
+        else if($result == "userNameAlreadyExists")
+        {
+            $rsp->setFailure(409, "The profile name is already taken.");
+        }
+        else
+        {
+            $rsp->setSuccess(201)
+                ->bindValue("profileID", $result);
+        }
 
         /**
          * Handle profile picture
          */
 
         //Send JSON response
-        $rsp->setSuccess(201)
-            ->bindValue("profileID", $pID)
-            ->send();
+        $rsp->send();
     }
 
     /**
