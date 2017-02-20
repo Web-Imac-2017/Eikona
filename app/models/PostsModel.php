@@ -29,7 +29,7 @@ class PostsModel extends DBInterface
         }
 
         //Confirm the id before doing anything
-        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE post_id = :pID");
+        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $postID]);
 
         //Post ID not found
@@ -42,7 +42,7 @@ class PostsModel extends DBInterface
 
         //Post found
         $stmt = $this->cnx->prepare("SELECT post_id, post_type, post_extension, post_description, post_publish_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
-        $stmt->execute([":postID" => postID]);
+        $stmt->execute([":postID" => $postID]);
 
         $this->postID = $postID;
         $this->postDatas = $stmt->fetch();
@@ -59,19 +59,16 @@ class PostsModel extends DBInterface
     */
     public function create($type, $extension, $description, $time)
     {
-        if($this->pID == 0)
-        {
-            return 0;
-        }
-
         //Wait for the upgrade of the Sanitize function
         //$this->extension = Sanitize::string($extension);
         //$this->type = Sanitize::string($type);
 
         $description = Sanitize::string($description);
+		$profile = 1;
 
-        $stmt = $this->cnx->prepare("INSERT INTO posts(post_type, post_extension, post_description, post_publish_time) VALUES (:type, :extension, :description, :time)");
-        $stmt->execute([ ":type" => $type,
+        $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_publish_time) VALUES (:profile, :type, :extension, :description, :time)");
+        $stmt->execute([ ":profile" => $profile,
+						 ":type" => $type,
                          ":extension" => $extension,
                          ":description" => $description,
                          ":time" => $time
@@ -94,7 +91,7 @@ class PostsModel extends DBInterface
     */
     public function setGeo($latitude, $longitude, $name)
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -122,7 +119,7 @@ class PostsModel extends DBInterface
      */
     public function getState()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -136,7 +133,7 @@ class PostsModel extends DBInterface
      */
     public function getGeo()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -154,7 +151,7 @@ class PostsModel extends DBInterface
      */
     public function getDescription()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -167,7 +164,7 @@ class PostsModel extends DBInterface
      */
     public function getPublishTime()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -180,7 +177,7 @@ class PostsModel extends DBInterface
      */
     public function getAllowComments()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -193,7 +190,7 @@ class PostsModel extends DBInterface
      */
     public function getApproved()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -206,7 +203,7 @@ class PostsModel extends DBInterface
      */
     public function getUpdateTime()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -223,7 +220,7 @@ class PostsModel extends DBInterface
     */
     public function updateDescription($description)
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -247,7 +244,7 @@ class PostsModel extends DBInterface
      */
     public function updateState($state)
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -265,7 +262,7 @@ class PostsModel extends DBInterface
      */
     public function updateLatitude($latitude)
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -283,7 +280,7 @@ class PostsModel extends DBInterface
      */
     public function updateLongitude($longitude)
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -301,7 +298,7 @@ class PostsModel extends DBInterface
      */
     public function updateGeoName($name)
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -319,7 +316,7 @@ class PostsModel extends DBInterface
      */
     public function allowComments()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -337,7 +334,7 @@ class PostsModel extends DBInterface
      */
     public function disableComments()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -355,7 +352,7 @@ class PostsModel extends DBInterface
      */
     public function updatePostApproved()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
@@ -373,17 +370,17 @@ class PostsModel extends DBInterface
      */
     public function delete()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
-        $stmt = $this->cnx->prepare("DELETE FROM posts WHERE post_id = :id");
+        $stmt = $this->cnx->prepare("DELETE FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
     }
 
     public function returnIfNull()
     {
-        if($this->pID == 0)
+        if($this->postID == 0)
         {
             return 0;
         }
