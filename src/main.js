@@ -9,7 +9,7 @@ Vue.use(VueRouter);
 Vue.use(Vuex);
 
 const router = new VueRouter({
-  mode : "history",
+  mode : 'history',
   routes : [{
     path: '/',
     component : require('./components/Hello.vue')
@@ -21,6 +21,6 @@ const router = new VueRouter({
 
 new Vue({ // eslint-disable-line no-new
   el: '#app',
-
+  router,
   render: (h) => h(require('./App.vue'))
 });
