@@ -66,11 +66,17 @@ class AuthController{
 		if(!empty($_POST['user_id']) &&
 		   !empty($_POST['user_key'])){
 
-			//activation du compte
-			$this->model->checkActivation($_POST['user_id']);
-			$resp->setSuccess();
+			//Activation du compte
+			$res = $this->model->checkActivation($_POST['user_id'], $_POST['user_key']);
+			//Si l'user existe bien
+			if($res){
+				$this->model->updateUserActivated($_POST['user_id']);
+				$resp->setSuccess(200, "Account activated"); 
+			}else{
+				$resp->setFailure(401, "id or and key do not exist");
+			}
 		}else{
-			$resp->setFailure();
+			$resp->setFailure(400, "tous les champs ne sont pas remplis");
 		}
 		
 		//envoi de la réponse

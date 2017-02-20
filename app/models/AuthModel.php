@@ -91,8 +91,8 @@ class AuthModel extends DBInterface{
 			AND :key = sha1(user_register_time)");
 		$stmt->execute([":id"  => $id,
 			            ":key" => $key]);
-
-		return ($stmt->rowCount() == 1) ? true : false;
+		
+		return ($stmt->fetchColumn() != 0) ? true : false;
 	}
 
 	/**
