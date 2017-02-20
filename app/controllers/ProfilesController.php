@@ -319,6 +319,49 @@ class ProfilesController
 
 
 
+    public function setPicture($profileID)
+    {
+        $rsp = new Response();
+
+        if(!isAuthorized::updateProfile())
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!is_uploaded_file($_FILES['profilePicture']['tmp_name']))
+		{
+            $rsp->setFailure(400, "Missing profilePicture file")
+                ->send();
+
+            return;
+        }
+        $source = $_FILES['img']['tmp_name'];
+        $format = getimagesize($source);
+        $tab;
+
+        if(preg_match('#(png|gif|jpeg)$#i', $format['mime'], $tab))
+        {
+            $imSource = imagecreatefromjpeg($source);
+            if($tab[1] == "jpeg")
+                $tab[1] = "jpg";
+            $extension = $tab[1];
+        }
+        if($format['mime'] == "image/png")
+        {
+            $extension = 'jpg';
+        }
+        /*appel du model*/
+        $postID = $this->model->create($type, $extension, $desc, $time);
+
+        /*enregistrement de l'image*/
+        imagejpeg($imSource, 'medias/img/' . $postID . '.' . $extension);
+    }
+
+
+
     /**
      * Increment by one (or more) the view counter of the specified profile
      *
