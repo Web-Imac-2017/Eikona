@@ -16,7 +16,7 @@ class Session
     public static $action;
 
     //Cipher informations
-    public static $cipher = 'aes-256-ctr';
+    public static $cipher = 'aes-256-cbc';
     public static $hash = 'sha256';
     public static $ivLength = 16;
     public static $iv = "56897ngq8907345f";
@@ -313,10 +313,6 @@ class Session
 
 /*header('Content-Type: application/json');
 Session::open();
-Session::renewKey();
-
 echo json_encode(["SESSION" => $_SESSION,
-                  "TEST" => Session::read("TEST"),
-                  "SESSION_ID" => session_id(),
-                  "ACTION" => Session::$action]);
-                  */
+                  "TEST" => Session::read("TEST")]);*/
+
