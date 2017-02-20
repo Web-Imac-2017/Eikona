@@ -32,10 +32,6 @@ class Session
 
         self::$key = session_id();
 
-<<<<<<< HEAD
-            //And renew the current key for more safety
-            self::renewKey(false);
-=======
         if(self::sessionIsValid())
         {
             if(!self::keyIsValid())
@@ -53,7 +49,6 @@ class Session
                 self::renewKey();
                 self::$action = "RANDOM RENEW";
             }
->>>>>>> origin/sessions
         }
         else
         {
