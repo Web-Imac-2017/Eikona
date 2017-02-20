@@ -12,7 +12,6 @@ class BlockModel extends DBInterface{
 	 * @param  int $blocker_id blocker_id
 	 * @param  int $blocked_id blocked_id
 	 * @param  time $time time()
-	 * @return boolean	       true / false
 	 */
 	public function blockUser($blocker_id, $blocked_id, $time)
 	{
@@ -20,22 +19,32 @@ class BlockModel extends DBInterface{
 		$stmt->execute([":blocker_id" => $blocker_id,
                         ":blocked_id" => $blocked_id,
                         ":time" => $time]);
-
-		return ($stmt->fetchColumn() == 0) ? true : false;
 	}
 
 	/**
 	 * Indique dans la BDD que le premier utilisateur fourni NE bloque PLUS le second.
 	 * @param  int $blocker_id blocker_id
 	 * @param  int $blocked_id blocked_id
-	 * @return boolean	       true / false
 	 */
 	public function unblockUser($blocker_id, $blocked_id)
 	{
 		$stmt = $this->cnx->prepare("DELETE FROM blocked WHERE blocker_id = :blocker_id AND blocker_id = :blocked_id");
 		$stmt->execute([":blocker_id" => $blocker_id,
                         ":blocked_id" => $blocked_id]);
+	}
 
-		return ($stmt->fetchColumn() == 0) ? true : false;
+	/**
+	 * Indique si le premier utilisateur fourni est bloqué par le second.
+	 * @param  int $blocker_id blocker_id
+	 * @param  int $blocked_id blocked_id
+	 * @return boolean	       true / false
+	 */
+	public function isBlocked($blocker_id, $blocked_id)
+	{
+		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM blocked WHERE blocker_id = :blocker_id AND blocker_id = :blocked_id");
+		$stmt->execute([":blocker_id" => $blocker_id,
+                        ":blocked_id" => $blocked_id]);
+
+		return ($stmt->fetchColumn() == 1) ? true : false;
 	}
 }
