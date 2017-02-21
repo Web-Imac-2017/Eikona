@@ -4,7 +4,6 @@ class UserModel extends DBInterface{
 
 	private $id = 0;
 	private $u = NULL;
-	private $model;
 
 
 	public function __construct($_id)
@@ -84,11 +83,26 @@ class UserModel extends DBInterface{
 	/***** UPDATE *****/
 	/******************/
 
+	/**
+	 * Update user name
+	 * @param  text $newName user_name
+	 * @return boolean          true / false
+	 */
 	public function updateName($newName)
 	{
 		if($this->id == 0) return false;
 
-		
+		$name Sanitize::userName($newName);
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_name = :name
+			WHERE user_id = :id");
+		$stmt->execute([":name" => $name,
+						":id" => $this->id]);
+
+		$this->u['user_name'] = $name;
+		return true;
 	}
 
 }

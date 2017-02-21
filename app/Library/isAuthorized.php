@@ -10,6 +10,7 @@ class isAuthorized
     {
         return true;
     }
+    
     static public function isModerator() {}
     static public function isAdmin() {}
 
