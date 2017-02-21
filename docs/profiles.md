@@ -66,10 +66,13 @@ GET
 ### Succès
 
   * **Code:** 200 OK <br />
-    **Data:** `{ 
-    profileID : ID du profil,
-    profileName : Nom du profil
-    }`
+    **Data:** 
+    ```JSON
+    { 
+        profileID : ID du profil,
+        profileName : Nom du profil
+    }
+    ```
  
 ### Erreurs
 
@@ -431,7 +434,7 @@ GET
 
   * **Code:** 200 OK <br />
     **Data:** `{}`
- 
+
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
