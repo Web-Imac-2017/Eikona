@@ -97,5 +97,21 @@ class Sanitize
         return strtolower($name);
     }
 
+    /**
+     * Format the given string to an acceptable string for user
+     * @param  text $uName user_name
+     * @return boolean 
+     */
+    public static function userName($uName)
+    {
+        //replace punctuation characters
+        $name = preg_replace("#[[:punct:]]#", "", $uName);
+
+        $name = filter_var($name, FILTER_SANITIZE_STRING);
+
+        $name = substr($name, 0, 30);
+
+        return $name;
+    }
 
 }
