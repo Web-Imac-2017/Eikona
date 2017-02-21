@@ -13,9 +13,7 @@ Créer un profil pour l'utilisateur courant.
 ```
 
 ### Méthode
-```
-POST
-```
+**POST**
 
 ### Variables POST
 
@@ -55,9 +53,7 @@ Récupère le nom d'un profil
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -95,9 +91,7 @@ Récupère la description d'un profil
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -135,9 +129,7 @@ Récupère l'URL de l'image d'un profil
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -175,9 +167,7 @@ Récupère le nombre de fois ou le profil a été vu.
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -215,9 +205,7 @@ Récupère le paramètre de confidentialité (Privé/Publique) du profil.
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -254,9 +242,7 @@ Récupère l'identifiant de l'utilisateur propriétaire du profil
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -294,9 +280,7 @@ Met à jour le champ indiqué du profil
 ```
 
 ### Méthode
-```
-POST
-```
+**POST**
 
 ### Variable GET
 
@@ -350,9 +334,7 @@ Remplace l'image actuelle du profil par une nouvelle
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -403,9 +385,7 @@ Ajoute une ou plusieurs vues au profil
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
@@ -446,9 +426,7 @@ Ajoute une ou plusieurs vues au profil
 ```
 
 ### Méthode
-```
-GET
-```
+**GET**
 
 ### Variable GET
 
