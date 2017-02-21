@@ -38,16 +38,30 @@ class ProfilesController
 
         $uID = 1; //Get current user ID
 
-        $pID = $this->model->create($uID, $name, $desc, $isPrivate);
+        $result = $this->model->create($uID, $name, $desc, $isPrivate);
+
+        $rsp = new Response();
+
+        if($result == "badUserID")
+        {
+            $rsp->setFailure(400, "Given user ID is not valid.");
+        }
+        else if($result == "userNameAlreadyExists")
+        {
+            $rsp->setFailure(409, "The profile name is already taken.");
+        }
+        else
+        {
+            $rsp->setSuccess(201)
+                ->bindValue("profileID", $result);
+        }
 
         /**
          * Handle profile picture
          */
 
         //Send JSON response
-        $rsp->setSuccess(201)
-            ->bindValue("profileID", $pID)
-            ->send();
+        $rsp->send();
     }
 
     /**
@@ -301,6 +315,60 @@ class ProfilesController
         $rsp->bindValue("profileID", $profileID)
             ->send();
 
+    }
+
+
+
+    public function setPicture($profileID)
+    {
+        $rsp = new Response();
+
+        if(!isAuthorized::updateProfile())
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!is_uploaded_file($_FILES['profilePicture']['tmp_name']))
+		{
+            $rsp->setFailure(400, "Missing profilePicture file")
+                ->send();
+
+            return;
+        }
+
+        $source = $_FILES['profilePicture']['tmp_name'];
+        $format = getimagesize($source);
+        $tab;
+
+        if(preg_match('#(png|gif|jpeg)$#i', $format['mime'], $tab))
+        {
+            $imSource = imagecreatefromjpeg($source);
+            if($tab[1] == "jpeg")
+                $tab[1] = "jpg";
+            $extension = $tab[1];
+        }
+        else
+        {
+            $rsp->setFailure(406, "Picture format (".$tab.") is not supported.")
+                ->send();
+
+            return;
+        }
+
+        if($format['mime'] == "image/png")
+        {
+            $extension = 'jpg';
+        }
+
+        /*enregistrement de l'image*/
+        imagejpeg($imSource, 'medias/profilesPictures/' . $profileID . '.' . $extension);
+
+        $rsp->setSuccess(200)
+            ->bindValue("ProfilePicture", "/app/medias/profilesPictures/".$profileID.".jpg'")
+            ->send();
     }
 
 
