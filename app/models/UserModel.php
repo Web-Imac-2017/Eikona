@@ -4,6 +4,7 @@ class UserModel extends DBInterface{
 
 	private $id = 0;
 	private $u = NULL;
+	private $model;
 
 
 	public function __construct($_id)
@@ -58,7 +59,7 @@ class UserModel extends DBInterface{
 	}
 
 	/*****************/
-	/***** GETER *****/
+	/***** GETTER *****/
 	/*****************/
 
 	/**
@@ -78,4 +79,16 @@ class UserModel extends DBInterface{
 	{
 		return $this->u['user_activated'];
 	}
+
+	/******************/
+	/***** UPDATE *****/
+	/******************/
+
+	public function updateName($newName)
+	{
+		if($this->id == 0) return false;
+
+		
+	}
+
 }

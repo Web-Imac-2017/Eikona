@@ -6,7 +6,10 @@
 class isAuthorized
 {
     /***** Global verifications *****/
-    static public function isUser() {}
+    static public function isUser()
+    {
+        return true;
+    }
     static public function isModerator() {}
     static public function isAdmin() {}
 

@@ -96,4 +96,6 @@ class Sanitize
 
         return strtolower($name);
     }
+
+
 }
