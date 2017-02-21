@@ -69,7 +69,8 @@ class AuthModel extends DBInterface{
                    'MIME-Version: 1.0' . "\r\n" .
                    'Content-type: text/html; charset=utf-8';
 
-        mail($email, $subject);
+       $ok = mail($email, $subject, $content, $headers);
+       var_dump("status = ".$ok);
 
     }
 

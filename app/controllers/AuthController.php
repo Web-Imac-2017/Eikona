@@ -36,9 +36,9 @@ class AuthController{
 						$user_register_time);
 					//envoi d'un mail d'activation
 					$this->model->sendMail(
+						$id,
 						$_POST['user_email'],
-						$user_register_time,
-						$id);
+						$user_register_time);
 					$resp->setSuccess(200, "user added")
 					     ->bindValue("email", $_POST['user_email']);
 				}else{
@@ -63,17 +63,16 @@ class AuthController{
 	{
 		$resp = new Response();
 
-		if(!empty($_POST['user_id']) &&
-		   !empty($_POST['user_key'])){
+		if(!empty($_REQUEST['user_id']) && !empty($_REQUEST['user_key'])){
 
 			//Activation du compte
-			$res = $this->model->checkActivation($_POST['user_id'], $_POST['user_key']);
+			$res = $this->model->checkActivation($_REQUEST['user_id'], $_REQUEST['user_key']);
 			//Si l'user existe bien
 			if($res){
-				$this->model->updateUserActivated($_POST['user_id']);
+				$this->model->updateUserActivated($_REQUEST['user_id']);
 				$resp->setSuccess(200, "Account activated"); 
 			}else{
-				$resp->setFailure(401, "id or and key do not exist");
+				$resp->setFailure(401, "user_id or and user_key do not exist");
 			}
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
