@@ -1,3 +1,7 @@
+<?php
+
+$content = "
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -17,4 +21,4 @@
 		<h3>Si le formulaire ne s'affiche pas correctement, <a href='localhost/Groupe1/app/do/auth/activate?id=".$id."&key=".sha1($time)."'>veuillez suivre ce lien.</a>
 	</body>
 
-</html>
+</html>";
