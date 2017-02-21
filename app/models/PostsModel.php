@@ -56,24 +56,25 @@ class PostsModel extends DBInterface
      * @param $type Type of the post to be posted
      * @param $extension Extension of the picture/video of the post
      * @param $description Description of the post
-     * @param $time Time the post was created
-     *
     */
-    public function create($type, $extension, $description, $time)
+    public function create($type, $extension, $description)
     {
         //Wait for the upgrade of the Sanitize function
         //$this->extension = Sanitize::string($extension);
         //$this->type = Sanitize::string($type);
 
         $description = Sanitize::string($description);
+
+		// To change when there will be profile
 		$profile = 1;
 
-        $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_publish_time) VALUES (:profile, :type, :extension, :description, :time)");
+        $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_edit_time, post_publish_time) VALUES (:profile, :type, :extension, :description, :editTime, :publishTime)");
         $stmt->execute([ ":profile" => $profile,
 						 ":type" => $type,
                          ":extension" => $extension,
                          ":description" => $description,
-                         ":time" => $time
+						 ":editTime" => time(),
+						 ":publishTime" => time()
         ]);
 
         $postID = $this->cnx->lastInsertId();
@@ -137,7 +138,7 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
 
         $tabGeo[0] = $this->postDatas['post_geo_lat'];
@@ -226,15 +227,15 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
 
-        $description = Sanitize::string($description);
+		$description = Sanitize::string($description);
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_description = :description WHERE post_id = :postID");
         $stmt->execute([
            ":description" => $description,
-            ":pID" => $this->postID
+            ":postID" => $this->postID
         ]);
 
         $this->postDatas['description'] = $description;
@@ -250,7 +251,7 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_state = :state WHERE post_id = :postID");
@@ -258,6 +259,8 @@ class PostsModel extends DBInterface
                       ":postID" => $this->postID]);
 
         $this->postDatas['post_state'] = $state;
+
+		return $state;
     }
 
     /*
@@ -268,14 +271,18 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
+
+		/* Sanitize à ajouter pour Latitude */
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lat = :latitude WHERE post_id = :postID");
         $stmt->execute([":latitude" => $latitude,
                          ":postID" => $this->postID]);
 
         $this->postDatas['post_geo_lat'] = $latitude;
+
+		return $latitude;
     }
 
     /*
@@ -286,14 +293,18 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
+
+		/* Sanitize à ajouter pour Latitude */
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lng = :longitude WHERE post_id = :postID");
         $stmt->execute([":longitude" => $longitude,
                          ":postID" => $this->postID]);
 
         $this->postDatas['post_geo_lng'] = $longitude;
+
+		return $longitude;
     }
 
     /*
@@ -304,14 +315,18 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
 
-        $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_lat = :name WHERE post_id = :postID");
+		/* Sanitize String à ajouter pour Latitude */
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_geo_name = :name WHERE post_id = :postID");
         $stmt->execute([":name" => $name,
                          ":postID" => $this->postID]);
 
         $this->postDatas['post_geo_name'] = $name;
+
+		return $name;
     }
 
     /*
@@ -322,14 +337,15 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
 
-
-        $stmt = $this->cnx->prepare("UPDATE posts SET post_allow_comments = 1 WHERE post_id = :pID");
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_allow_comments = 1 WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
 
-        $this->postDatas['post_state'] = 1;
+        $this->postDatas['post_allow_comments'] = 1;
+
+		return $this->postDatas['post_allow_comments'];
     }
 
     /*
@@ -340,14 +356,15 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
-
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_allow_comments = 0 WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
 
-        $this->postDatas['post_state'] = 0;
+        $this->postDatas['post_allow_comments'] = 0;
+
+		return $this->postDatas['post_allow_comments'];
     }
 
     /*
@@ -358,14 +375,15 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
-
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_approved = 1 WHERE post_id = postID");
         $stmt->execute([":postID" => $this->postID]);
 
         $this->postDatas['post_approved'] = 1;
+
+		return $this->postDatas['post_approved'];
     }
 
     /*
@@ -376,9 +394,12 @@ class PostsModel extends DBInterface
     {
         if($this->postID == 0)
         {
-            return 0;
+            return false;
         }
+
         $stmt = $this->cnx->prepare("DELETE FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
+
+		return true;
     }
 }
