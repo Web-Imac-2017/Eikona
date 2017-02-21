@@ -3,20 +3,21 @@
 Les profils sont gérés par le **profilesController**.
 Celui-ci permet d'accèder à toutes les informations relatives à ces derniers.
 
-Création d'un profil
-----
-  Crééer un profil pour l'utilisateur courant.
+## Création d'un profil
 
-* **URL**
+Créer un profil pour l'utilisateur courant.
 
-    `/profiles/create/`
+### URL
+````
+/profiles/create/
+```
 
-* **Méthode:**
-  
-  `POST`
+### Méthode
+````
+POST
+```
 
-
-* **Variables POST**
+### Variables POST
 
   * **profileName** : Nom du profil
   
@@ -25,12 +26,12 @@ Création d'un profil
   * **profileDesc** : Description du profil
   * **profilePrivate** : À transmettre si le profil est privé
 
-* **Succès:**
+### Succès
 
   * **Code:** 201 CREATED <br />
     **Data:** `{ profileID : ID du profil créé }`
  
-* **Erreurs:**
+### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
     **Explication** La variable POST **profileName** n'a pas été transmise.
@@ -40,6 +41,6 @@ Création d'un profil
   * **Code:** 409 CONFLICT <br />
     **Explication** Le nom de profil est déjà utilisé.
 
-* **Notes:**
+###Notes
 
   Un profil ne peut être créer si il n'y a pas d'utilisateur de connecté.
