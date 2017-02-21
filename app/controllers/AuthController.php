@@ -76,7 +76,7 @@ class AuthController{
 			}
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
-		}
+		} 	
 		
 		//envoi de la réponse
 		$resp->send();
@@ -101,6 +101,7 @@ class AuthController{
 					//Si le compte est activé
 					if($user->getActivated()){
 						$resp->setSuccess(200, "user connected");
+						Session::write("userID", $user-getID());
 					}else{
 						$resp->setFailure(401, "account not yet activated");
 					}
