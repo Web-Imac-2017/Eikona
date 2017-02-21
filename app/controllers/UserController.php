@@ -35,6 +35,7 @@ class UserController{
 	{
 		$resp = new Response();
 
+		//User is authorized ?
 		if(!isAuthorized::isUser()){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
@@ -42,24 +43,62 @@ class UserController{
 			return;
 		}
 
-
+		// If userID is wrong 
 		if(!$this->setUser($userID)){
 			return;
 		}
 
 		switch($field)
 		{
+			/*---------- USER_NAME ----------*/
 			case "name":
 
 				if(!empty($_POST['name'])){
 					if($this->model->updateName($_POST['name'])){
 						$resp->setSuccess(200, "name changed")
 						     ->bindValue("userName", $this->model->getName());
+					}else{
+						$resp->setFailure(400, "incorrect value");
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
 				}
-			break;
+				break;
+
+			/*---------- USER_EMAIL ----------*/
+			case "email":
+
+				if(!empty($_POST['email'])){
+					if($this->model->updateEmail($_POST['email'])){
+						$resp->setSuccess(200, "email changed")
+							 ->bindValue("userEmail", $this->model->getEmail());
+					}else{
+						$resp->setFailure(400, "incorrect email");
+					}
+				}
+				else{
+					$resp->setFailure(400, "Missing value. Edit aborted.");
+				}
+				break;
+
+			/*---------- USER_PASSWORD ----------*/
+			case "password":
+
+				if(!empty($_POST['passwd']) && !empty($_POST['passwd_confirm'])){
+					if($_POST['passwd'] == $_POST['passwd_confirm']){
+						if($this->model->updatePassword($_POST['passwd'])){
+							$resp->setSuccess(200, "password changed");
+							//Pour la sécurité, pas de bind value du passwd
+						}else{
+							$resp->setFailure(400, "incorrect password");
+						}
+					}else{
+						$resp->setFailure(400, "password and confirmation do not correspond");
+					}
+				}else{
+					$resp->setFailure(400, "Missing value. Edit aborted.");
+				}
+				break;
 
 			default:
 				$resp->setFailure(405);

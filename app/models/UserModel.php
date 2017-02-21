@@ -80,6 +80,15 @@ class UserModel extends DBInterface{
 	}
 
 	/**
+	 * Return user email
+	 * @return text user_email
+	 */
+	public function getEmail()
+	{
+		return $this->u['user_email'];
+	}	
+
+	/**
 	 * Return if user account is activated
 	 * @return boolean true(1) / false(0)
 	 */
@@ -103,14 +112,63 @@ class UserModel extends DBInterface{
 
 		$name = Sanitize::userName($newName);
 
+		if(!$name) return false;
+
 		$stmt = $this->cnx->prepare("
 			UPDATE users
 			SET user_name = :name
 			WHERE user_id = :id");
 		$stmt->execute([":name" => $name,
-						":id" => $this->id]);
+						":id"   => $this->id]);
 
 		$this->u['user_name'] = $name;
+		return true;
+	}
+
+
+	/**
+	 * Update user email
+	 * @param  text $newEmail user_email
+	 * @return boolean           true / false
+	 */
+	public function updateEmail($newEmail)
+	{
+		if($this->id == 0) return false;
+
+		$email = Sanitize::userEmail($newEmail);
+
+		if(!$email) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_email = :email
+			WHERE user_id = :id");
+		$stmt->execute([":email" => $email,
+			            ":id"    => $this->id]);
+
+		$this->u['user_email'] = $email;
+
+		return true;
+	}
+
+	/**
+	 * Update user password
+	 * @param  text $newPasswd user_passwd
+	 */
+	public function updatePassword($newPasswd){
+		if($this->id == 0) return false;
+
+		$pwd = hash('sha256', $newPasswd);
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_passwd = :pwd
+			WHERE user_id = :id");
+		$stmt->execute([":pwd" => $pwd,
+			            ":id"  => $this->id]);
+
+		$this->u['user_passwd'] = $pwd;
+
 		return true;
 	}
 

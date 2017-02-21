@@ -100,18 +100,40 @@ class Sanitize
     /**
      * Format the given string to an acceptable string for user
      * @param  text $uName user_name
-     * @return boolean 
      */
     public static function userName($uName)
     {
         //replace punctuation characters
         $name = preg_replace("#[[:punct:]]#", "", $uName);
 
+        //sanitize
         $name = filter_var($name, FILTER_SANITIZE_STRING);
 
         $name = substr($name, 0, 30);
 
+        if(strlen($name) == 0) return false;
+
         return $name;
+    }
+
+    /**
+     * Format the given email to an acceptable email for user
+     * @param  text $uEmail user_email   
+     */
+    public static function userEmail($uEmail)
+    {
+        //replace accented characters
+        $email = iconv('UTF-8', 'ASCII//TRANSLIT', $uEmail);
+
+        //Sanitize email
+        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+
+        //Validate email
+        $validate = filter_var($email, FILTER_VALIDATE_EMAIL);
+
+        if(!$validate || strlen($email) == 0) return false;
+
+        return strtolower($email);
     }
 
 }
