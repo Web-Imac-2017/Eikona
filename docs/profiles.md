@@ -67,7 +67,8 @@ GET
 
   * **Code:** 200 OK <br />
     **Data:** 
-    ```JSON
+    
+    ```json
     { 
         profileID : ID du profil,
         profileName : Nom du profil
