@@ -6,7 +6,7 @@ class UserModel extends DBInterface{
 	private $u = NULL;
 
 
-	public function __construct($_id)
+	public function __construct($_id = 0)
 	{
 		parent::__construct();
 
@@ -26,7 +26,7 @@ class UserModel extends DBInterface{
 		{
 			$this->id = 0;
 			$this->u = NULL;
-			return;
+			return "wrongFormat";
 		}
 
 		//Confirm the id before doing anything
@@ -40,7 +40,7 @@ class UserModel extends DBInterface{
 		{
 			$this->id = 0;
 			$this->u = NULL;
-			return;
+			return "notFound";
 		}
 
 		//profile found
@@ -54,7 +54,7 @@ class UserModel extends DBInterface{
 		$this->id = $userID;
 		$this->u = $stmt->fetch();
 
-		return;
+		return "success";
 	}
 
 	/*****************/
@@ -68,6 +68,15 @@ class UserModel extends DBInterface{
 	public function getID()
 	{
 		return $this->id;
+	}
+
+	/**
+	 * Return user name
+	 * @return text user_name
+	 */
+	public function getName()
+	{
+		return $this->u['user_name'];
 	}
 
 	/**
@@ -86,13 +95,13 @@ class UserModel extends DBInterface{
 	/**
 	 * Update user name
 	 * @param  text $newName user_name
-	 * @return boolean          true / false
+	 * @return boolean       true / false
 	 */
 	public function updateName($newName)
 	{
 		if($this->id == 0) return false;
 
-		$name Sanitize::userName($newName);
+		$name = Sanitize::userName($newName);
 
 		$stmt = $this->cnx->prepare("
 			UPDATE users
