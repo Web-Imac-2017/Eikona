@@ -3,8 +3,11 @@
 class ProfilesController
 {
     private $model;
-    private $view;
 
+    /**
+     * Init the constructor and link the model
+     * @private
+     */
     public function __construct()
     {
         $this->model = new ProfilesModel();
@@ -17,13 +20,18 @@ class ProfilesController
      */
     public function create()
     {
+        $rsp = new Response();
+
         /**
-         * Verify if user is connected
+         * TODO: Verify if user is connected and can add a new profile
          */
 
-        if(empty($_POST['profileName']))
+        if (empty($_POST['profileName']))
+        {
+            $rsp->setFailure(400);
+            $rsp->send();
             return;
-
+        }
         $name = $_POST['profileName'];
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
@@ -36,15 +44,42 @@ class ProfilesController
          * Handle profile picture
          */
 
-        return $pID;
+        //Send JSON response
+        $rsp->setSuccess(201)
+            ->bindValue("profileID", $pID)
+            ->send();
     }
 
     /**
-     * Return the profile sheet to display
-     *
-     * @param $profileID ID of the profile to display
+     * Set the profile to use with the model
+     * @param  integer $profileID Profile ID to use with the model
+     * @return boolean  true on success, false on failure
      */
-    public function display($profileID){ }
+    private function setProfile($profileID)
+    {
+        $result = $this->model->setProfile($profileID);
+
+        if($result != "success")
+        {
+            $rsp = new Response();
+
+            if($result == "wrongFormat")
+            {
+                $rsp->setFailure(400, "Wrong format. This is not a profile ID.");
+            }
+            else if($result == "notFound")
+            {
+                $rsp->setFailure(404, "Given profile ID does not exist.");
+            }
+
+            $rsp->send();
+
+            return false;
+        }
+
+        return true;
+    }
+
 
     /**
      * Return the description of the specified profile
@@ -53,11 +88,17 @@ class ProfilesController
      */
     public function name($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $name = $this->model->getName();
 
-        return $name;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileName", $name)
+            ->send();
     }
 
     /**
@@ -67,11 +108,17 @@ class ProfilesController
      */
     public function description($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $desc = $this->model->getDesc();
 
-        return $desc;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profiledesc", $desc)
+            ->send();
     }
 
     /**
@@ -81,11 +128,17 @@ class ProfilesController
      */
     public function picture($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $pic = $this->model->getPic();
 
-        return $pic;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profilePicture", $pic)
+            ->send();
     }
 
     /**
@@ -95,11 +148,17 @@ class ProfilesController
      */
     public function views($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $views = $this->model->getViews();
 
-        return $views;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileViews", $views)
+            ->send();
     }
 
     /**
@@ -109,24 +168,55 @@ class ProfilesController
      */
     public function isPrivate($profileID)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
         $isPrivate = $this->model->isPrivate();
 
-        return $isPrivate;
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileIsPrivate", $isPrivate)
+            ->send();
     }
 
     /**
      * Return the number of views of the specified profile
      *
      * @param $profileID ID of the profile
-     * @param $limit number of posts to return
+     */
+    public function owner($profileID)
+    {
+        if(!$this->setProfile($profileID))
+            return;
+
+        /**
+         * TODO: confirm current user is moderator or profile owner
+         */
+
+        $owner = $this->model->getOwner();
+
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("profileOwner", $owner)
+            ->send();
+    }
+
+    /**
+     * Return the posts of the specified profile
+     * @param  integer $profileID ID of the profile
+     * @param  integer $limit     Number of posts to return
+     * @return void
      */
     public function posts($profileID, $limit = 30)
     {
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts())
+            return;
 
-        $posts = $this->model->getPosts();
+        $posts = $this->model->getPosts($limit);
 
         return $posts;
     }
@@ -139,30 +229,82 @@ class ProfilesController
      */
     public function update($field, $profileID)
     {
-        /*
-         * Only allow users who have authority on this profile to update
-         */
+        //Init JSON Response
+        $rsp = new Response();
 
-        $this->model->setProfile($profileID);
 
+        //Exclude all failure possibilities
+        if(!isAuthorized::updateProfile())
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!$this->setProfile($profileID))
+        {
+            return;
+        }
+
+        if(!isset($_POST['newValue']))
+        {
+            $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
+            $rsp->send();
+            return;
+        }
+
+        //Now, do the update
         switch($field)
         {
             case "name":
-                echo $this->model->updateName($_POST['newValue']);
+
+                if($this->model->updateName($_POST['newValue']))
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileName", $this->model->getName());
+                }
+
             break;
             case "description":
-                echo $this->model->updateDesc($_POST['newValue']);
+
+                if($this->model->updateDesc($_POST['newValue']))
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileDesc", $this->model->getDesc());
+                }
+
             break;
             case "setPrivate":
-                echo $this->model->setPrivate();
+
+                if($this->model->setPrivate())
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileIsPrivate", 1);
+                }
+
             break;
             case "setPublic":
-                echo $this->model->setPublic();
+
+                if($this->model->setPublic())
+                {
+                    $rsp->setSuccess(200)
+                        ->bindValue("profileIsPrivate", 0);
+                }
+
             break;
             default;
-                throw new InvalidArgumentException ("The field '".$field."'Is invalid.");
+                $rsp->setFailure(405);
         }
+
+        //Send JSON response
+        $rsp->bindValue("profileID", $profileID)
+            ->send();
+
     }
+
+
+
     /**
      * Increment by one (or more) the view counter of the specified profile
      *
@@ -171,32 +313,59 @@ class ProfilesController
      */
     public function addView($profileID, $nbr = 1)
     {
-        $this->model->setProfile($profileID);
-        $this->model->addView($nbr);
+        if(!$this->setProfile($profileID))
+            return;
+
+        //Init JSON Response
+        $rsp = new Response();
+        $rsp->bindValue("profileID", $profileID);
+
+        if($this->model->addView($nbr))
+        {
+            $rsp->setSuccess(200)
+                ->bindValue("profileViews", $this->model->getViews());
+        }
+        else
+        {
+            $rsp->setFailure(400);
+        }
+
+        $rsp->send();
     }
 
     /**
      * Delete the specified profile and all its dependecies
      *
      * @param $profileToDelete
+     * @return void
      */
     public function delete($profileID)
     {
-        /*
-         * Only allow users who have authority on this profile to delete
-         */
+        if(!isAuthorized::updateProfile())
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
 
         /*
-         * Remove dependants data like posts, comments, likes, etc...
+         * TODO: Remove dependants data like posts, comments, likes, etc...
          */
 
-        $this->model->setProfile($profileID);
+        if(!$this->setProfile($profileID))
+            return;
+
         $this->model->delete($profileID);
 
         if(file_exists("PATH/TO/PROFILE/PICTURE/".$profileID.".jpg"))
         {
             unlink("PATH/TO/PROFILE/PICTURE/".$profileID.".jpg");
         }
+
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->send();
     }
 }
 ?>
