@@ -8,7 +8,7 @@ Celui-ci permet d'accèder à toutes les informations relatives à ces derniers.
 Créer un profil pour l'utilisateur courant.
 
 ### URL
-````
+```
 /profiles/create/
 ```
 
@@ -21,7 +21,7 @@ POST
 
   * **profileName** : Nom du profil
   
-  **Optionnel**
+  **Variables optionnelles**
   
   * **profileDesc** : Description du profil
   * **profilePrivate** : À transmettre si le profil est privé
