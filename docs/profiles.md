@@ -65,9 +65,8 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-
-**Data:** 
+  * **Code:** 200 OK
+Data:
 ```json
 { 
     profileID : ID du profil, 
@@ -106,11 +105,14 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profileDesc : Description du profil
-    }`
+}
+```
  
 ### Erreurs
 
@@ -143,11 +145,14 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profilePicture : URL de l'image du profil
-    }`
+}
+```
  
 ### Erreurs
 
@@ -180,11 +185,14 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profileViews : Nombre de vues du profil
-    }`
+}
+```
  
 ### Erreurs
 
@@ -217,11 +225,14 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profileIsPrivate : Indique si le profile est privé (true/false)
-    }`
+}
+```
  
 ### Erreurs
 
@@ -253,11 +264,14 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profileOwner : UserID du propriétaire du profil
-    }`
+}
+```
  
 ### Erreurs
 
@@ -297,11 +311,14 @@ POST
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profileName OU profileDesc OU profileIsPrivate : Valeur mise à jour
-    }`
+}
+```
  
 ### Erreurs
 
@@ -347,11 +364,14 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profilePicture : URL de la nouvelle image de profil
-    }`
+}
+```
  
 ### Erreurs
 
@@ -397,11 +417,14 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{ 
+  * **Code:** 200 OK
+Data:
+```json
+{ 
     profileID : ID du profil, 
     profileViews : Nombre de vues du profil
-    }`
+}
+```
  
 ### Erreurs
 
@@ -433,8 +456,11 @@ GET
 
 ### Succès
 
-  * **Code:** 200 OK <br />
-    **Data:** `{}`
+  * **Code:** 200 OK
+Data:
+```json
+{ }
+```
 
 ### Erreurs
 
