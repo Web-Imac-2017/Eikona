@@ -101,7 +101,7 @@ class AuthController{
 					//Si le compte est activé
 					if($user->getActivated()){
 						$resp->setSuccess(200, "user connected");
-						Session::write("userID", $user-getID());
+						Session::write("userID", $user->getID());
 					}else{
 						$resp->setFailure(401, "account not yet activated");
 					}
