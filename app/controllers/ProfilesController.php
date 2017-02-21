@@ -261,17 +261,17 @@ class ProfilesController
             return;
         }
 
-        if(!isset($_POST['newValue']))
-        {
-            $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
-            $rsp->send();
-            return;
-        }
-
         //Now, do the update
         switch($field)
         {
             case "name":
+
+                if(!isset($_POST['newValue']))
+                {
+                    $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
+                    $rsp->send();
+                    return;
+                }
 
                 if($this->model->updateName($_POST['newValue']))
                 {
@@ -281,6 +281,13 @@ class ProfilesController
 
             break;
             case "description":
+
+                if(!isset($_POST['newValue']))
+                {
+                    $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
+                    $rsp->send();
+                    return;
+                }
 
                 if($this->model->updateDesc($_POST['newValue']))
                 {
