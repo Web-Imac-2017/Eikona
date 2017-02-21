@@ -66,14 +66,14 @@ GET
 ### Succès
 
   * **Code:** 200 OK <br />
-    **Data:** 
-    
-    ```json
-    { 
-        profileID : ID du profil,
-        profileName : Nom du profil
-    }
-    ```
+
+**Data:** 
+```json
+{ 
+    profileID : ID du profil, 
+    profileName : Nom du profil 
+}
+```
  
 ### Erreurs
 
