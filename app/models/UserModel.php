@@ -57,6 +57,10 @@ class UserModel extends DBInterface{
 		return;
 	}
 
+	/*****************/
+	/***** GETER *****/
+	/*****************/
+
 	/**
 	 * Return user ID
 	 * @return int user_id
