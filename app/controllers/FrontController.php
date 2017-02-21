@@ -14,7 +14,7 @@ class FrontController
     /**
      * Set trigger path
      */
-    protected $basePath    = "do/";
+    protected $basePath    = "Groupe1/app/do/";
 
     /**
      * Init the FrontController
@@ -45,7 +45,6 @@ class FrontController
     {
         //Clean up URL
         $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-
         //Remove basepath
         if(strpos($path, $this->basePath) === 0)
         {
