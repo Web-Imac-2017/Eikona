@@ -309,10 +309,27 @@ class Session
 
         $_SESSION[$encName] = $encValue;
     }
+
+
+
+
+    public static function remove($vName)
+    {
+        if($vName == 'USER_INFOS' || $vName == 'OBSOLETE' || $vName == 'EXPIRES')
+            return false;
+
+        $encName = self::encrypt($vName);
+
+        if(!array_key_exists($encName, $_SESSION))
+            return false;
+
+        unset($_SESSION[$encName]);
+    }
 }
 
 /*header('Content-Type: application/json');
 Session::open();
+Session::remove("TEST");
 echo json_encode(["SESSION" => $_SESSION,
                   "TEST" => Session::read("TEST")]);*/
 
