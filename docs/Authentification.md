@@ -24,4 +24,30 @@ Créer un compte pour le nouvel utilisateur
 ### Succès
 
 * **Code:** 201 CREATED <br />
-  **Data:** `{email: Email de l'user ajouté, userID: id de l'user ajouté}` 
+  **Data:** 
+  ```json
+  {
+  	email: Email du user ajouté,
+    userID: id du user ajouté
+  }
+  ```
+
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Au moins une des variables POST n'a pas été transmise.
+
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** Le mot de passe et celui de confirmation ne correpsondent pas.
+
+  OU
+
+* **Code:** 403 FORBIDDEN <br />
+  **Explication** L'utilisateur exite déjà. Son mail est déjà présent dans la base de données.
+
+### Notes
+
+Un utilisateur ne peut s'inscrire que si son adresse email est unique.
+
