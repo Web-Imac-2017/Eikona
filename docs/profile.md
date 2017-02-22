@@ -1,6 +1,7 @@
-# Profils
 
-Les profils sont gérés par le **profilesController**.
+# Les Profils
+
+Les profils sont gérés par le **profileController**.
 Celui-ci permet d'accèder à toutes les informations relatives à ces derniers.
 
 ## Création d'un profil
@@ -9,7 +10,7 @@ Créer un profil pour l'utilisateur courant.
 
 ### URL
 ```
-/profiles/create/
+/profile/create/
 ```
 
 ### Méthode
@@ -49,7 +50,7 @@ Récupère le nom d'un profil
 
 ### URL
 ```
-/profiles/name/<profileID>
+/profile/name/<profileID>
 ```
 
 ### Méthode
@@ -87,7 +88,7 @@ Récupère la description d'un profil
 
 ### URL
 ```
-/profiles/description/<profileID>
+/profile/description/<profileID>
 ```
 
 ### Méthode
@@ -125,7 +126,7 @@ Récupère l'URL de l'image d'un profil
 
 ### URL
 ```
-/profiles/picture/<profileID>
+/profile/picture/<profileID>
 ```
 
 ### Méthode
@@ -163,7 +164,7 @@ Récupère le nombre de fois ou le profil a été vu.
 
 ### URL
 ```
-/profiles/views/<profileID>
+/profile/views/<profileID>
 ```
 
 ### Méthode
@@ -201,7 +202,7 @@ Récupère le paramètre de confidentialité (Privé/Publique) du profil.
 
 ### URL
 ```
-/profiles/isprivate/<profileID>
+/profile/isprivate/<profileID>
 ```
 
 ### Méthode
@@ -238,7 +239,7 @@ Récupère l'identifiant de l'utilisateur propriétaire du profil
 
 ### URL
 ```
-/profiles/owner/<profileID>
+/profile/owner/<profileID>
 ```
 
 ### Méthode
@@ -276,7 +277,7 @@ Met à jour le champ indiqué du profil
 
 ### URL
 ```
-/profiles/update/<field>/<profileID>
+/profile/update/<field>/<profileID>
 ```
 
 ### Méthode
@@ -330,7 +331,7 @@ Remplace l'image actuelle du profil par une nouvelle
 
 ### URL
 ```
-/profiles/setPicture/<profileID>
+/profile/setPicture/<profileID>
 ```
 
 ### Méthode
@@ -381,7 +382,7 @@ Ajoute une ou plusieurs vues au profil
 
 ### URL
 ```
-/profiles/ddView/<profileID>/[<nbrView>/]
+/profile/ddView/<profileID>/[<nbrView>/]
 ```
 
 ### Méthode
@@ -422,7 +423,7 @@ Ajoute une ou plusieurs vues au profil
 
 ### URL
 ```
-/profiles/delete/<profileID>/
+/profile/delete/<profileID>/
 ```
 
 ### Méthode
