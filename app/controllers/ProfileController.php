@@ -1,6 +1,6 @@
 <?php
 
-class ProfilesController
+class ProfileController
 {
     private $model;
 
@@ -10,7 +10,7 @@ class ProfilesController
      */
     public function __construct()
     {
-        $this->model = new ProfilesModel();
+        $this->model = new ProfileModel();
     }
 
     /**
@@ -92,6 +92,32 @@ class ProfilesController
         }
 
         return true;
+    }
+
+
+    /**
+     * Return the description of the specified profile
+     *
+     * @param $profileID ID of the profile
+     */
+    public function get($profileID)
+    {
+        if(!$this->setProfile($profileID))
+            return;
+
+        $profileInfos = $this->model->getFullProfile();
+
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("ownerID", $profileInfos['user_id'])
+            ->bindValue("profileName", $profileInfos['profile_name'])
+            ->bindValue("profileDesc", $profileInfos['profile_desc'])
+            ->bindValue("profileCreateTime", $profileInfos['profile_create_time'])
+            ->bindValue("profileViews", $profileInfos['profile_views'])
+            ->bindValue("profileIsPrivate", $profileInfos['profile_views'] == 1)
+            ->send();
     }
 
 
@@ -261,17 +287,17 @@ class ProfilesController
             return;
         }
 
-        if(!isset($_POST['newValue']))
-        {
-            $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
-            $rsp->send();
-            return;
-        }
-
         //Now, do the update
         switch($field)
         {
             case "name":
+
+                if(!isset($_POST['newValue']))
+                {
+                    $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
+                    $rsp->send();
+                    return;
+                }
 
                 if($this->model->updateName($_POST['newValue']))
                 {
@@ -281,6 +307,13 @@ class ProfilesController
 
             break;
             case "description":
+
+                if(!isset($_POST['newValue']))
+                {
+                    $rsp->setFailure(400, "Missing newValue POST variable. Update aborted.");
+                    $rsp->send();
+                    return;
+                }
 
                 if($this->model->updateDesc($_POST['newValue']))
                 {

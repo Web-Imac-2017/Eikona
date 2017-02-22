@@ -1,5 +1,5 @@
 <?php
-class ProfilesModel extends DBInterface
+class ProfileModel extends DBInterface
 {
     /**
      * Internal varibales
@@ -114,6 +114,14 @@ class ProfilesModel extends DBInterface
     public function getID()
     {
         return $this->pID;
+    }
+
+
+
+
+    function getFullProfile()
+    {
+        return $this->p;
     }
 
     /**
