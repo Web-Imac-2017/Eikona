@@ -49,5 +49,101 @@ Créer un compte pour le nouvel utilisateur
 
 ### Notes
 
-Un utilisateur ne peut s'inscrire que si son adresse email est unique.
+Un utilisateur ne peut s'inscrire que si son adresse email est unique. Un email d'activation lui est envoyé à la suite de son enregistrement. 
 
+## Activation du compte d'un utilisateur
+
+Active le compte d'un utilisateur enregistré dans la base de données.
+
+### URL
+```
+/auth/activate/
+```
+
+### Méthode
+**POST**
+
+### Variables POST
+
+* **user_id** : ID de l'utilisateur
+* **user_key**: Clé cryptée pour sécuriser l'activation (correspond au sha1 du regiter_time)
+
+
+### Succès
+
+* **Code:** 200 OK <br />
+  **Data:** 
+  ```json
+  {
+  	userID: ID du user
+  }
+  ```
+
+### Erreurs
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** user_id et/ou user_key n'existe(nt) pas.
+
+  OU
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Au moins une des variables POST n'a pas été transmise.
+
+  OU
+
+### Notes
+
+Une fois son compte activé, il peut se connecter su site et accéder aux fonctionnalités réservées aux membres connectés.
+
+## Connexion
+
+Permet à l'utilisateur de se connecter à son compte et d'accéder à diverses fonctionnalités.
+
+### URL
+```
+/auth/signIn/
+```
+
+### Méthode
+**POST**
+
+### Variables POST
+
+* **user_email** : Email de l'utilisateur
+* **user_passwd**: Mot de passe de l'utilisateur
+
+
+### Succès
+
+* **Code:** 200 OK <br />
+  **Data:** 
+  ```json
+  {
+  	userID: ID du user,
+  	userEmail: Email du user
+  }
+  ```
+  ```html
+  $_SESSION['userID']
+  ```
+  Enregistrement dans une variable de session l'id de l'utilisateur.
+
+### Erreurs
+
+* **Code:** 401 UNAUTHORIZED <br />
+  **Explication** Le compte de l'utilisateur n'est pas activé.
+
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** Le mot de passe ne correspond pas **MAIS** l'adresse mail est correcte.
+
+  OU
+
+* **Code:** 404 NOT FOUND <br />
+  **Explication** L'utilisateur (adresse email) est inconnu(e).
+
+  OU
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Au moins une des variables POST n'a pas été transmise.
