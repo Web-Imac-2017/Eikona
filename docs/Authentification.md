@@ -24,13 +24,13 @@ Créer un compte pour le nouvel utilisateur
 ### Succès
 
 * **Code:** 201 CREATED <br />
-  **Data:** 
-  ```json
-  {
-  	email: Email du user ajouté,
-    userID: id du user ajouté
-  }
-  ```
+Data:
+```json
+{
+  email: Email du user ajouté,
+  userID: id du user ajouté
+}
+```
 
 ### Erreurs
 
@@ -72,12 +72,12 @@ Active le compte d'un utilisateur enregistré dans la base de données.
 ### Succès
 
 * **Code:** 200 OK <br />
-  **Data:** 
-  ```json
-  {
-  	userID: ID du user
-  }
-  ```
+Data:
+```json
+{
+	userID: ID du user
+}
+```
 
 ### Erreurs
 
@@ -117,16 +117,16 @@ Permet à l'utilisateur de se connecter à son compte et d'accéder à diverses 
 
 * **Code:** 200 OK <br />
   **Data:** 
-  ```json
-  {
-  	userID: ID du user,
-  	userEmail: Email du user
-  }
-  ```
-  ```html
-  $_SESSION['userID']
-  ```
-  Enregistrement dans une variable de session l'id de l'utilisateur.
+```json
+{
+  userID: ID du user,
+  userEmail: Email du user
+}
+```
+```html
+$_SESSION['userID']
+```
+Enregistrement dans une variable de session l'id de l'utilisateur.
 
 ### Erreurs
 

@@ -35,13 +35,13 @@ Les utilisateurs sont gérés pas le **UserController**. Il permet d'accèder à
 ### Succès
 
 * **Code:** 200 OK
-  **Data:**
-  ```json
-  {
-  	userID: ID du user
-  	userName: nouveau nom du user
-  }
-  ```
+Data:
+```json
+{
+	userID: ID du user
+	userName: nouveau nom du user
+}
+```
 
 ### Erreurs
 
@@ -62,13 +62,13 @@ Les utilisateurs sont gérés pas le **UserController**. Il permet d'accèder à
 ### Succès
 
 * **Code:** 200 OK
-  **Data:**
-  ```json
-  {
-  	userID: ID du user
-  	userEmail: nouveau email du user
-  }
-  ```
+Data:
+```json
+{
+  userID: ID du user
+  userEmail: nouveau email du user
+}
+```
 
 ### Erreurs
 
