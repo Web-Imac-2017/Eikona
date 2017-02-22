@@ -31,12 +31,14 @@ class UserController{
 		return true;
 	}
 
-	public function edit($field, $userID)
+	public function edit($field)
 	{
 		$resp = new Response();
 
-		// If userID is wrong
-		
+		//get userID
+		$userID = Session::read("userID");
+
+		// If userID is wrong		
 		if(!$this->setUser($userID)){
 			return;
 		}
@@ -49,8 +51,6 @@ class UserController{
 			return;
 		}
 
-		var_dump("id = ".$userID);
-
 		switch($field)
 		{
 			/*---------- USER_NAME ----------*/
@@ -59,7 +59,7 @@ class UserController{
 				if(!empty($_POST['name'])){
 					if($this->model->updateName($_POST['name'])){
 						$resp->setSuccess(200, "name changed")
-							 ->bindValue("userID", $this->model->getID())
+							 ->bindValue("userID", $userID)
 						     ->bindValue("userName", $this->model->getName());
 					}else{
 						$resp->setFailure(409, "incorrect value");
@@ -75,7 +75,7 @@ class UserController{
 				if(!empty($_POST['email'])){
 					if($this->model->updateEmail($_POST['email'])){
 						$resp->setSuccess(200, "email changed")
-						     ->bindValue("userID", $this->model->getID())
+						     ->bindValue("userID", $userID)
 							 ->bindValue("userEmail", $this->model->getEmail());
 					}else{
 						$resp->setFailure(409, "incorrect email");
