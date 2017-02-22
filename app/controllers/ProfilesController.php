@@ -100,6 +100,32 @@ class ProfilesController
      *
      * @param $profileID ID of the profile
      */
+    public function get($profileID)
+    {
+        if(!$this->setProfile($profileID))
+            return;
+
+        $profileInfos = $this->model->getFullProfile();
+
+        //Send JSON response
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("ownerID", $profileInfos['user_id'])
+            ->bindValue("profileName", $profileInfos['profile_name'])
+            ->bindValue("profileDesc", $profileInfos['profile_desc'])
+            ->bindValue("profileCreateTime", $profileInfos['profile_create_time'])
+            ->bindValue("profileViews", $profileInfos['profile_views'])
+            ->bindValue("profileIsPrivate", $profileInfos['profile_views'] == 1)
+            ->send();
+    }
+
+
+    /**
+     * Return the description of the specified profile
+     *
+     * @param $profileID ID of the profile
+     */
     public function name($profileID)
     {
         if(!$this->setProfile($profileID))

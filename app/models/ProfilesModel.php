@@ -116,6 +116,14 @@ class ProfilesModel extends DBInterface
         return $this->pID;
     }
 
+
+
+
+    function getFullProfile()
+    {
+        return $this->p;
+    }
+
     /**
      * Return the path to the profile picture
      */
