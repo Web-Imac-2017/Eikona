@@ -44,6 +44,48 @@ Créer un profil pour l'utilisateur courant.
 
   Un profil ne peut être créer si il n'y a pas d'utilisateur de connecté.
 
+## Informations d'un profil
+
+Récupère toutes les informations d'un profil
+
+### URL
+```
+/profile/get/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil à utiliser
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+    profileID: ID du profil,
+    ownerID: ID du user propriétaire du profil,
+    profileName: Nom du profil,
+    profileDesc: Description du profil,
+    profileCreateTime: Timestamp de la création du profil,
+    profileViews: Nombre de vues du profil,
+    profileIsPrivate: Confidentialité du profil
+}
+```
+ 
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
+
+  OU
+
+  * **Code:** 404 NOT FOUND <br />
+    **Explication** Le profil spécifié n'existe pas
+
 ## Nom d'un profil
 
 Récupère le nom d'un profil
