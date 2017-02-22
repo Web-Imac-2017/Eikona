@@ -100,7 +100,8 @@ class PostController
 		if($deleted)
 		{
 			unlink("medias/img/".$postID.".jpg");
-        	$rsp->setSuccess(200);
+        	$rsp->setSuccess(200)
+				->bindValue("postId", $postID);
 		} else {
 			$rsp->setFailure(404);
 		}
