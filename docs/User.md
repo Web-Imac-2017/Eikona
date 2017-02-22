@@ -80,6 +80,11 @@ Data:
 * **Code:** 409 CONFLICT <br />
   **Explication** Le nouvel email est incorrect. 
 
+  OU
+
+* **Code:** 403 FORBIDDEN <br />
+  **Explication** L'adresse mail est déjà présente dans la base de données. Elle n'est pas changée.
+
 ## Field = password
 
 ### Variables POST
