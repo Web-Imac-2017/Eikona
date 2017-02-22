@@ -35,18 +35,21 @@ class UserController{
 	{
 		$resp = new Response();
 
+		// If userID is wrong
+		
+		if(!$this->setUser($userID)){
+			return;
+		}
+
 		//User is authorized ?
-		if(!isAuthorized::isUser()){
+		if(!isAuthorized::isUser($userID)){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
 
 			return;
 		}
 
-		// If userID is wrong 
-		if(!$this->setUser($userID)){
-			return;
-		}
+		var_dump("id = ".$userID);
 
 		switch($field)
 		{
