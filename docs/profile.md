@@ -1,6 +1,7 @@
-# Profils
 
-Les profils sont gérés par le **profilesController**.
+# Les Profils
+
+Les profils sont gérés par le **profileController**.
 Celui-ci permet d'accèder à toutes les informations relatives à ces derniers.
 
 ## Création d'un profil
@@ -9,7 +10,7 @@ Créer un profil pour l'utilisateur courant.
 
 ### URL
 ```
-/profiles/create/
+/profile/create/
 ```
 
 ### Méthode
@@ -43,13 +44,55 @@ Créer un profil pour l'utilisateur courant.
 
   Un profil ne peut être créer si il n'y a pas d'utilisateur de connecté.
 
+## Informations d'un profil
+
+Récupère toutes les informations d'un profil
+
+### URL
+```
+/profile/get/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil à utiliser
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+    profileID: ID du profil,
+    ownerID: ID du user propriétaire du profil,
+    profileName: Nom du profil,
+    profileDesc: Description du profil,
+    profileCreateTime: Timestamp de la création du profil,
+    profileViews: Nombre de vues du profil,
+    profileIsPrivate: Confidentialité du profil
+}
+```
+ 
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
+
+  OU
+
+  * **Code:** 404 NOT FOUND <br />
+    **Explication** Le profil spécifié n'existe pas
+
 ## Nom d'un profil
 
 Récupère le nom d'un profil
 
 ### URL
 ```
-/profiles/name/<profileID>
+/profile/name/<profileID>
 ```
 
 ### Méthode
@@ -87,7 +130,7 @@ Récupère la description d'un profil
 
 ### URL
 ```
-/profiles/description/<profileID>
+/profile/description/<profileID>
 ```
 
 ### Méthode
@@ -118,52 +161,13 @@ Data:
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
 
-
-## Description d'un profil
-
-Récupère l'URL de l'image d'un profil
-
-### URL
-```
-/profiles/picture/<profileID>
-```
-
-### Méthode
-**GET**
-
-### Variable GET
-
-  * **profileID** : ID du profil à utiliser
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    profileID : ID du profil, 
-    profilePicture : URL de l'image du profil
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** La variable GET **profileID** n'est pas un ID
-
-  OU
-
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le profil spécifié n'existe pas
-
-
 ## Vues d'un profil
 
 Récupère le nombre de fois ou le profil a été vu.
 
 ### URL
 ```
-/profiles/views/<profileID>
+/profile/views/<profileID>
 ```
 
 ### Méthode
@@ -201,7 +205,7 @@ Récupère le paramètre de confidentialité (Privé/Publique) du profil.
 
 ### URL
 ```
-/profiles/isprivate/<profileID>
+/profile/isprivate/<profileID>
 ```
 
 ### Méthode
@@ -238,7 +242,7 @@ Récupère l'identifiant de l'utilisateur propriétaire du profil
 
 ### URL
 ```
-/profiles/owner/<profileID>
+/profile/owner/<profileID>
 ```
 
 ### Méthode
@@ -276,7 +280,7 @@ Met à jour le champ indiqué du profil
 
 ### URL
 ```
-/profiles/update/<field>/<profileID>
+/profile/update/<field>/<profileID>
 ```
 
 ### Méthode
@@ -330,7 +334,7 @@ Remplace l'image actuelle du profil par une nouvelle
 
 ### URL
 ```
-/profiles/setPicture/<profileID>
+/profile/setPicture/<profileID>
 ```
 
 ### Méthode
@@ -381,7 +385,7 @@ Ajoute une ou plusieurs vues au profil
 
 ### URL
 ```
-/profiles/ddView/<profileID>/[<nbrView>/]
+/profile/ddView/<profileID>/[<nbrView>/]
 ```
 
 ### Méthode
@@ -422,7 +426,7 @@ Ajoute une ou plusieurs vues au profil
 
 ### URL
 ```
-/profiles/delete/<profileID>/
+/profile/delete/<profileID>/
 ```
 
 ### Méthode
