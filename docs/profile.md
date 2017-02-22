@@ -161,45 +161,6 @@ Data:
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
 
-
-## Description d'un profil
-
-Récupère l'URL de l'image d'un profil
-
-### URL
-```
-/profile/picture/<profileID>
-```
-
-### Méthode
-**GET**
-
-### Variable GET
-
-  * **profileID** : ID du profil à utiliser
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    profileID : ID du profil, 
-    profilePicture : URL de l'image du profil
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** La variable GET **profileID** n'est pas un ID
-
-  OU
-
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le profil spécifié n'existe pas
-
-
 ## Vues d'un profil
 
 Récupère le nombre de fois ou le profil a été vu.
