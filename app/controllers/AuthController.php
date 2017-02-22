@@ -26,7 +26,7 @@ class AuthController{
 			//Si passwd == passwd confirm
 			if($_POST['user_passwd'] == $_POST['user_passwd_confirm']){
 				//si user est unique
-				if($this->model->uniqueUser($_POST['user_email'])){
+				if($this->model->isUnique($_POST['user_email'])){
 					//insertion dans la base de données
 					$user_register_time = time();
 					$id = $this->model->addUser(

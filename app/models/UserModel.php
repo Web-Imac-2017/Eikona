@@ -177,4 +177,19 @@ class UserModel extends DBInterface{
 		return true;
 	}
 
+	/**
+	 * Vérifie si l'utilisateur est unique
+	 * @param  text $email user_email
+	 * @return boolean	    true / false
+	 */
+	public function isUnique($email)	
+	{
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM users
+			WHERE user_email = :email");	
+		$stmt->execute([":email" => $email]);
+
+		return ($stmt->fetchColumn() == 0) ? true : false;
+	}
+
 }

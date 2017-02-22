@@ -54,7 +54,7 @@ class UserController{
 		$resp = new Response();
 		$resp->setSuccess(200, "all elements returned")
 		     ->bindValue("userID", $userID)
-		     ->bindValue("userName", $userInfos['user_name'])
+		     ->bindValue("userName", $userInfos['user_name'])	
 		     ->bindValue("userEmail", $userInfos['user_email'])
 		     ->bindValue("userRegisterTime", $userInfos['user_register_time'])
 		     ->bindValue("userLastActivity", $userInfos['user_last_activity'])
@@ -111,12 +111,16 @@ class UserController{
 			case "email":
 
 				if(!empty($_POST['email'])){
-					if($this->model->updateEmail($_POST['email'])){
-						$resp->setSuccess(200, "email changed")
-						     ->bindValue("userID", $userID)
-							 ->bindValue("userEmail", $this->model->getEmail());
-					}else{
-						$resp->setFailure(409, "incorrect email");
+					if($this->model->isUnique($_POST['email'])){
+						if($this->model->updateEmail($_POST['email'])){
+							$resp->setSuccess(200, "email changed")
+						         ->bindValue("userID", $userID)
+							     ->bindValue("userEmail", $this->model->getEmail());
+						}else{
+							$resp->setFailure(409, "incorrect email");
+						}					
+					}else{						
+						$resp->setFailure(403, "user already exists");
 					}
 				}
 				else{

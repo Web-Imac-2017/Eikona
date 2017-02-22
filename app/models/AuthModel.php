@@ -16,7 +16,7 @@ class AuthModel extends DBInterface{
 	 * @param  text $email user_email
 	 * @return boolean	    true / false
 	 */
-	public function uniqueUser($email)	
+	public function isUnique($email)	
 	{
 		$stmt = $this->cnx->prepare("
 			SELECT COUNT(*) FROM users
