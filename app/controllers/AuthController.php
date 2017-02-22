@@ -105,6 +105,7 @@ class AuthController{
 						$resp->setSuccess(200, "user connected")
 						     ->bindValue("userID", $user->getID())
 						     ->bindValue("userEmail", $_POST['user_email']);
+						Session::renewKey();
 						Session::write("userID", $user->getID());
 					}else{
 						$resp->setFailure(401, "account not yet activated");
@@ -121,5 +122,21 @@ class AuthController{
 
 		//envoi de la réponse
 		$resp->send();
+	}
+
+	public function logout()
+	{
+
+		Session::renewKey();
+		Session::remove("userID");
+		//Session::remove("profileID");
+
+		$resp = new Response();
+		$resp->setSuccess(200, "user deconnected")
+			 ->bindValue("id", Session::read("userID"))
+			 ->send();
+
+		
+
 	}
 }

@@ -56,9 +56,10 @@ class UserController{
 				if(!empty($_POST['name'])){
 					if($this->model->updateName($_POST['name'])){
 						$resp->setSuccess(200, "name changed")
+							 ->bindValue("userID", $this->model->getID())
 						     ->bindValue("userName", $this->model->getName());
 					}else{
-						$resp->setFailure(400, "incorrect value");
+						$resp->setFailure(409, "incorrect value");
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
@@ -71,9 +72,10 @@ class UserController{
 				if(!empty($_POST['email'])){
 					if($this->model->updateEmail($_POST['email'])){
 						$resp->setSuccess(200, "email changed")
+						     ->bindValue("userID", $this->model->getID())
 							 ->bindValue("userEmail", $this->model->getEmail());
 					}else{
-						$resp->setFailure(400, "incorrect email");
+						$resp->setFailure(409, "incorrect email");
 					}
 				}
 				else{
@@ -90,10 +92,10 @@ class UserController{
 							$resp->setSuccess(200, "password changed");
 							//Pour la sécurité, pas de bind value du passwd
 						}else{
-							$resp->setFailure(400, "incorrect password");
+							$resp->setFailure(409, "incorrect password");
 						}
 					}else{
-						$resp->setFailure(400, "password and confirmation do not correspond");
+						$resp->setFailure(409, "password and confirmation do not correspond");
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
