@@ -46,7 +46,7 @@ class AuthController{
 					$resp->setFailure(403, "user already exists");
 				}				
 			}else{
-				$resp->setFailure(404, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
+				$resp->setFailure(409, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
 			}
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
@@ -74,7 +74,7 @@ class AuthController{
 				$resp->setSuccess(200, "Account activated")
 				     ->bindValue("userID", $_REQUEST['user_id']); 
 			}else{
-				$resp->setFailure(401, "user_id or and user_key do not exist");
+				$resp->setFailure(409, "user_id or and user_key do not exist");
 			}
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
@@ -110,7 +110,7 @@ class AuthController{
 						$resp->setFailure(401, "account not yet activated");
 					}
 				}else{
-					$resp->setFailure(401, "wrong password");
+					$resp->setFailure(409, "wrong password");
 				}
 			}else{
 				$resp->setFailure(404, "unknown user");
