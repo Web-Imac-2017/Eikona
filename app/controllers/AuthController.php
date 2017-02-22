@@ -39,8 +39,9 @@ class AuthController{
 						$id,
 						$_POST['user_email'],
 						$user_register_time);
-					$resp->setSuccess(200, "user added")
-					     ->bindValue("email", $_POST['user_email']);
+					$resp->setSuccess(201, "user added")
+					     ->bindValue("email", $_POST['user_email'])
+					     ->bindValue("userID", $id);
 				}else{
 					$resp->setFailure(403, "user already exists");
 				}				
@@ -70,7 +71,8 @@ class AuthController{
 			//Si l'user existe bien
 			if($res){
 				$this->model->updateUserActivated($_REQUEST['user_id']);
-				$resp->setSuccess(200, "Account activated"); 
+				$resp->setSuccess(200, "Account activated")
+				     ->bindValue("userID", $_REQUEST['user_id']); 
 			}else{
 				$resp->setFailure(401, "user_id or and user_key do not exist");
 			}
@@ -101,7 +103,8 @@ class AuthController{
 					//Si le compte est activé
 					if($user->getActivated()){
 						$resp->setSuccess(200, "user connected")
-						     ->bindValue("userID", $user->getID());
+						     ->bindValue("userID", $user->getID())
+						     ->bindValue("userEmail", $_POST['user_email']);
 						Session::write("userID", $user->getID());
 					}else{
 						$resp->setFailure(401, "account not yet activated");
