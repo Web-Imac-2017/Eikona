@@ -8,7 +8,9 @@ class isAuthorized
     /***** Global verifications *****/
     static public function isUser()
     {
-        return true;
+        if(Session::read("userID")) return true;
+
+        return false;
     }
     
     static public function isModerator() {}
