@@ -1,5 +1,5 @@
 <?php
-class ProfilesModel extends DBInterface
+class ProfileModel extends DBInterface
 {
     /**
      * Internal varibales

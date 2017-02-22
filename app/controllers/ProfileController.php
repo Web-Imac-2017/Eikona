@@ -1,6 +1,6 @@
 <?php
 
-class ProfilesController
+class ProfileController
 {
     private $model;
 
@@ -10,7 +10,7 @@ class ProfilesController
      */
     public function __construct()
     {
-        $this->model = new ProfilesModel();
+        $this->model = new ProfileModel();
     }
 
     /**
