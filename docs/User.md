@@ -34,7 +34,7 @@ Les utilisateurs sont gérés pas le **UserController**. Il permet d'accèder à
 
 ### Succès
 
-* **Code:** 200 OK
+  * **Code:** 200 OK
 Data:
 ```json
 {
@@ -61,7 +61,7 @@ Data:
 
 ### Succès
 
-* **Code:** 200 OK
+  * **Code:** 200 OK
 Data:
 ```json
 {
@@ -89,7 +89,7 @@ Data:
 
 ### Succès
 
-* **Code:** 200 OK <br />
+  * **Code:** 200 OK
 
 ### Erreurs
 

@@ -23,7 +23,7 @@ Créer un compte pour le nouvel utilisateur
 
 ### Succès
 
-* **Code:** 201 CREATED <br />
+  * **Code:** 201 CREATED 
 Data:
 ```json
 {
@@ -71,7 +71,7 @@ Active le compte d'un utilisateur enregistré dans la base de données.
 
 ### Succès
 
-* **Code:** 200 OK <br />
+  * **Code:** 200 OK
 Data:
 ```json
 {
@@ -115,8 +115,8 @@ Permet à l'utilisateur de se connecter à son compte et d'accéder à diverses 
 
 ### Succès
 
-* **Code:** 200 OK <br />
-  **Data:** 
+  * **Code:** 200 OK
+Data: 
 ```json
 {
   userID: ID du user,
