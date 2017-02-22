@@ -132,7 +132,7 @@ class AuthController{
 	 * Deconnexion
 	 * @return Response JSON
 	 */
-	public function logout()
+	public function signOut()
 	{		
 		$resp = new Response();
 		$resp->setSuccess(200, "user deconnected")
