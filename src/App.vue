@@ -1,16 +1,16 @@
 <template>
   <div id="app">
     <router-view></router-view>
+    <mainFooter></mainFooter>
   </div>
 </template>
 
 <script>
-import Hello from './components/Hello.vue'
+
+let mainFooter = require('./components/mainFooter.vue');
 
 export default {
   name: 'app',
-  components: {
-    Hello
-  }
+  components : { mainFooter }
 }
 </script>
