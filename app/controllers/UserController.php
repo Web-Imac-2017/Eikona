@@ -116,6 +116,7 @@ class UserController{
 							$resp->setSuccess(200, "email changed")
 						         ->bindValue("userID", $userID)
 							     ->bindValue("userEmail", $this->model->getEmail());
+							Session::renewKey();
 						}else{
 							$resp->setFailure(409, "incorrect email");
 						}					
@@ -136,6 +137,7 @@ class UserController{
 						if($this->model->updatePassword($_POST['passwd'])){
 							$resp->setSuccess(200, "password changed");
 							//Pour la sécurité, pas de bind value du passwd
+							Session::renewKey();
 						}else{
 							$resp->setFailure(409, "incorrect password");
 						}
