@@ -12,7 +12,7 @@ const router = new VueRouter({
   mode: 'history',
   routes: [{
     path: '/',
-    component: require('./components/Hello.vue')
+    component: require('./components/Home.vue')
   }, {
     path: '/user/:id/settings',
     component: require('./components/Settings.vue')
