@@ -21,4 +21,4 @@ class Cookie
 }
 
 //Cookie::set("YOLO", "SWAG", 31536000);
-Cookie::delete("YOLO");
+//Cookie::delete("YOLO");
