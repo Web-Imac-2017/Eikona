@@ -11,14 +11,14 @@
 
 let topHeader = require('./components/Header.vue')
 let mainFooter = require('./components/mainFooter.vue')
-let inscription = require('./components/Inscription.vue')
+
 
 export default {
   name: 'app',
   components: {
     topHeader,
-    mainFooter,
-    inscription
+    mainFooter
+   
   }
 
 }
