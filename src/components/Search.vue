@@ -1,19 +1,22 @@
 <template lang="html">
-  <form id="search-bar">
+  <div id="search-bar">
     <button @click="search"></button>
-    <input type="text" placeholder="Mots-clés" />
-  </form>
+    <input name="search" type="search" placeholder="Mots-clés" />
+  </div>
 </template>
 
 <script>
 export default {
-  methods : {
+  methods: {
     search () {
-      console.log("Search");
+      console.log('Search')
     }
   }
-};
+}
 </script>
 
 <style lang="css" scoped>
+#search-bar {
+  margin-left : 1%;
+}
 </style>
