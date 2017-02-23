@@ -5,12 +5,15 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    urlBeforeConnexion: '/'
+    userId: 'none',
+    connected: false
   },
   mutations: {
-    SET_CURRENT_URL: (state, url) => { state.urlBeforeConnexion = url }
+    SET_USER: (state, id) => { state.userId = id },
+    CONNECT: (state, connection) => { state.connected = connection}
   },
   getters: {
-    url: state => { return state.urlBeforeConnexion }
+    userId: state => { return state.userId },
+    isConnected: state => { return state.connected }
   }
 })

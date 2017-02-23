@@ -16,25 +16,22 @@ import store from './connectionStore.js'
 
 export default {
   name: 'header-connection',
-  store: store,
   data () {
     return {
       user: {
-        id: 'none'
-      },
-      connected: false
+        id: 'none',
+        connected: false
+      }
     }
   },
   methods: {
     connexion () {
       console.log('connexion')
-      store.commit('SET_CURRENT_URL', window.location.pathname)
-      document.location.href = '/#connectionForm'
+      window.location = '/#connectionForm'
     },
     inscription () {
       console.log('inscription')
-      store.commit('SET_CURRENT_URL', window.location.pathname)
-      document.location.href = '/#inscriptionForm'
+      window.location = '/#inscriptionForm'
     },
     deconnect () {
       console.log('deconnect')
