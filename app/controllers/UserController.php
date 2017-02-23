@@ -76,7 +76,7 @@ class UserController{
 		//get userID
 		$userID = Session::read("userID");
 
-		// If userID is wrong		
+		// If userID is wrong	
 		if(!$this->setUser($userID)){
 			return;
 		}
@@ -149,13 +149,37 @@ class UserController{
 				}
 				break;
 
+			/*---------- USER_MODERATOR ----------*/
+			case "setModerator":
+
+				if(!empty($_POST['id'])){
+					if(isAuthorized::isAdmin($this->model->getAdmin())){
+						if($this->model->setModerator($_POST['id'])){
+							if($this->model->userExists($_POST['id'])){
+								$resp->setSuccess(200, "user is now moderator")
+								 	 ->bindValue("userModeratorID", $_POST['id'])
+								 	 ->bindValue("userModerator", 1);
+								Session::renewKey();
+							}else{
+								$resp->setFailure(404, "Given user ID does not exist");
+							}						
+						}else{
+							$resp->setFailure(409, "incorrect id");
+						}
+					}else{
+						$resp->setFailure(401, "You are not authorized to do this action.");
+					}
+				}else{
+					$resp->setFailure(400, "Missing value. Edit aborted.");
+				}
+				break;			
+
 			default:
 				$resp->setFailure(405);
 		}
 
 		$resp->bindValue("userID", $userID)
 		     ->send();
-
 	}
 
 }

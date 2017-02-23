@@ -102,6 +102,15 @@ class UserModel extends DBInterface{
 		return $this->u['user_activated'];
 	}
 
+	/**
+	 * Return if user id admin
+	 * @return boolean true(1) / false(0)
+	 */
+	public function getAdmin()
+	{
+		return $this->u['user_admin'];
+	}
+
 	/******************/
 	/***** UPDATE *****/
 	/******************/
@@ -177,6 +186,29 @@ class UserModel extends DBInterface{
 		return true;
 	}
 
+	/******************/
+	/***** SETTER *****/
+	/******************/
+
+	/**
+	 * L'utilisateur devient un modérateur
+	 * @param int $id user_id
+	 */
+	public function setModerator($id)
+	{
+		if($this->id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_moderator = true
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $id]);
+
+		$this->u['user_moderator'] = true;
+
+		return true;
+	}
+
 	/**
 	 * Vérifie si l'utilisateur est unique
 	 * @param  text $email user_email
@@ -190,6 +222,21 @@ class UserModel extends DBInterface{
 		$stmt->execute([":email" => $email]);
 
 		return ($stmt->fetchColumn() == 0) ? true : false;
+	}
+
+	/**
+	 * Return if user exists
+	 * @param  int $id user_id
+	 * @return boolean     true / false
+	 */
+	public function userExists($id)
+	{
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM users
+			WHERE user_id = :id");	
+		$stmt->execute([":id" => $id]);
+
+		return ($stmt->fetchColumn() == 1) ? true : false;
 	}
 
 }

@@ -13,8 +13,17 @@ class isAuthorized
         return false;
     }
     
-    static public function isModerator() {}
-    static public function isAdmin() {}
+    static public function isModerator()
+    {
+
+    }
+
+    static public function isAdmin($userAdmin)
+    {
+        if($userAdmin == true) return true;
+
+        return false;
+    }
 
     /***** Profiles verifications *****/
     static public function updateProfile()
