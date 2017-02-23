@@ -13,6 +13,14 @@ class Cookie
         setcookie($name, $value, time() + $expires, '/', 'localhost', isset($_SERVER["HTTPS"]), true);
     }
 
+    public static function read($name)
+    {
+        if(!isset($_COOKIE[$name]))
+            return false;
+
+        return $_COOKIE[$name];
+    }
+
     public static function delete($name)
     {
         unset($_COOKIE[$name]);
@@ -21,4 +29,5 @@ class Cookie
 }
 
 //Cookie::set("YOLO", "SWAG", 31536000);
+//echo Cookie::read("YOLO");
 //Cookie::delete("YOLO");
