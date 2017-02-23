@@ -85,6 +85,10 @@ class AuthController{
 	}
 
 
+	/**
+	 * Connexion
+	 * @return Response JSON
+	 */
 	public function signIn()
 	{
 		$resp = new Response();
@@ -124,19 +128,19 @@ class AuthController{
 		$resp->send();
 	}
 
-	public function logout()
-	{
-
-		Session::renewKey();
-		Session::remove("userID");
-		//Session::remove("profileID");
-
+	/**
+	 * Deconnexion
+	 * @return Response JSON
+	 */
+	public function signOut()
+	{		
 		$resp = new Response();
 		$resp->setSuccess(200, "user deconnected")
 			 ->bindValue("id", Session::read("userID"))
 			 ->send();
 
-		
-
+		Session::renewKey();
+		Session::remove("userID");
+		Session::remove("profileID");
 	}
 }

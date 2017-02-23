@@ -6,9 +6,9 @@
 class isAuthorized
 {
     /***** Global verifications *****/
-    static public function isUser()
+    static public function isUser($userID)
     {
-        if(Session::read("userID")) return true;
+        if(Session::read("userID") === $userID) return true;
 
         return false;
     }

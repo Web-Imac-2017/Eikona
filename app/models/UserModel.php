@@ -61,6 +61,11 @@ class UserModel extends DBInterface{
 	/***** GETTER *****/
 	/*****************/
 
+	public function getFullUser()
+	{
+		return $this->u;
+	}
+
 	/**
 	 * Return user ID
 	 * @return int user_id

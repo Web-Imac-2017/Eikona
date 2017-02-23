@@ -10,6 +10,11 @@ class UserController{
 		$this->model = new UserModel();
 	}
 
+	/**
+     * Set the user to use with the model
+     * @param  int $userID User ID to use with the model
+     * @return boolean  true on success, false on failure
+     */
 	private function setUser($userID)
 	{
 		$result = $this->model->setUser($userID);
@@ -31,20 +36,56 @@ class UserController{
 		return true;
 	}
 
-	public function edit($field, $userID)
+	/**
+	 * Return all elements of an user
+	 * @return Response JSON
+	 */
+	public function get()
 	{
-		$resp = new Response();
+		$userID = Session::read("userID");
 
-		//User is authorized ?
-		if(!isAuthorized::isUser()){
-			$resp->setFailure(401, "You are not authorized to do this action.")
-			     ->send();
-
+		if(!$this->setUser($userID)){
 			return;
 		}
 
-		// If userID is wrong 
+		$userInfos = $this->model->getFullUser();
+
+		//Send JSON response
+		$resp = new Response();
+		$resp->setSuccess(200, "all elements returned")
+		     ->bindValue("userID", $userID)
+		     ->bindValue("userName", $userInfos['user_name'])
+		     ->bindValue("userEmail", $userInfos['user_email'])
+		     ->bindValue("userRegisterTime", $userInfos['user_register_time'])
+		     ->bindValue("userLastActivity", $userInfos['user_last_activity'])
+		     ->bindValue("userModerator", $userInfos['user_moderator'])
+		     ->bindValue("userAdmin", $userInfos['user_admin'])
+		     ->bindValue("userActivated", $userInfos['user_activated'])
+		     ->send();
+	}
+
+	/**
+	 * Update the specified element of the user
+	 * @param  text $field Field to be updated
+	 * @return Response        JSON
+	 */
+	public function edit($field)
+	{
+		$resp = new Response();
+
+		//get userID
+		$userID = Session::read("userID");
+
+		// If userID is wrong		
 		if(!$this->setUser($userID)){
+			return;
+		}
+
+		//User is authorized ?
+		if(!isAuthorized::isUser($userID)){
+			$resp->setFailure(401, "You are not authorized to do this action.")
+			     ->send();
+
 			return;
 		}
 
@@ -56,7 +97,7 @@ class UserController{
 				if(!empty($_POST['name'])){
 					if($this->model->updateName($_POST['name'])){
 						$resp->setSuccess(200, "name changed")
-							 ->bindValue("userID", $this->model->getID())
+							 ->bindValue("userID", $userID)
 						     ->bindValue("userName", $this->model->getName());
 					}else{
 						$resp->setFailure(409, "incorrect value");
@@ -72,7 +113,7 @@ class UserController{
 				if(!empty($_POST['email'])){
 					if($this->model->updateEmail($_POST['email'])){
 						$resp->setSuccess(200, "email changed")
-						     ->bindValue("userID", $this->model->getID())
+						     ->bindValue("userID", $userID)
 							 ->bindValue("userEmail", $this->model->getEmail());
 					}else{
 						$resp->setFailure(409, "incorrect email");
