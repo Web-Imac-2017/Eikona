@@ -215,22 +215,25 @@ class ProfileModel extends DBInterface
         //Include only useful parameters for optimization
         if($after != 0)
         {
-            $where .= " AND post_publish_time > ".$after;
+            $where .= " AND post_publish_time > :after";
             $bindArray[":after"] = Sanitize::int($after);
         }
 
         if($before != 0)
         {
-            $where .= " AND post_publish_time < ".$before;
+            $where .= " AND post_publish_time < :before";
             $bindArray[":before"] = Sanitize::int($before);
         }
 
         $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        //Execute the query
-        $posts = $this->cnx->query("SELECT * FROM posts WHERE profile_id = '".$this->pID."'".$where);
+        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
 
-        print_r($posts->fetchAll());
+        //Execute the query
+        $stmt = $this->cnx->prepare($sql);
+        $stmt->execute($bindArray);
+
+        return $stmt->fetchAll();
     }
 
 

@@ -302,9 +302,7 @@ class ProfileController
 
         $rsp= new Response();
         $rsp->bindValue("posts", $posts)
-            ->bindValue("offset", $offset)
-            ->bindValue("after", $after)
-            ->bindValue("before", $before)
+            ->bindValue("nbrPosts", count($posts))
             ->send();
     }
 
