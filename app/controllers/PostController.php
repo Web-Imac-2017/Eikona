@@ -110,11 +110,27 @@ class PostController
 	}
 
 	/*
-	 * Display all the information of the post
+	 * Display all the information of the post with the given ID
 	 */
 	public function display($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
 
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postId", $postID)
+			->bindValue("profileID", $this->model->getProfileID())
+			->bindValue("desc", $this->model->getDescription())
+			->bindValue("publishTime", $this->model->getPublishTime())
+			->bindValue("allowComments", $this->model->getAllowComments())
+			->bindValue("approved", $this->model->getApproved())
+			->bindValue("getUpdateTime", $this->model->getUpdateTime())
+			->bindValue("state", $this->model->getState())
+			->bindValue("geo", $this->model->getGeo())
+			->send();
 	}
 
 	/*
