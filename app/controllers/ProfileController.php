@@ -251,15 +251,66 @@ class ProfileController
      * @param  integer $limit     Number of posts to return
      * @return void
      */
-    public function posts($profileID, $limit = 30)
+    public function posts($profileID, ...$args)
     {
         if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts())
             return;
 
-        $posts = $this->model->getPosts($limit);
+        $limit = 4096;
+        $offset = 0;
+        $after = 0;
+        $before = 0;
+        $order = "DESC";
 
-        return $posts;
+        $waitFor = false;
+
+        foreach($args as $arg)
+        {
+            if($arg === "desc" || $arg === "asc")
+            {
+                $order = strtoupper($arg);
+                continue;
+            }
+
+            if(is_numeric($arg))
+            {
+                if($waitFor == "after")
+                {
+                    $after = Sanitize::int($arg);
+                }
+                else if($waitFor == "before")
+                {
+                    $before = Sanitize::int($arg);
+                }
+                else if($limit == 4096)
+                {
+                    $limit = Sanitize::int($arg);
+                }
+                else
+                {
+                    $offset = Sanitize::int($arg);
+                }
+
+                $waitFor = false;
+                continue;
+            }
+
+            $waitFor = $arg;
+        }
+
+        $posts = $this->model->getPosts($limit, $offset, $after, $before, $order);
+
+        $rsp= new Response();
+        $rsp->bindValue("posts", $posts)
+            ->bindValue("offset", $offset)
+            ->bindValue("after", $after)
+            ->bindValue("before", $before)
+            ->send();
     }
+
+    // /profile/posts/<profileid>[/after/<timestamp>][/before/<timestamp>][/<lim>[/<offset>]][<desc|asc>]
+
+
 
     /**
      * Update the specified element of the profile
