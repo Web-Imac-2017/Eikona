@@ -64,9 +64,6 @@ class ProfileModel extends DBInterface
     }
 
 
-
-
-
     /**
      * Create a new profile
      *
