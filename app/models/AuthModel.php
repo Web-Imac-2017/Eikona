@@ -120,7 +120,7 @@ class AuthModel extends DBInterface{
 	 */
 	public function checkEmail($email)
 	{
-		//Savoir si luser est inscrit
+		//Savoir si l'user est inscrit
 		$stmt = $this->cnx->prepare("
 			SELECT user_id FROM users
 			WHERE :email = user_email");
@@ -147,6 +147,35 @@ class AuthModel extends DBInterface{
 
 		$u = $stmt->fetch(PDO::FETCH_ASSOC);
 		return new UserModel($u['user_id']);
+	}
+
+	/***********************/
+	/***** SUPPRESSION *****/
+	/***********************/
+
+	public function checkDelete($passwd)
+	{
+
+		$pwd = hash("sha256", $passwd);
+
+		$stmt = $this->cnx->prepare("
+			SELECT user_id FROM users
+			WHERE :pwd = user_passwd");
+		$stmt->execute([":pwd" => $pwd]);
+
+		return ($stmt->fetchColumn() == 1) ? true : false;
+	}
+
+	public function delete($id)
+	{
+		if($id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			DELETE FROM users
+			WHERE :id = user_id");
+		$stmt->execute([":id" => $id]);
+
+		return true;
 	}
 
 }

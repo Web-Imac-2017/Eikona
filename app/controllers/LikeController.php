@@ -27,7 +27,9 @@ class LikeController{
 			return;
 		}
 
-				
+		if(!empty($_GET['id'])){
+			if($this->model->)
+		}		
 		
 	}
 
