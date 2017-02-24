@@ -25,25 +25,30 @@ class AuthController{
 
 			//Si passwd == passwd confirm
 			if($_POST['user_passwd'] == $_POST['user_passwd_confirm']){
-				//si user est unique
-				if($this->model->isUnique($_POST['user_email'])){
-					//insertion dans la base de données
-					$user_register_time = time();
-					$id = $this->model->addUser(
-						$_POST['user_name'],
-						$_POST['user_email'],
-						$_POST['user_passwd'],
-						$user_register_time);
-					//envoi d'un mail d'activation
-					$this->model->sendMail(
-						$id,
-						$_POST['user_email'],
-						$user_register_time);
-					$resp->setSuccess(201, "user added")
-					     ->bindValue("email", $_POST['user_email'])
-					     ->bindValue("userID", $id);
+				//Si le mail est valide
+				if(filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)){
+					//si user est unique
+					if($this->model->isUnique($_POST['user_email'])){
+						//insertion dans la base de données
+						$user_register_time = time();
+						$id = $this->model->addUser(
+							$_POST['user_name'],
+							$_POST['user_email'],
+							$_POST['user_passwd'],
+							$user_register_time);
+						//envoi d'un mail d'activation
+						$this->model->sendMail(
+							$id,
+							$_POST['user_email'],
+							$user_register_time);
+						$resp->setSuccess(201, "user added")
+						     ->bindValue("email", $_POST['user_email'])
+						     ->bindValue("userID", $id);
+					}else{
+						$resp->setFailure(403, "user already exists");
+					}				
 				}else{
-					$resp->setFailure(403, "user already exists");
+					$resp->setFailure(409, "user_email is not an email");
 				}				
 			}else{
 				$resp->setFailure(409, "user_passwd et user_passwd_confirm ne sont pas les mêmes");

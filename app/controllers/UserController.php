@@ -169,7 +169,7 @@ class UserController{
 		}
 
 		//User is authorized ?
-		if(!isAuthorized::isUser($userID)){
+		if(!isAuthorized::isAdmin($this->model->getAdmin())){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
 
@@ -182,21 +182,17 @@ class UserController{
 			case "setModerator":
 
 				if(!empty($_POST['id'])){
-					if(isAuthorized::isAdmin($this->model->getAdmin())){
-						if($this->model->userExists($_POST['id'])){
-							if($this->model->setModerator($_POST['id'])){	
-								$resp->setSuccess(200, "user is now moderator")
-								 	 ->bindValue("userModeratorID", $_POST['id'])
-								 	 ->bindValue("userModerator", 1);
-								Session::renewKey();
-							}else{
-								$resp->setFailure(409, "incorrect id");
-							}						
+					if($this->model->userExists($_POST['id'])){
+						if($this->model->setModerator($_POST['id'])){	
+							$resp->setSuccess(200, "user is now moderator")
+							 	 ->bindValue("userModeratorID", $_POST['id'])
+							 	 ->bindValue("userModerator", 1);
+							Session::renewKey();
 						}else{
-							$resp->setFailure(404, "Given user ID does not exist");	
-						}
+							$resp->setFailure(409, "incorrect id");
+						}						
 					}else{
-						$resp->setFailure(401, "You are not authorized to do this action.");
+						$resp->setFailure(404, "Given user ID does not exist");	
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
