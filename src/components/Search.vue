@@ -17,6 +17,6 @@ export default {
 
 <style lang="css" scoped>
 #search-bar {
-  margin-left : 1%;
+  margin-left : 10px;
 }
 </style>

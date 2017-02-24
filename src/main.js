@@ -5,8 +5,12 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuex from 'vuex'
 import VueResource from 'vue-resource'
+import VueMaterial from 'vue-material'
 
-Vue.use(VueRouter, Vuex, VueResource)
+Vue.use(VueRouter)
+Vue.use(Vuex)
+Vue.use(VueResource)
+Vue.use(VueMaterial)
 
 const router = new VueRouter({
   mode: 'history',

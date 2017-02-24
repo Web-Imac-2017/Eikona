@@ -1,6 +1,7 @@
 <template lang="html">
   <div>
     <div v-if="!connected">
+      <a class="waves-effect waves-light btn">button</a>
       <button @click="connexion">Connexion</button>
       <button @click="inscription">Inscription</button>
     </div>
