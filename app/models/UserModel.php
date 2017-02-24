@@ -210,6 +210,52 @@ class UserModel extends DBInterface{
 	}
 
 	/**
+	 * L'utilisateur devient un admin
+	 * @param int $id user_id
+	 */
+	public function setAdmin($id)
+	{
+		if($this->id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_admin = true,
+			    user_moderator = true
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $id]);
+
+		$this->u['user_moderator'] = true;
+		$this->u['user_admin'] = true;
+
+		return true;
+	}
+
+	/**
+	 * L'utilisateur devient un simple user
+	 * @param int $id user_id
+	 */
+	public function setToUser($id)
+	{
+		if($this->id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_admin = false,
+			    user_moderator = false
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $id]);
+
+		$this->u['user_moderator'] = false; 
+		$this->u['user_admin'] = false;
+
+		return true;
+	}
+
+	/******************/
+	/***** OTHERS *****/
+	/******************/
+
+	/**
 	 * Vérifie si l'utilisateur est unique
 	 * @param  text $email user_email
 	 * @return boolean	    true / false

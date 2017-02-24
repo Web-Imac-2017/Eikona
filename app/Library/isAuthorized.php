@@ -8,21 +8,17 @@ class isAuthorized
     /***** Global verifications *****/
     static public function isUser($userID)
     {
-        if(Session::read("userID") === $userID) return true;
-
-        return false;
+        return (Session::read("userID") === $userID) ? true : false;
     }
     
-    static public function isModerator()
-    {
-
+    static public function isModerator($userModerator)
+    {   
+        return ($userModerator == true) ? true : false;
     }
 
     static public function isAdmin($userAdmin)
     {
-        if($userAdmin == true) return true;
-
-        return false;
+        return ($userAdmin == true) ? true : false;
     }
 
     /***** Profiles verifications *****/
