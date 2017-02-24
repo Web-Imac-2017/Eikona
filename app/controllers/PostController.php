@@ -7,7 +7,7 @@ class PostController
 
 	public function __construct()
 	{
-		$this->model = new PostsModel();
+		$this->model = new PostModel();
 	}
 
 	/*
