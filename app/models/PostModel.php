@@ -2,10 +2,10 @@
 
 class PostModel extends DBInterface
 {
-    private $postID = 0;
+    private $postID = -1;
     private $postDatas = null;
 
-    public function __construct($postID = 0)
+    public function __construct($postID = -1)
     {
         parent::__construct();
 
@@ -30,7 +30,7 @@ class PostModel extends DBInterface
         if($postID < 1)
         {
             $this->postDatas = NULL;
-            $this->postID = 0;
+            $this->postID = -1;
             return "wrongFormat";
         }
 
@@ -42,7 +42,7 @@ class PostModel extends DBInterface
         if($stmt->fetchColumn() == 0)
         {
             $this->postDatas = NULL;
-            $this->postID = 0;
+            $this->postID = -1;
             return "notFound";
         }
 
