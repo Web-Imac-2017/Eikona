@@ -149,6 +149,36 @@ class UserController{
 				}
 				break;
 
+			default:
+				$resp->setFailure(405);
+		}
+
+		$resp->bindValue("userID", $userID)
+		     ->send();
+	}
+
+	public function rules($field)
+	{
+		$resp = new Response();
+
+		//get userID
+		$userID = Session::read("userID");
+
+		// If userID is wrong	
+		if(!$this->setUser($userID)){
+			return;
+		}
+
+		//User is authorized ?
+		if(!isAuthorized::isUser($userID)){
+			$resp->setFailure(401, "You are not authorized to do this action.")
+			     ->send();
+
+			return;
+		}
+
+		switch($field)
+		{
 			/*---------- USER_MODERATOR ----------*/
 			case "setModerator":
 
@@ -172,7 +202,33 @@ class UserController{
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
 				}
-				break;			
+				break;
+
+
+			/*---------- USER_MODERATOR ----------*/
+			case "setModerator":
+
+				if(!empty($_POST['id'])){
+					if(isAuthorized::isAdmin($this->model->getAdmin())){
+						if($this->model->setAdmin($_POST['id'])){
+							if($this->model->userExists($_POST['id'])){
+								$resp->setSuccess(200, "user is now admin")
+								 	 ->bindValue("userAdminID", $_POST['id'])
+								 	 ->bindValue("userAdmin", 1);
+								Session::renewKey();
+							}else{
+
+							}
+						}else{
+
+						}
+					}else{
+
+					}
+				}else{
+
+				}
+				break;
 
 			default:
 				$resp->setFailure(405);
@@ -183,3 +239,8 @@ class UserController{
 	}
 
 }
+
+
+
+
+
