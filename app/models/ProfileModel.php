@@ -233,7 +233,7 @@ class ProfileModel extends DBInterface
         $stmt = $this->cnx->prepare($sql);
         $stmt->execute($bindArray);
 
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
     }
 
 
