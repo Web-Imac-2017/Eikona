@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <topHeader></topHeader>
-    <inscription></inscription>
     <router-view></router-view>
     <mainFooter></mainFooter>
   </div>
@@ -9,16 +8,14 @@
 
 <script>
 
-let topHeader = require('./components/Header.vue')
-let mainFooter = require('./components/mainFooter.vue')
-
+import topHeader from './components/Header.vue'
+import mainFooter from './components/mainFooter.vue'
 
 export default {
   name: 'app',
   components: {
     topHeader,
     mainFooter
-   
   }
 
 }

@@ -1,15 +1,19 @@
 <template lang="html">
-  <form id="connectionForm" method="post">
-    <h1>Connectez vous</h1>
+  <form id="connectionForm" @submit.stop.prevent="send">
+    <h2>Connectez vous</h2>
+    <div v-if="error_message != ''" class="error-msg">{{ error_message }}</div>
     <md-input-container>
       <label>E-mail</label>
-      <md-input type="email" v-model="user_email"></md-input>
+      <md-input id="connection-id" required type="email" v-model="user_email"></md-input>
+      <span v-if="error_mail" class="md-error">Adresse mail inconnue ou incorrecte</span>
     </md-input-container>
     <md-input-container md-has-password>
       <label>Mot de passe</label>
-      <md-input type="password" v-model="user_passwd"></md-input>
+      <md-input id="connection-password" required type="password" v-model="user_passwd"></md-input>
+      <span v-if="error_password" class="md-error">Mot de passe incorrect</span>
     </md-input-container>
-    <md-button  class="md-raised md-primary" @click="send">Se Connecter</md-button>
+    <p>Les champs marqués d'un * sont obligatoires.</p>
+    <md-button  class="md-raised" type="submit">SE CONNECTER</md-button>
   </form>
 </template>
 
@@ -22,7 +26,10 @@ export default {
   data () {
     return {
       user_email: '',
-      user_passwd: ''
+      user_passwd: '',
+      error_mail: false,
+      error_password: false,
+      error_message: ''
     }
   },
   methods: {
@@ -40,16 +47,23 @@ export default {
         switch(response.code){
           case 400:
             console.log('Bad request')
+            this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
             break
           case 401:
             console.log('Unauthorized')
+            this.error_message = 'Votre compte n\'est pas activé.'
             break
           case 404:
             console.log('Not found')
+            this.error_mail = true
+            document.getElementById('connection-id').className += " md-input-invalid"
             break
           case 409:
             console.log('Conflict')
+            thi.error_password = true
             break
+          default:
+            console.log('Unknown error')
         }
       })
     }
@@ -58,8 +72,12 @@ export default {
 </script>
 
 <style lang="css" scoped>
-  #connectionForm {
-    width : 250px;
-    text-align: right;
-  }
+.error-msg {
+  color: red;
+  font-weight: bold;
+}
+p {
+  font-size: x-small;
+  color: darkgray;
+}
 </style>

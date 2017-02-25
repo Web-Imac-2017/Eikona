@@ -1,14 +1,14 @@
 <template>
 	<div id="inscription">
-		<p>Pas encore inscrit(e) ?</p>
+		<h2>Pas encore inscrit(e) ?</h2>
+		<md-icon>keyboard_arrow_down</md-icon>
 		<inscriptionForm></inscriptionForm>
 	</div>
 </template>
 
 
 <script>
-let inscriptionForm = require('./InscriptionForm.vue')
-
+import inscriptionForm from './InscriptionForm.vue'
 
 export default {
 	name:'inscription',

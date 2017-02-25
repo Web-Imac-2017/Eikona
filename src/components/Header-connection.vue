@@ -16,6 +16,7 @@ import store from './connectionStore.js'
 
 export default {
   name: 'header-connection',
+  store: store,
   data () {
     return {
       user: {
@@ -28,6 +29,7 @@ export default {
     connexion () {
       console.log('connexion')
       window.location = '/#connectionForm'
+      document.getElementById('connection-id').focus()
     },
     inscription () {
       console.log('inscription')
