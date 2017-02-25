@@ -28,7 +28,6 @@ class PostController
 			     ->send();
 
 			return;
-
 		}
 
 		/*
@@ -106,18 +105,26 @@ class PostController
 	*/
 	public function delete($postID)
 	{
-		$this->model->setPost($postID);
-		$deleted = $this->model->delete();
 
 		$rsp = new Response();
 
-		if($deleted)
+		if(!isAuthorized::isUser(Session::read("userID"))){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}
+
+		$this->model->setPost($postID);
+
+		//TODO : VERIFIER SI LE PROFIL COURANT EST LE MEME QUE CELUI DU POST A SUPPRIME
+
+		if($this->model->delete())
 		{
 			unlink("medias/img/".$postID.".jpg");
-        	$rsp->setSuccess(200)
+        	$rsp->setSuccess(200, "post deleted")
 				->bindValue("postId", $postID);
 		} else {
-			$rsp->setFailure(404);
+			$rsp->setFailure(404, "post not deleted");
 		}
 
 		$rsp->send();
