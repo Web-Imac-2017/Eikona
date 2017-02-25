@@ -301,7 +301,8 @@ class ProfileController
         $posts = $this->model->getPosts($limit, $offset, $after, $before, $order);
 
         $rsp= new Response();
-        $rsp->bindValue("posts", $posts)
+        $rsp<>setSuccess(200)
+            ->bindValue("posts", $posts)
             ->bindValue("nbrPosts", count($posts))
             ->send();
     }
