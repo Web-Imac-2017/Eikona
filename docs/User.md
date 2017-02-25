@@ -22,6 +22,8 @@ Les utilisateurs sont gérés pas le **UserController**. Il permet d'accèder à
 * **Code:** 401 NOT AUTHORIZED <br />
   **Explication** L'utilisateur n'est pas autorisé à mettre à jour les informations.
 
+  OU
+
 * **Code:** 405 METHOD NOT ALLOWED <br />
   **Explication** La méthode n'existe pas. Le "field" est incorrect.
 
@@ -288,7 +290,7 @@ Data:
 }
 ```
 
-## Notes : 
+### Notes : 
 Le mot de passe n'est pas retourné pour la sécurité. Cette fonction récupère les informations de l'utilisateur courant. 
 
 ## Récupération de tous les profils de l'utilisateur courant
@@ -309,13 +311,20 @@ Le mot de passe n'est pas retourné pour la sécurité. Cette fonction récupèr
 Data:
 ```json
 {
-  userID: ID du user dont les infos sont récupérées,
-  userName: nom du user,
-  userEmail: email du user,
-  userRegisterTime: date de son inscription,
-  userLastActivity: date de sa dernière activité sur le site,
-  userModerator: si il est moderateur ou non,
-  userAdmin: si il est admin ou non,
-  userActivated: si son compte est activé ou non
+  userID: ID du user,
+  nbOfProfiles: nombre de profils que possède le user,
+  profile1:{
+    profile_id: id du profil,
+    user_id: id du user (== userID),
+    profile_name: nom du profil,
+    profile_desc: description du profil,
+    profile_create_time: date de création du profil,
+    profile_views: nombre de vues du profil,
+    profile_private: si le profil est privé ou non
+  },
+  profile2:{
+    même champs que profile1
+  },
+  ...
 }
 ```
