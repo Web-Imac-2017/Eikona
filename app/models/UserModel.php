@@ -111,6 +111,23 @@ class UserModel extends DBInterface{
 		return $this->u['user_admin'];
 	}
 
+	/**
+	 * Get profiles of an user
+	 * @return [type] [description]
+	 */
+	public function getProfiles()
+	{
+		if($this->id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			SELECT profile_id, user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private
+			FROM profiles
+			WHERE :id = user_id");
+		$stmt->execute([":id" => $this->id]);
+		
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
 	/******************/
 	/***** UPDATE *****/
 	/******************/

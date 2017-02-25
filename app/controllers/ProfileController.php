@@ -36,7 +36,7 @@ class ProfileController
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
 
-        $uID = 1; //Get current user ID
+        $uID = Session::read("userID"); //Get current user ID
 
         $result = $this->model->create($uID, $name, $desc, $isPrivate);
 

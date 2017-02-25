@@ -65,6 +65,35 @@ class UserController{
 	}
 
 	/**
+	 * Return all profiles of an user
+	 * @return Response    JSON
+	 */
+	public function profiles()
+	{
+		$userID = Session::read("userID");
+
+		if(!$this->setUser($userID)){
+			return;
+		}
+
+		$profiles = $this->model->getProfiles();
+
+		$resp = new Response();
+		$resp->setSuccess(200, "user profiles returned")
+			 ->bindValue("userID", $profiles[0]['user_id'])
+			 ->bindValue("nbOfProfiles", count($profiles));
+
+		$i=0;
+		foreach($profiles as $p){
+			$i++;
+			$resp->bindValue("profile".$i, $p);
+		}
+
+		//envoi de la réponse
+		$resp->send();
+	}
+
+	/**
 	 * Update the specified element of the user
 	 * @param  text $field Field to be updated
 	 * @return Response        JSON
