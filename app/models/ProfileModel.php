@@ -7,9 +7,6 @@ class ProfileModel extends DBInterface
     private $pID = 0;
     private $p   = NULL;
 
-
-
-
     /**
      * Class constructor
      *

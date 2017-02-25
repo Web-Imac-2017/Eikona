@@ -3,11 +3,12 @@
 class PostController
 {
 	private $model;
-	private $view;
+	private $likeModel;
 
 	public function __construct()
 	{
 		$this->model = new PostModel();
+		$this->likeModel = new LikeModel();
 	}
 
 	/*
@@ -416,4 +417,68 @@ class PostController
 
 		$rsp->send();
 	}
+
+	/************************************/
+	/*************** LIKE ***************/
+	/************************************/
+
+	public function like($postID)
+	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
+		$resp = new Response();
+
+		//get ID
+		$userID = Session::read("userID");
+
+		if(!isAuthorized::isUser($userID)){
+			$resp->setFailure(401, "You are not authorized to do this action.")
+			     ->send();
+
+			return;
+		}
+
+		$profileID = 1;
+
+		if($this->likeModel->like($postID, $profileID)){
+			$resp->setSuccess(200, "post liked");
+		}else{
+			$resp->setFailure(400, "post is not liked");
+		}
+		$resp->send();
+
+	}
+
+	public function unlike($postID)
+	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
+		$resp = new Response();
+
+		$userID = Session::read("userID");
+
+		if(!isAuthorized::isUser($userID)){
+			$resp->setFailure(401, "You are not authorized to do this action.")
+			     ->send();
+
+			return;
+		}
+			
+		$profileID = 1;
+
+		if($this->likeModel->unlike($postID, $profileID)){
+			$resp->setSuccess(200, "post unliked");
+		}else{
+			$resp->setFailure(400, "post not unliked");
+		}
+		$resp->send();
+
+	}
+
 }

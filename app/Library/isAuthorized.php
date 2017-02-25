@@ -8,7 +8,7 @@ class isAuthorized
     /***** Global verifications *****/
     static public function isUser($userID)
     {
-        return (Session::read("userID") === $userID) ? true : false;
+        return (Session::read("userID") === $userID && $userID != null) ? true : false;
     }
     
     static public function isModerator($userModerator)
