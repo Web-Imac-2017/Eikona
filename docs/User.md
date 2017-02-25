@@ -7,7 +7,7 @@ Les utilisateurs sont gérés pas le **UserController**. Il permet d'accèder à
 ### URL
 
 ```
-/user/edit/<field>/<userID>
+/user/edit/<field>/
 ```
 
 ### Methode
@@ -16,7 +16,6 @@ Les utilisateurs sont gérés pas le **UserController**. Il permet d'accèder à
 ### Variables GET
 
 * **field** : Nom du champ à modifier `NAME|EMAIL|PASSWORD`
-* **userID** : ID de 'l'utilisateur
 
 ### Erreurs
 
@@ -105,3 +104,218 @@ Data:
 
 * **Code:** 409 CONFLICT <br />
   **Explication** Le nouveau mot de passe est incorrect OU les mots de passe ne sont pas identiques.
+
+## Edition des droits d'accès de l'utilisateur
+
+### URL
+
+```
+/user/rules/<field>/
+```
+
+### Methode
+
+**POST**
+
+### Variables GET
+
+* **field** : Nom du champ à modifier `SETMODERATOR|SETADMIN|SETUSER`
+
+### Erreurs
+
+* **Code:** 401 NOT AUTHORIZED <br />
+  **Explication** L'utilisateur n'est pas autorisé à mettre à jour les informations. Seuls les administrateurs peuvent changer les droits des autres utilisateurs.
+
+* **Code:** 405 METHOD NOT ALLOWED <br />
+  **Explication** La méthode n'existe pas. Le "field" est incorrect.
+
+## Field = setModerator
+
+### Variables POST
+
+* **id** : L'id de l'utilisateur dont on va changer les droits.
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+  userModeratorID: ID du user qui est maintenant modérateur,
+  userModerator: 1 (true). Pour dire que le user est modérateur
+}
+```
+
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Au moins une des variables POST n'a pas été transmise.
+
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** L'id est incorrect. 
+
+  OU
+
+* **Code:** 404 NOT FOUND <br />
+  **Explication** L'id ne renvoie à auncun utilisateur.
+
+## Field = setAdmin
+
+### Variables POST
+
+* **id** : L'id de l'utilisateur dont on va changer les droits.
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+  userAdminID: ID du user qui est maintenant modérateur,
+  userModerator: 1 (true). Pour dire que le user est modérateur,
+  userAdmin: 1 (true). Pour dire que le user est admin
+}
+```
+
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Au moins une des variables POST n'a pas été transmise.
+
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** L'id est incorrect. 
+
+  OU
+
+* **Code:** 404 NOT FOUND <br />
+  **Explication** L'id ne renvoie à auncun utilisateur.
+
+  ## Field = setModerator
+
+### Variables POST
+
+* **id** : L'id de l'utilisateur dont on va changer les droits.
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+  userModeratorID: ID du user qui est maintenant modérateur,
+  userModerator: 1 (true). Pour dire que le user est modérateur
+}
+```
+
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Au moins une des variables POST n'a pas été transmise.
+
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** L'id est incorrect. 
+
+  OU
+
+* **Code:** 404 NOT FOUND <br />
+  **Explication** L'id ne renvoie à auncun utilisateur.
+
+## Field = setUser
+
+### Variables POST
+
+* **id** : L'id de l'utilisateur dont on va changer les droits. Il va redevenir un simple utilisateur. 
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+  oldModeratorAdminID: ID du user qui est maintenant user simple,
+  userModerator: 0 (false). Pour dire que le user est plus modérateur,
+  userAdmin: 0 (false). Pour dire que le user est plus admin
+}
+```
+
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Au moins une des variables POST n'a pas été transmise.
+
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** L'id est incorrect. 
+
+  OU
+
+* **Code:** 404 NOT FOUND <br />
+  **Explication** L'id ne renvoie à auncun utilisateur.
+
+## Récupération de toutes les informations de l'utilisateur courant
+
+### URL
+
+```
+/user/get/
+```
+
+### Methode
+
+**POST**
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+  userID: ID du user dont les infos sont récupérées,
+  userName: nom du user,
+  userEmail: email du user,
+  userRegisterTime: date de son inscription,
+  userLastActivity: date de sa dernière activité sur le site,
+  userModerator: si il est moderateur ou non,
+  userAdmin: si il est admin ou non,
+  userActivated: si son compte est activé ou non
+}
+```
+
+## Notes : 
+Le mot de passe n'est pas retourné pour la sécurité. Cette fonction récupère les informations de l'utilisateur courant. 
+
+## Récupération de tous les profils de l'utilisateur courant
+
+### URL
+
+```
+/user/profiles/
+```
+
+### Methode
+
+**POST**
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+  userID: ID du user dont les infos sont récupérées,
+  userName: nom du user,
+  userEmail: email du user,
+  userRegisterTime: date de son inscription,
+  userLastActivity: date de sa dernière activité sur le site,
+  userModerator: si il est moderateur ou non,
+  userAdmin: si il est admin ou non,
+  userActivated: si son compte est activé ou non
+}
+```
