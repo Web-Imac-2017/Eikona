@@ -2,10 +2,10 @@
 
 class PostModel extends DBInterface
 {
-    private $postID = 0;
+    private $postID = -1;
     private $postDatas = null;
 
-    public function __construct($postID = 0)
+    public function __construct($postID = -1)
     {
         parent::__construct();
 
@@ -21,10 +21,16 @@ class PostModel extends DBInterface
     {
         $postID = Sanitize::int($postID);
 
-        if($postID < 1 || $postID == $this->postID)
+		/* If post is already define -> current post */
+		if($postID == $this->postID)
+		{
+			return;
+		}
+
+        if($postID < 1)
         {
-            $this->postDatas = 0;
-            $this->postID = null;
+            $this->postDatas = NULL;
+            $this->postID = -1;
             return "wrongFormat";
         }
 
@@ -35,13 +41,13 @@ class PostModel extends DBInterface
         //Post ID not found
         if($stmt->fetchColumn() == 0)
         {
-            $this->postDatas = 0;
-            $this->postID = null;
+            $this->postDatas = NULL;
+            $this->postID = -1;
             return "notFound";
         }
 
         //Post found
-        $stmt = $this->cnx->prepare("SELECT post_id, post_type, post_extension, post_description, post_publish_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
+        $stmt = $this->cnx->prepare("SELECT post_id, profile_id, post_type, post_extension, post_description, post_publish_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $postID]);
 
         $this->postID = $postID;
@@ -115,6 +121,19 @@ class PostModel extends DBInterface
         $this->postDatas['post_geo_lng'] = $name;
     }
 
+    /*
+     * Get the profileID of the post
+     *
+     */
+    public function getProfileID()
+    {
+        if($this->postID == 0)
+        {
+            return 0;
+        }
+
+        return $this->postDatas['profile_id'];
+    }
 
     /*
      * Get the state of the post
