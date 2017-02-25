@@ -128,7 +128,6 @@ class AuthController{
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
 		}
-
 		//envoi de la réponse
 		$resp->send();
 	}
@@ -141,9 +140,14 @@ class AuthController{
 	{		
 		if(!$silence){
 			$resp = new Response();
-			$resp->setSuccess(200, "user deconnected")
-				 ->bindValue("id", Session::read("userID"))
-				 ->send();
+
+			if(!Session::read("userID")){
+				$resp->setFailure(400, "User not connected");
+			}else{
+				$resp->setSuccess(200, "user deconnected")
+				     ->bindValue("id", Session::read("userID"));
+			}
+			$resp->send();
 		}
 		
 		Session::renewKey();
@@ -155,6 +159,9 @@ class AuthController{
 	 * Supprime le compt ede l'user
 	 * @return [type] [description]
 	 */
+	
+	/* TODO : SUPPRIMER LES PROFILS LORS DE LA SUPPRESSION DU COMPTE */
+
 	public function delete()
 	{
 		$resp = new Response();
