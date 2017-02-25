@@ -153,15 +153,17 @@ class AuthModel extends DBInterface{
 	/***** SUPPRESSION *****/
 	/***********************/
 
-	public function checkDelete($passwd)
+	public function checkDelete($id, $passwd)
 	{
 
 		$pwd = hash("sha256", $passwd);
 
 		$stmt = $this->cnx->prepare("
-			SELECT user_id FROM users
-			WHERE :pwd = user_passwd");
-		$stmt->execute([":pwd" => $pwd]);
+			SELECT COUNT(*) FROM users
+			WHERE :pwd = user_passwd
+			AND :id = user_id");
+		$stmt->execute([":pwd" => $pwd,
+			            ":id"  => $id]);
 
 		return ($stmt->fetchColumn() == 1) ? true : false;
 	}

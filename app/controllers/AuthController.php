@@ -170,7 +170,7 @@ class AuthController{
 
 		if($userID){
 			if(!empty($_POST['user_passwd'])){
-				if($this->model->checkDelete($_POST['user_passwd'])){
+				if($this->model->checkDelete($userID, $_POST['user_passwd'])){
 					if($this->model->delete($userID)){
 						$resp->setSuccess(200, "account deleted")
 						     ->bindValue("userID", $userID)
