@@ -1,13 +1,12 @@
 <template lang="html">
   <div>
     <div v-if="!connected">
-      <a class="waves-effect waves-light btn">button</a>
-      <button @click="connexion">Connexion</button>
-      <button @click="inscription">Inscription</button>
+      <md-button @click="connexion">Connexion</md-button>
+      <md-button @click="inscription">Inscription</md-button>
     </div>
     <div v-else>
-      <button @click="settings"> {{ user.id }}</button>
-      <button @click="deconnect">Se déconnecter</button>
+      <md-button @click="settings"> {{ user.id }}</md-button>
+      <md-button @click="deconnect">Se déconnecter</md-button>
     </div>
   </div>
 </template>
@@ -46,7 +45,5 @@ export default {
 </script>
 
 <style scoped>
-  form > * {
-    display : inline-block;
-  }
+
 </style>

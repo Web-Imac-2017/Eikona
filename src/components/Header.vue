@@ -1,7 +1,9 @@
 <template lang="html">
   <header>
     <search class="header-item"></search>
-    <a id="logo" class="header-item" title="Accueil" href="/"><img alt="Eiko" src="./assets/Eiko.png"/></a>
+    <div class="header-item">
+      <a id="logo" title="Accueil" href="/"><md-icon alt="Eiko" class="md-size-2x" md-src="./assets/Eiko.png"/></a>
+    </div>
     <connexion id="connexion" class="header-item"></connexion>
   </header>
 </template>
@@ -20,30 +22,15 @@ export default {
 </script>
 
 <style lang="css" scoped>
-#logo {
-  text-align: center;
-}
-#connexion {
-  text-align: right;
-}
-header{
-  width: 100%;
-  margin : 0;
-  position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
-
+header {
+  width:100%;
   background-color: lightgray;
-  display : flex;
+  display: flex;
 }
 .header-item {
-  flex : 1;
-  display : inline-block;
-  margin : 10px;
-  vertical-align: middle;
+  flex: 1;
+  text-align: center;
+  margin: auto 0;
 }
-.header-item img {
-  max-height : 20px;
-}
+
 </style>
