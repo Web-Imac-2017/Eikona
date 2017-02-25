@@ -19,7 +19,17 @@ class PostController
 	{
 
 		$type = $_POST['postType'];
-		$desc = isset($_POST['postDescription']) ? $_POST['postDescription'] : "";
+		$desc = isset($_POST['postDescription']) && !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+
+		$rsp = new Response(); 
+
+		if(!isAuthorized::isUser(Session::read("userID"))){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			     ->send();
+
+			return;
+
+		}
 
 		/*
 		 * Management of the picture
@@ -46,7 +56,7 @@ class PostController
 
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
-			$rsp = new Response();
+			
 
 			if($postID)
 			{
