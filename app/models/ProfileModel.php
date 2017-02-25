@@ -199,18 +199,38 @@ class ProfileModel extends DBInterface
      *
      * @param $limit int Number of posts to return. Defautl 30.
      */
-    public function getPosts($limit = 30)
+    public function getPosts($limit = 4096, $offset = 0, $after = 0, $before = 0, $order = "DESC")
     {
         $limit = Sanitize::int($limit);
 
         if($this->pID == 0 || $limit == 0)
             return;
 
-        $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID ORDER BY post_publish_time DESC LIMIT :limit");
-        $posts = $stmt->execute([":pID" => $this->pID,
-                                 ":limit" => $limit]);
+        $where = "";
+        $bindArray = [":pID" => $this->pID];
 
-        return $posts;
+        //Include only useful parameters for optimization
+        if($after != 0)
+        {
+            $where .= " AND post_publish_time > :after";
+            $bindArray[":after"] = Sanitize::int($after);
+        }
+
+        if($before != 0)
+        {
+            $where .= " AND post_publish_time < :before";
+            $bindArray[":before"] = Sanitize::int($before);
+        }
+
+        $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
+
+        //Execute the query
+        $stmt = $this->cnx->prepare($sql);
+        $stmt->execute($bindArray);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
     }
 
 
