@@ -274,6 +274,51 @@ Data:
     **Explication** Le profil spécifié n'existe pas
 
 
+## Posts du profil
+
+Récupère les posts du profil spécifié selon les arguments spécifiés
+
+### URL
+```
+/profile/posts/<profileID>[/after/<timestamp>][/before/<timestamp>][/<limite>[/<offset>]][/<order>]
+```
+
+**Note** Les crochets indiquent une valeur optionnelle. L'ordre des paramètres entre croches n'a pas d'importance.
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil à utiliser
+  * after **timestamp** : Date a partir de laquelle récupérer des posts (exclue)
+  * before **timestamp** : Date jusqu'a laquelle récuperer des posts (exclue)
+  * **limite** : Nombre maximal de posts à récuperer. 4096 par défaut
+  * **offset** : Nombre de posts de décalage pour la recherche
+  * **order** : Sélectionner les posts en commencant par le plus ancien (asc) ou par le plus récent (desc, par défaut) 
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ 
+    nbrPosts : Nombre de posts trouvés, 
+    posts : Tableau avec les ID de touts les posts trouvés
+}
+```
+ 
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
+
+  OU
+
+  * **Code:** 404 NOT FOUND <br />
+    **Explication** Le profil spécifié n'existe pas
+
+
 ## Mise à jour du profil
 
 Met à jour le champ indiqué du profil
@@ -322,6 +367,11 @@ Data:
 
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
+  
+  OU
+ 
+   * **Code:** 405 METHOD NOT ALLOWED <br />
+     **Explication** Le field spécifié n'est pas supporté.
 
 ## Modifier l'image du profil
 
