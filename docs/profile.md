@@ -323,11 +323,6 @@ Data:
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
 
-  OU
-
-  * **Code:** 405 METHOD NOT ALLOWED <br />
-    **Explication** Le field spécifié n'est pas supporté.
-
 ## Modifier l'image du profil
 
 Remplace l'image actuelle du profil par une nouvelle
