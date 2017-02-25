@@ -17,6 +17,7 @@ class PostController
 	 */
 	public function create()
 	{
+
 		$type = $_POST['postType'];
 		$desc = isset($_POST['postDescription']) ? $_POST['postDescription'] : "";
 
@@ -57,6 +58,8 @@ class PostController
 			} else {
 				$rsp->setFailure(400);
 			}
+		}else{
+			$rsp->setFailure(400, "file not uploaded");
 		}
 
 		$rsp->send();
