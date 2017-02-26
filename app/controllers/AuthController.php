@@ -30,6 +30,7 @@ class AuthController{
 					//si user est unique
 					if($this->model->isUnique($_POST['user_email'])){
 						//insertion dans la base de données
+						var_dump("ok");
 						$user_register_time = time();
 						$id = $this->model->addUser(
 							$_POST['user_name'],
@@ -37,7 +38,7 @@ class AuthController{
 							$_POST['user_passwd'],
 							$user_register_time);
 						//envoi d'un mail d'activation
-						if($this->model->sendMail($id, $_POST['user_email'],	$user_register_time)){
+						if($this->model->sendMail($id, $_POST['user_email'], $user_register_time)){
 							$resp->setSuccess(201, "user added and activation mail sent")
 						     ->bindValue("email", $_POST['user_email'])
 						     ->bindValue("userID", $id);

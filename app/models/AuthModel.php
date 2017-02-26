@@ -40,12 +40,13 @@ class AuthModel extends DBInterface{
 		$pwd = hash('sha256', $passwd);
 
 		$stmt = $this->cnx->prepare("
-			INSERT INTO users (user_name, user_email, user_passwd, user_register_time)
-			VALUES (:name, :email, :pwd, :time)");
-		$stmt->execute([":name"  => $name,
-			            ":email" => $email,
-			            ":pwd"   => $pwd,
-			            ":time"  => $time]);
+			INSERT INTO users (user_name, user_email, user_passwd, user_register_time, user_last_activity)
+			VALUES (:name, :email, :pwd, :time, :lastAct)");
+		$stmt->execute([":name"    => $name,
+			            ":email"   => $email,
+			            ":pwd"     => $pwd,
+			            ":time"    => $time,
+			            ":lastAct" => $time]);
 
 		return $this->cnx->lastInsertId();
 	}
