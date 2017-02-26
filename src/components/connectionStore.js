@@ -9,7 +9,28 @@ export default new Vuex.Store({
       id: '',
       email: '',
       connected: false
-    }
+    },
+    profiles: [{
+      id: 'Jean Jean',
+      avatarPath: './assets/Eiko.png',
+      publications: 4,
+      followers: 6,
+      followings: 10
+    },
+    {
+      id: 'Jean Michel',
+      avatarPath: './assets/Eiko.png',
+      publications: 5,
+      followers: 6,
+      followings: 0
+    },
+    {
+      id: 'Jean Jean',
+      avatarPath: './assets/Eiko.png',
+      publications: 0,
+      followers: 2,
+      followings: 10
+    }]
   },
   mutations: {
     SET_USER: (state, id, email, isConnected) => {

@@ -13,7 +13,7 @@
       <span v-if="error_password" class="md-error">Mot de passe incorrect</span>
     </md-input-container>
     <p>Les champs marqués d'un * sont obligatoires.</p>
-    <md-button  class="md-raised" type="submit">SE CONNECTER</md-button>
+    <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
   </form>
 </template>
 
@@ -42,6 +42,7 @@ export default {
       }).then((response) => {
         console.log('Connected', response)
         store.commit('SET_USER', response.data.userID, response.data.userEmail, true)
+        //ouverture pop-up selection profil OU redirection vers page perso, vec pop-up choix de profil
       }, (response) => {
         console.log('Not connected', response)
         store.commit('SET_USER', '', '', false)
