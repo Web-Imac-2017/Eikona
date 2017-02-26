@@ -39,6 +39,11 @@ Data:
 
   OU
 
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Le mail n'a pas été envoyé.
+
+  OU
+
 * **Code:** 409 CONFLICT <br />
   **Explication** Le mot de passe et celui de confirmation ne correpsondent pas.
 
