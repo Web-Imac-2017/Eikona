@@ -150,12 +150,17 @@ class Response
     {
         $controller .= "Controller";
 
+        //Get response
         ob_start();
 
         call_user_func_array(array(new $controller, $method), $args);
 
-        $response = ob_get_clean();
+        $response = str_replace('\\', '', ob_get_clean());
 
-        return json_encode($response, true);
+        //Reset header
+        header('Content-Type: text/html');
+        http_response_code(200);
+
+        return json_decode($response, true);
     }
 }
