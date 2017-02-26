@@ -5,15 +5,25 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    userId: 'none',
-    connected: false
+    user: {
+      id: '',
+      email: '',
+      connected: false
+    }
   },
   mutations: {
-    SET_USER: (state, id) => { state.userId = id },
-    CONNECT: (state, connection) => { state.connected = connection}
+    SET_USER: (state, id, email, isConnected) => {
+      state.user.id = id
+      state.user.email = email
+      state.user.connected = isConnected
+    }
   },
   getters: {
-    userId: state => { return state.userId },
-    isConnected: state => { return state.connected }
-  }
+    user: state => {
+      if(state.user.connected)
+        return state.user
+      return false
+    }
+  },
+  strict: true
 })

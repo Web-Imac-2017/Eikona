@@ -1,7 +1,13 @@
 <template lang="html">
   <div id="home">
-    <description id="description" class="home-top-element"></description>
-    <connection id="connect" class="home-top-element"></connection>
+    <md-layout :md-gutter="8" md-align="center">
+      <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
+        <description id="description" class="home-top-element"></description>
+      </md-layout>
+      <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
+        <connection id="connect" class="home-top-element"></connection>
+      </md-layout>
+    </md-layout>
     <md-whiteframe md-elevation="8" id="register"><inscription></inscription></md-whiteframe>
   </div>
 </template>
@@ -22,11 +28,11 @@ export default {
 </script>
 
 <style lang="css">
+
 #home {
   text-align: center;
 }
 #description {
-  width: 40%;
   text-align: left;
   color: white;
   background-image: url(./../assets/arbre_violet.jpeg);
@@ -35,7 +41,6 @@ export default {
   background-repeat: no-repeat;
 }
 #connect {
-  width: 40%;
   text-align: right;
 }
 .home-top-element {

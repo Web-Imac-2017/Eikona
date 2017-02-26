@@ -41,9 +41,10 @@ export default {
         user_passwd: this.user_passwd
       }).then((response) => {
         console.log('Connected', response)
-        store.commit('SET_USER', response.data.userID)
+        store.commit('SET_USER', response.data.userID, response.data.userEmail, true)
       }, (response) => {
         console.log('Not connected', response)
+        store.commit('SET_USER', '', '', false)
         switch(response.code){
           case 400:
             console.log('Bad request')
@@ -71,12 +72,12 @@ export default {
 }
 </script>
 
-<style lang="css" scoped>
+<style lang="css">
 .error-msg {
   color: red;
   font-weight: bold;
 }
-p {
+#connectionForm p {
   font-size: x-small;
   color: darkgray;
 }
