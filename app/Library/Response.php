@@ -47,7 +47,7 @@
 class Response
 {
     private $data       = [];
-    private $status     = "";
+    private $status     = "success";
     private $message    = "";
     private $code       = 200;
 
@@ -141,5 +141,21 @@ class Response
         http_response_code($this->code);
 
         echo json_encode($json);
+    }
+
+    /**
+     * Send the response
+     */
+    public static function read($controller, $method, ...$args)
+    {
+        $controller .= "Controller";
+
+        ob_start();
+
+        call_user_func_array(array(new $controller, $method), $args);
+
+        $response = ob_get_clean();
+
+        return json_encode($response, true);
     }
 }
