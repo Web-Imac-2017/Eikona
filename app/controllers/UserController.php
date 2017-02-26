@@ -77,7 +77,7 @@ class UserController{
 			return;
 		}
 
-		$profiles = $this->profileModel->getFullProfile();
+		$profiles = $this->profileModel->getUserProfiles($userID);
 
 		var_dump($profiles);
 

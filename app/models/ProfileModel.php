@@ -76,6 +76,8 @@ class ProfileModel extends DBInterface
         $desc = Sanitize::string($desc);
         $private = Sanitize::boolean($private);
 
+        var_dump($private);
+
         if($uID < 1)
             return "badUserID";
 
@@ -85,14 +87,17 @@ class ProfileModel extends DBInterface
         if($stmt->fetchColumn() != 0)
             return "userNameAlreadyExists";
 
-        $stmt = $this->cnx->prepare("INSERT INTO profiles(user_id, profile_name, profile_desc, profile_private, profile_create_time) VALUES(:uID, :name, :desc, :private, :create)");
-        $stmt->execute([":uID" => $uID,
-                        ":name" => $name,
-                        ":desc" => $desc,
-                        ":private" => $private,
-                        ":create" => time()]);
+        $stmt = $this->cnx->prepare("INSERT INTO profiles (user_id, profile_name, profile_desc, profile_create_time, profile_private) VALUES (:uID, :name, :desc, :create, :private)");
+
+        $stmt->execute([":uID"     => $uID,
+                        ":name"    => $name,
+                        ":desc"    => $desc,
+                        ":create"  => time(),
+                        ":private" => $private]);
 
         $pID = $this->cnx->lastInsertId();
+
+        var_dump("id = ". $pID);
 
         $this->setProfile($pID);
 
@@ -110,12 +115,26 @@ class ProfileModel extends DBInterface
         return $this->pID;
     }
 
-
-
-
-    function getFullProfile()
+    public function getFullProfile()
     {
         return $this->p;
+    }
+
+    /**
+     * Return infos of all profile of current User
+     * @return [type] [description]
+     */
+    public function getUserProfiles($id)
+    {
+        if($id == 0) return false;
+
+        $stmt = $this->cnx->prepare("
+            SELECT profile_id, user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private
+            FROM profiles
+            WHERE :id = user_id");
+        $stmt->execute([":id" => $id]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
