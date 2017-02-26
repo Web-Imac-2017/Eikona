@@ -22,13 +22,10 @@ class isAuthorized
     }
 
     /***** Profiles verifications *****/
-    static public function updateProfile()
+    static public function editProfile($profileID)
     {
+        $userID = Session::read("userID");
         return true;
-    }
-
-    static public function deleteProfile()
-    {
         return true;
     }
 

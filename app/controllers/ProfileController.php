@@ -253,7 +253,7 @@ class ProfileController
      */
     public function posts($profileID, ...$args)
     {
-        if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts())
+        if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts($profileID))
             return;
 
         $limit = 4096;
@@ -324,7 +324,7 @@ class ProfileController
 
 
         //Exclude all failure possibilities
-        if(!isAuthorized::updateProfile())
+        if(!isAuthorized::editProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
                 ->send();
@@ -406,7 +406,7 @@ class ProfileController
     {
         $rsp = new Response();
 
-        if(!isAuthorized::updateProfile())
+        if(!isAuthorized::editProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
                 ->send();
@@ -492,7 +492,7 @@ class ProfileController
      */
     public function delete($profileID)
     {
-        if(!isAuthorized::updateProfile())
+        if(!isAuthorized::editProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
                 ->send();
