@@ -4,6 +4,11 @@
 Les profils sont gérés par le **profileController**.
 Celui-ci permet d'accèder à toutes les informations relatives à ces derniers.
 
+
+
+
+
+
 ## Création d'un profil
 
 Créer un profil pour l'utilisateur courant.
@@ -43,6 +48,47 @@ Créer un profil pour l'utilisateur courant.
 ### Notes
 
   Un profil ne peut être créer si il n'y a pas d'utilisateur de connecté.
+
+
+
+
+
+
+## Choix d'un profil
+
+Utilisé pour définir le profil courant utilisé par l'utilisateur
+
+### URL
+```
+/profile/setCurrent/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variables POST
+
+  * **profileID** : ID du profil à définir comme courant
+
+### Succès
+
+  * **Code:** 20O OK <br />
+    **Data:** `{ profileID : ID du profil choisi }`
+ 
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** nn'est pas correcte
+
+  OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** L'utilisateur ne peut pas utiliser ce profile, peut-être qu'il ne lui appartient pas.
+    
+
+
+
+
 
 ## Informations d'un profil
 
@@ -86,6 +132,11 @@ Data:
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
 
+
+
+
+
+
 ## Nom d'un profil
 
 Récupère le nom d'un profil
@@ -122,6 +173,10 @@ Data:
 
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
+
+
+
+
 
 
 ## Description d'un profil
@@ -161,6 +216,11 @@ Data:
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
 
+
+
+
+
+
 ## Vues d'un profil
 
 Récupère le nombre de fois ou le profil a été vu.
@@ -197,6 +257,11 @@ Data:
 
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
+
+
+
+
+
 
 
 ## Confidentialité d'un profil
@@ -236,6 +301,11 @@ Data:
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
 
+
+
+
+
+
 ## Propriétaire du profil
 
 Récupère l'identifiant de l'utilisateur propriétaire du profil
@@ -274,6 +344,11 @@ Data:
     **Explication** Le profil spécifié n'existe pas
 
 
+
+
+
+
+
 ## Posts du profil
 
 Récupère les posts du profil spécifié selon les arguments spécifiés
@@ -307,7 +382,6 @@ Data:
     posts : Tableau avec les ID de touts les posts trouvés
 }
 ```
- 
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
@@ -317,6 +391,11 @@ Data:
 
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
+
+
+
+
+
 
 
 ## Mise à jour du profil
@@ -373,6 +452,11 @@ Data:
    * **Code:** 405 METHOD NOT ALLOWED <br />
      **Explication** Le field spécifié n'est pas supporté.
 
+
+
+
+
+
 ## Modifier l'image du profil
 
 Remplace l'image actuelle du profil par une nouvelle
@@ -424,6 +508,11 @@ Data:
   * **Code:** 406 NOT ACCEPTABLE <br />
     **Explication** Le format de l'image transmise n'est pas supporté
 
+
+
+
+
+
 ## Ajouter des vues au profil
 
 Ajoute une ou plusieurs vues au profil
@@ -465,7 +554,12 @@ Data:
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
 
-## supprimer un profil
+
+
+
+
+
+## Supprimer un profil
 
 Ajoute une ou plusieurs vues au profil
 
