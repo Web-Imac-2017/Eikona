@@ -94,6 +94,42 @@ class ProfileController
         return true;
     }
 
+    /**
+     * Set the profile to use with the model
+     * @param  integer $profileID Profile ID to use with the model
+     * @return boolean  true on success, false on failure
+     */
+    public function setCurrent($profileID)
+    {
+        $result = $this->model->setProfile($profileID);
+
+        $userID = Session::read("userID");
+
+        $rsp = new Response();
+
+        if(!$userID)
+        {
+            $rsp->setFailure(400, "You must be connected to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!isAuthorized::ownProfile($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to use this profile.")
+                ->send();
+
+            return;
+        }
+
+        Session::write("profileID", $profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->send();
+    }
+
 
     /**
      * Return the description of the specified profile
