@@ -3,11 +3,12 @@
 class UserController{
 	
 	private $model;
-
+	private $profileModel;
 
 	public function __construct()
 	{
 		$this->model = new UserModel();
+		$this->profileModel = new ProfileModel();
 	}
 
 	/**
@@ -76,7 +77,11 @@ class UserController{
 			return;
 		}
 
-		$profiles = $this->model->getProfiles();
+		$profiles = $this->profileModel->getFullProfile();
+
+		var_dump($profiles);
+
+		/*$profiles = $this->model->getProfiles();
 
 		$resp = new Response();
 		$resp->setSuccess(200, "user profiles returned")
@@ -90,7 +95,7 @@ class UserController{
 		}
 
 		//envoi de la réponse
-		$resp->send();
+		$resp->send();*/
 	}
 
 	/**
