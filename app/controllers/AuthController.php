@@ -37,13 +37,13 @@ class AuthController{
 							$_POST['user_passwd'],
 							$user_register_time);
 						//envoi d'un mail d'activation
-						$this->model->sendMail(
-							$id,
-							$_POST['user_email'],
-							$user_register_time);
-						$resp->setSuccess(201, "user added")
+						if($this->model->sendMail($id, $_POST['user_email'],	$user_register_time)){
+							$resp->setSuccess(201, "user added and activation mail sent")
 						     ->bindValue("email", $_POST['user_email'])
 						     ->bindValue("userID", $id);
+						}else{
+							$resp->setFailure(400, "mail not sent");
+						}						
 					}else{
 						$resp->setFailure(403, "user already exists");
 					}				
