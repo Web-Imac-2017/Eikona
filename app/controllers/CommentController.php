@@ -3,11 +3,13 @@
 class CommentController
 {
 	private $model;
+	private $likeModel;
 	private $view;
 
 	public function __construct()
 	{
 		$this->model = new CommentModel();
+		$this->likeModel = new CommentLikeModel();
 	}
 
 
@@ -50,7 +52,7 @@ class CommentController
 	}
 
 	/*
-	 * Suppression d'un post
+	 * Suppression d'un commentaire
 	 *
 	 */
 	public function delete($commentID)
@@ -59,4 +61,85 @@ class CommentController
 		$this->model->delete();
 	}
 
+	/*
+	 * Like d'un commentaire
+	 *
+	 */
+	public function like($commentID)
+	{
+		$rsp = new Response();
+		
+		$profile = Session::read("profileID");
+		
+		if(!$profile)
+		{
+			/*$rsp->setFailure(401, "You must be connected to be able to like.")
+				->send();
+
+			return;*/
+			$profile = 1;
+		}
+		
+		$rslt = $this->likeModel->like($profile, $commentID);
+
+		if(!$rslt)
+		{
+			$rsp->setFailure(400, "Wrong given parameters")
+				->send();
+
+			return;
+		}
+
+		$rsp->setSuccess(201)
+			->send();
+	}
+
+	/*
+	 * Unlike d'un commentaire
+	 *
+	 */
+	public function unlike($comment)
+	{
+		$rsp = new Response();
+
+		$profile = Session::read("profileID");
+		
+		if(!$profile)
+		{
+			$rsp->setFailure(401, "You must be connected to be able to like.")
+				->send();
+
+			return;
+		}
+
+		if(isLiking($profile, $comment) == false)
+		{
+			$rsp->setFailure(400, "You have already liked this comment")
+				->send();
+
+			return;
+		}
+
+		$this->likeModel->unlike($profile, $comment);
+		$rsp->setSuccess(201)
+			->send();
+	}
+
+	/*
+	 * renvoie le nombre de likes d'un commentaire
+	 *
+	 */
+	public function getLikes($comment)
+	{
+		$nbLikes = $this->likeModel->getLikes($comment);
+
+		return $nbLikes;
+	}
+
+	public function isLiking($profile, $comment)
+	{
+		$isLiking = $this->likeModel->isLiking($profile, $comment);
+
+		return $isLiking;
+	}
 }
