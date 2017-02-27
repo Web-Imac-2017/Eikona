@@ -29,8 +29,6 @@ class isAuthorized
 
         $userProfiles = Response::read("user", "profiles")['data'];
 
-        //print_r($userProfiles);
-
         if($userProfiles["nbOfProfiles"] == 0)
             return false;
 

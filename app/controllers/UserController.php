@@ -79,23 +79,19 @@ class UserController{
 
 		$profiles = $this->profileModel->getUserProfiles($userID);
 
-		var_dump($profiles);
-
-		/*$profiles = $this->model->getProfiles();
-
 		$resp = new Response();
-		$resp->setSuccess(200, "user profiles returned")
-			 ->bindValue("userID", $profiles[0]['user_id'])
-			 ->bindValue("nbOfProfiles", count($profiles));
 
-		$i=0;
-		foreach($profiles as $p){
-			$i++;
-			$resp->bindValue("profile".$i, $p);
-		}
+		if($profiles){
+			$resp->setSuccess(200, "user profiles returned")
+			     ->bindValue("userID", $profiles[0]['user_id'])
+			     ->bindValue("nbOfProfiles", count($profiles))
+			     ->bindValue("profiles", $profiles);
+		}else{
+			$resp->setFailure(404, "user profiles not found");
+		}	
 
 		//envoi de la réponse
-		$resp->send();*/
+		$resp->send();
 	}
 
 	/**

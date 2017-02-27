@@ -25,8 +25,15 @@ class PostController
 
 		if(!isAuthorized::isUser(Session::read("userID"))){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
-			     ->send();
+			    ->send();
+			return;
+		}
 
+		$profileID = Session::read("profileID");
+
+		if(!$profileID){
+			$rsp->setFailure(401, "You don't have current profile selected")
+			    ->send();	
 			return;
 		}
 
@@ -55,7 +62,11 @@ class PostController
 
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
-			
+
+			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img";
+
+			die();
+
 
 			if($postID)
 			{
@@ -165,6 +176,12 @@ class PostController
 		$this->model->setPost($postID);
 
 		$rsp = new Response();
+
+		if(!isAuthorized::isUser(Session::read("userID"))){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}		
 
 		switch($field)
 		{
