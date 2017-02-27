@@ -74,9 +74,7 @@ class ProfileModel extends DBInterface
         $uID = Sanitize::int($userID);
         $name = Sanitize::profileName($name, true);
         $desc = Sanitize::string($desc);
-        $private = Sanitize::boolean($private);
-
-        var_dump($private);
+        $private = Sanitize::booleanToInt($private);
 
         if($uID < 1)
             return "badUserID";
@@ -97,15 +95,10 @@ class ProfileModel extends DBInterface
 
         $pID = $this->cnx->lastInsertId();
 
-        var_dump("id = ". $pID);
-
         $this->setProfile($pID);
 
         return $pID;
     }
-
-
-
 
     /**
      * Return the ID of the profile
