@@ -132,16 +132,22 @@ class PostController
 	*/
 	public function delete($postID)
 	{
-
 		$rsp = new Response();
 
-		if(!isAuthorized::isUser(Session::read("userID"))){
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
+
+		if(!isAuthorized::isUser($userID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
-		}
+		}		
 
-		$this->model->setPost($postID);
+		if(!$profileID){
+			$rsp->setFailure(401, "You don't have current profile selected")
+			    ->send();	
+			return;
+		}
 
 		//TODO : VERIFIER SI LE PROFIL COURANT EST LE MEME QUE CELUI DU POST A SUPPRIME
 

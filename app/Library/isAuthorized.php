@@ -51,8 +51,7 @@ class isAuthorized
         if(self::ownProfile($profileID))
             return true;
 
-        //Current user is an administrator?
-        if(self::isAdmin(Session::read("userID")))
+        if(self::isAdmin(Response::read("user", "get")['data']['userAdmin']) == true)
             return true;
 
         return false;
