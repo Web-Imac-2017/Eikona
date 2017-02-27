@@ -33,8 +33,8 @@ class isAuthorized
             return false;
 
         //prevent error until user->profiles gets updated
-        if(!isset($userProfiles["profiles"]))
-            return true;
+        if(empty($userProfiles["profiles"]))
+            return false;
 
         foreach ($userProfiles["profiles"] as $profile)
         {
@@ -52,6 +52,18 @@ class isAuthorized
             return true;
 
         if(self::isAdmin(Response::read("user", "get")['data']['userAdmin']) == true)
+            return true;
+
+        return false;
+    }
+
+    static public function editPost($postID)
+    {
+        $profileID = Session::read("profileID");
+        //profile_id du post = profileID
+        $data = Response::read("post", "display", $postID)['data'];
+
+        if($data['profileID'] == $profileID)
             return true;
 
         return false;

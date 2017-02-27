@@ -20,9 +20,9 @@ class PostController
 
 		$rsp = new Response(); 
 
-
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
+
 
 		if(!isAuthorized::isUser($userID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
@@ -37,7 +37,7 @@ class PostController
 		}
 
 		$type = $_POST['postType'];
-		$desc = isset($_POST['postDescription']) && !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+		$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
 
 		if(empty($_FILES['img'])){
 			$rsp->setFailure(400, "no file selected")
@@ -73,8 +73,10 @@ class PostController
 			//Création des dossiers
 			if(!is_dir($root.$userID)){
 				mkdir($root.$userID);
-			}else if(!is_dir($root.$userID."/".$profileID)){
+			}
+			if(!is_dir($root.$userID."/".$profileID)){
 				mkdir($root.$userID."/".$profileID);
+				var_dump("ok");
 			}		
 
 			/* Call to the postModel and creation of the JSON response */
@@ -137,40 +139,32 @@ class PostController
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
+		if(!$this->setPost($postID))
+			return;
+
 		if(!$profileID){
 			$rsp->setFailure(401, "You do not have current profile selected")
 			    ->send();	
 			return;
 		}
 
-		if(!isAuthorized::editProfile($profileID)){
+		if(!isAuthorized::editPost($postID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
 		}
 
-		//Récupérer les données du post qu'on veut delete
-		$profile = $this->setPost($postID);
-		//Si le post n'existe pas, on sort de la fonction
-		if(!$profile)
-			return;
-
-		if($this->model->getProfileID($profileID) == $profileID)
+		if($this->model->delete())
 		{
-			if($this->model->delete())
-			{
-				//Suppression sans connaitre l'extension
-				$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
-				$pattern = $root.$userID."/".$profileID."/".$postID.".*";
-				array_map("unlink", glob($pattern));
+			//Suppression sans connaitre l'extension
+			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+			$pattern = $root.$userID."/".$profileID."/".$postID.".*";
+			array_map("unlink", glob($pattern));
 
-	        	$rsp->setSuccess(200, "post deleted")
-					->bindValue("postId", $postID);
-			} else {
-				$rsp->setFailure(404, "post not deleted");
-			}
-		}else{
-			$rsp->setFailure(401, "You can not delete the post. Wrong profile");
+	       	$rsp->setSuccess(200, "post deleted")
+				->bindValue("postId", $postID);
+		} else {
+			$rsp->setFailure(404, "post not deleted");
 		}
 
 		$rsp->send();
@@ -187,7 +181,7 @@ class PostController
 		}
 
 		$rsp = new Response();
-		$rsp->setSuccess(200)
+		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postId", $postID)
 			->bindValue("profileID", $this->model->getProfileID())
 			->bindValue("desc", $this->model->getDescription())
@@ -208,20 +202,37 @@ class PostController
 	 */
 	public function update($field, $postID)
 	{
-		$this->model->setPost($postID);
-
 		$rsp = new Response();
 
-		if(!isAuthorized::isUser(Session::read("userID"))){
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
+
+		if(!$profileID){
+			$rsp->setFailure(401, "You do not have current profile selected")
+			    ->send();	
+			return;
+		}
+
+		if(!isAuthorized::editProfile($profileID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
-		}		
+		}	
+
+		$post = $this->setPost($postID);
+		if(!$post)
+			return;
+
+		if($this->model->getProfileID($profileID) != $profileID){
+			$rsp->setFailure(401, "You can not delete the post. Wrong current profile")
+			    ->send();
+			return;
+		}
 
 		switch($field)
 		{
 			case "description" :
-				if(isset($_POST['desc']))
+				if(!empty($_POST['desc']))
 				{
 					$desc = $this->model->updateDescription($_POST['desc']);
 
@@ -230,13 +241,15 @@ class PostController
 						$rsp->setFailure(400);
 					} else {
 						$rsp->setSuccess(200)
-							->bindValue("postDescription", $this->model->getDescription());
+							->bindValue("postDescription", $_POST['desc']);
 					}
+				} else {
+					$rsp->setFailure(400, "Missing value. Edit aborted.");
 				}
 			break;
 
 			case "geo" :
-				if(isset($_POST['post_geo_lat']) && isset($_POST['post_geo_lng']) && isset($_POST['post_geo_name']) )
+				if(!empty($_POST['post_geo_lat']) && !empty($_POST['post_geo_lng']) && !empty($_POST['post_geo_name']) )
 				{
 					$lat = $this->model->updateLatitude($_POST['post_geo_lat']);
 					$lng = $this->model->updateLongitude($_POST['post_geo_lng']);
@@ -248,6 +261,8 @@ class PostController
 						$rsp->setSuccess(200)
 							->bindValue("postGeo", $this->model->getGeo());
 					}
+				} else {
+					$rsp->setFailure(400, "Missing value. Edit aborted.");
 				}
 			break;
 
