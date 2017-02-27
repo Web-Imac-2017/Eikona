@@ -73,27 +73,24 @@ class PostController
 			//Création des dossiers
 			if(!is_dir($root.$userID)){
 				mkdir($root.$userID);
-				if(!is_dir($root.$userID."/".$profileID)){
-					mkdir($root.$userID."/".$profileID);
-				}
-			}
-
-
-			die();
+			}else if(!is_dir($root.$userID."/".$profileID)){
+				mkdir($root.$userID."/".$profileID);
+			}		
 
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
-
 			
 
 			//Si img enregistrée dans bdd et uploadée
 			if($postID)
 			{
 				/* Storing of the picture*/
-				imagejpeg($imSource, 'medias/img/' . $postID . '.' . $extension);
+				imagejpeg($imSource, $root.$userID."/".$profileID."/".$postID.".".$extension);
 
-				$rsp->setSuccess(201)
-					->bindValue("ProfileID", $postID);
+				$rsp->setSuccess(201, "post created")
+					->bindValue("userID", $userID)
+					->bindValue("profileID", $profileID)
+					->bindValue("postID", $postID);
 			}else{
 				$rsp->setFailure(400, "echec lors de l'ajout à la bdd");
 			}
