@@ -137,27 +137,40 @@ class PostController
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
-		if(!isAuthorized::isUser($userID)){
-			$rsp->setFailure(401, "You are not authorized to do this action.")
-			    ->send();
-			return;
-		}		
-
 		if(!$profileID){
-			$rsp->setFailure(401, "You don't have current profile selected")
+			$rsp->setFailure(401, "You do not have current profile selected")
 			    ->send();	
 			return;
 		}
 
-		//TODO : VERIFIER SI LE PROFIL COURANT EST LE MEME QUE CELUI DU POST A SUPPRIME
+		if(!isAuthorized::editProfile($profileID)){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}
 
-		if($this->model->delete())
+		//Récupérer les données du post qu'on veut delete
+		$profile = $this->setPost($postID);
+		//Si le post n'existe pas, on sort de la fonction
+		if(!$profile)
+			return;
+
+		if($this->model->getProfileID($profileID) == $profileID)
 		{
-			unlink("medias/img/".$postID.".jpg");
-        	$rsp->setSuccess(200, "post deleted")
-				->bindValue("postId", $postID);
-		} else {
-			$rsp->setFailure(404, "post not deleted");
+			if($this->model->delete())
+			{
+				//Suppression sans connaitre l'extension
+				$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+				$pattern = $root.$userID."/".$profileID."/".$postID.".*";
+				array_map("unlink", glob($pattern));
+
+	        	$rsp->setSuccess(200, "post deleted")
+					->bindValue("postId", $postID);
+			} else {
+				$rsp->setFailure(404, "post not deleted");
+			}
+		}else{
+			$rsp->setFailure(401, "You can not delete the post. Wrong profile");
 		}
 
 		$rsp->send();
