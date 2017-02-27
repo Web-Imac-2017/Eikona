@@ -3,11 +3,12 @@
 class PostController
 {
 	private $model;
-	private $view;
+	private $likeModel;
 
 	public function __construct()
 	{
 		$this->model = new PostModel();
+		$this->likeModel = new LikeModel();
 	}
 
 	/*
@@ -16,8 +17,25 @@ class PostController
 	 */
 	public function create()
 	{
+
 		$type = $_POST['postType'];
-		$desc = isset($_POST['postDescription']) ? $_POST['postDescription'] : "";
+		$desc = isset($_POST['postDescription']) && !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+
+		$rsp = new Response(); 
+
+		if(!isAuthorized::isUser(Session::read("userID"))){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}
+
+		$profileID = Session::read("profileID");
+
+		if(!$profileID){
+			$rsp->setFailure(401, "You don't have current profile selected")
+			    ->send();	
+			return;
+		}
 
 		/*
 		 * Management of the picture
@@ -44,7 +62,11 @@ class PostController
 
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
-			$rsp = new Response();
+
+			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img";
+
+			die();
+
 
 			if($postID)
 			{
@@ -56,6 +78,8 @@ class PostController
 			} else {
 				$rsp->setFailure(400);
 			}
+		}else{
+			$rsp->setFailure(400, "file not uploaded");
 		}
 
 		$rsp->send();
@@ -92,29 +116,53 @@ class PostController
 	*/
 	public function delete($postID)
 	{
-		$this->model->setPost($postID);
-		$deleted = $this->model->delete();
 
 		$rsp = new Response();
 
-		if($deleted)
+		if(!isAuthorized::isUser(Session::read("userID"))){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}
+
+		$this->model->setPost($postID);
+
+		//TODO : VERIFIER SI LE PROFIL COURANT EST LE MEME QUE CELUI DU POST A SUPPRIME
+
+		if($this->model->delete())
 		{
 			unlink("medias/img/".$postID.".jpg");
-        	$rsp->setSuccess(200)
+        	$rsp->setSuccess(200, "post deleted")
 				->bindValue("postId", $postID);
 		} else {
-			$rsp->setFailure(404);
+			$rsp->setFailure(404, "post not deleted");
 		}
 
 		$rsp->send();
 	}
 
 	/*
-	 * Display all the information of the post
+	 * Display all the information of the post with the given ID
 	 */
 	public function display($postID)
 	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
 
+		$rsp = new Response();
+		$rsp->setSuccess(200)
+			->bindValue("postId", $postID)
+			->bindValue("profileID", $this->model->getProfileID())
+			->bindValue("desc", $this->model->getDescription())
+			->bindValue("publishTime", $this->model->getPublishTime())
+			->bindValue("allowComments", $this->model->getAllowComments())
+			->bindValue("approved", $this->model->getApproved())
+			->bindValue("getUpdateTime", $this->model->getUpdateTime())
+			->bindValue("state", $this->model->getState())
+			->bindValue("geo", $this->model->getGeo())
+			->send();
 	}
 
 	/*
@@ -128,6 +176,12 @@ class PostController
 		$this->model->setPost($postID);
 
 		$rsp = new Response();
+
+		if(!isAuthorized::isUser(Session::read("userID"))){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}		
 
 		switch($field)
 		{
@@ -400,4 +454,68 @@ class PostController
 
 		$rsp->send();
 	}
+
+	/************************************/
+	/*************** LIKE ***************/
+	/************************************/
+
+	public function like($postID)
+	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
+		$resp = new Response();
+
+		//get ID
+		$userID = Session::read("userID");
+
+		if(!isAuthorized::isUser($userID)){
+			$resp->setFailure(401, "You are not authorized to do this action.")
+			     ->send();
+
+			return;
+		}
+
+		$profileID = 1;
+
+		if($this->likeModel->like($postID, $profileID)){
+			$resp->setSuccess(200, "post liked");
+		}else{
+			$resp->setFailure(400, "post is not liked");
+		}
+		$resp->send();
+
+	}
+
+	public function unlike($postID)
+	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
+		$resp = new Response();
+
+		$userID = Session::read("userID");
+
+		if(!isAuthorized::isUser($userID)){
+			$resp->setFailure(401, "You are not authorized to do this action.")
+			     ->send();
+
+			return;
+		}
+			
+		$profileID = 1;
+
+		if($this->likeModel->unlike($postID, $profileID)){
+			$resp->setSuccess(200, "post unliked");
+		}else{
+			$resp->setFailure(400, "post not unliked");
+		}
+		$resp->send();
+
+	}
+
 }
