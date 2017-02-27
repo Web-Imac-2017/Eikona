@@ -18,22 +18,30 @@ class PostController
 	public function create()
 	{
 
-		$type = $_POST['postType'];
-		$desc = isset($_POST['postDescription']) && !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
-
 		$rsp = new Response(); 
 
-		if(!isAuthorized::isUser(Session::read("userID"))){
+
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
+
+		if(!isAuthorized::isUser($userID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
-		}
-
-		$profileID = Session::read("profileID");
+		}		
 
 		if(!$profileID){
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();	
+			return;
+		}
+
+		$type = $_POST['postType'];
+		$desc = isset($_POST['postDescription']) && !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+
+		if(empty($_FILES['img'])){
+			$rsp->setFailure(400, "no file selected")
+			    ->send();
 			return;
 		}
 
@@ -60,14 +68,25 @@ class PostController
 				$extension = 'jpg';
 			}
 
-			/* Call to the postModel and creation of the JSON response */
-			$postID = $this->model->create($type, $extension, $desc);
+			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
 
-			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img";
+			//Création des dossiers
+			if(!is_dir($root.$userID)){
+				mkdir($root.$userID);
+				if(!is_dir($root.$userID."/".$profileID)){
+					mkdir($root.$userID."/".$profileID);
+				}
+			}
+
 
 			die();
 
+			/* Call to the postModel and creation of the JSON response */
+			$postID = $this->model->create($type, $extension, $desc);
 
+			
+
+			//Si img enregistrée dans bdd et uploadée
 			if($postID)
 			{
 				/* Storing of the picture*/
@@ -75,8 +94,8 @@ class PostController
 
 				$rsp->setSuccess(201)
 					->bindValue("ProfileID", $postID);
-			} else {
-				$rsp->setFailure(400);
+			}else{
+				$rsp->setFailure(400, "echec lors de l'ajout à la bdd");
 			}
 		}else{
 			$rsp->setFailure(400, "file not uploaded");

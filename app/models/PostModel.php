@@ -83,8 +83,6 @@ class PostModel extends DBInterface
 						 ":publishTime" => time()
         ]);
 
-        var_dump("ok");
-
         $postID = $this->cnx->lastInsertId();
 
         $this->setPost($postID);

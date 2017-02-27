@@ -38,7 +38,7 @@ class isAuthorized
 
         foreach ($userProfiles["profiles"] as $profile)
         {
-            if (isset($profile["user_id"]) && $profile["user_id"] == $profileID)
+            if (isset($profile["user_id"]) && $profile["profile_id"] == $profileID)
                 return true;
         }
 
