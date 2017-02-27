@@ -10,6 +10,14 @@ class CommentLikeModel extends DBInterface
 		parent::__construct();
 	}
 
+
+    /**
+     * Like a comment 
+     *
+     * @param $profileID ID du profil utilisé pour liker le commentaire
+     * @param $commentID ID du commentaire liké
+     *
+    */
 	public function like($profileID, $commentID)
 	{
 		$prfl = Sanitize::int($profileID);
@@ -23,31 +31,70 @@ class CommentLikeModel extends DBInterface
 							":comment" => $cmnt,
 							":time" => time()
 		]);
-		
+
 		return true;
 	}
 
-	public function unlike($profile, $comment)
+    /**
+     * Unlike a comment
+     *
+     * @param $profileID ID du profil utilisé pour unliker le commentaire
+     * @param $commentID ID du commentaire unliké
+     *
+    */
+	public function unlike($profileID, $commentID)
 	{
+		$prfl = Sanitize::int($profileID);
+		$cmnt = Sanitize::int($commentID);
+		
+		if($prfl < 1 || $cmnt < 1)
+            return false;
+
 		$stmt = $this->cnx->prepare("DELETE FROM comment_likes WHERE profile_id = :profile AND comment_id = :comment");
-		$stmt->execute([	":profile" => $profile,
-							":comment" => $comment
+		$stmt->execute([	":profile" => $prfl,
+							":comment" => $cmnt
 		]);
+
+		return true;
 	}
 
-	public function getLikes($comment)
+    /**
+     * Récupère et renvoie le nombre de like d'un commentaire
+     *
+     * @param $commentID ID du commentaire dont on veut compter les likes
+     *
+    */
+	public function getLikes($commentID)
 	{
+		$cmnt = Sanitize::int($commentID);
+		
+		if($cmnt < 1)
+            return false;
+
 		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM comment_likes WHERE comment_id = :comment");
-		$stmt->execute(["comment" => $comment]);
+		$stmt->execute(["comment" => $cmnt]);
 
 		return $stmt->fetchColumn();
 	}
 
-	public function isLiking()
+    /**
+     * renvoie true si le commentaire et liké par le profil donné
+     *
+     * @param $profileID ID du profil dont on veut vérifier
+     * @param $commentID ID du commentaire qu'on veut vérifier
+     *
+    */
+	public function isLiking($profileID, $commentID)
 	{
+		$prfl = Sanitize::int($profileID);
+		$cmnt = Sanitize::int($commentID);
+		
+		if($prfl < 1 || $cmnt < 1)
+            return false;
+
 		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM comment_likes WHERE profile_id = :profile AND comment_id = :comment");
-		$stmt->execute([	":profile" => $profile,
-							":comment" => $comment
+		$stmt->execute([	":profile" => $prfl,
+							":comment" => $cmnt
 		]);
 		
 		if($stmt->fetchColumn() == 0)

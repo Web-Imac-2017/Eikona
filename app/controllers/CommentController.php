@@ -68,16 +68,15 @@ class CommentController
 	public function like($commentID)
 	{
 		$rsp = new Response();
-		
+
 		$profile = Session::read("profileID");
 		
 		if(!$profile)
 		{
-			/*$rsp->setFailure(401, "You must be connected to be able to like.")
+			$rsp->setFailure(401, "You must be connected to be able to like.")
 				->send();
 
-			return;*/
-			$profile = 1;
+			return;
 		}
 		
 		$rslt = $this->likeModel->like($profile, $commentID);
@@ -98,7 +97,7 @@ class CommentController
 	 * Unlike d'un commentaire
 	 *
 	 */
-	public function unlike($comment)
+	public function unlike($commentID)
 	{
 		$rsp = new Response();
 
@@ -106,21 +105,30 @@ class CommentController
 		
 		if(!$profile)
 		{
-			$rsp->setFailure(401, "You must be connected to be able to like.")
+			$rsp->setFailure(401, "You must be connected to be able to unlike.")
 				->send();
 
 			return;
 		}
 
-		if(isLiking($profile, $comment) == false)
+		if(!$this->isLiking($profile, $commentID))
 		{
-			$rsp->setFailure(400, "You have already liked this comment")
+			$rsp->setFailure(400, "You don't like this comment")
 				->send();
 
 			return;
 		}
 
-		$this->likeModel->unlike($profile, $comment);
+		$rslt = $this->likeModel->unlike($profile, $commentID);
+		
+		if(!$rslt)
+		{
+			$rsp->setFailure(400, "Wrong given parameters")
+				->send();
+
+			return;
+		}
+
 		$rsp->setSuccess(201)
 			->send();
 	}
@@ -129,16 +137,20 @@ class CommentController
 	 * renvoie le nombre de likes d'un commentaire
 	 *
 	 */
-	public function getLikes($comment)
+	public function getLikes($commentID)
 	{
-		$nbLikes = $this->likeModel->getLikes($comment);
+		$nbLikes = $this->likeModel->getLikes($commentID);
 
 		return $nbLikes;
 	}
 
-	public function isLiking($profile, $comment)
+	/*
+	 * renvoie true si le commentaire est déja aimé par le profil, false sinon
+	 *
+	 */
+	public function isLiking($profileID, $commentID)
 	{
-		$isLiking = $this->likeModel->isLiking($profile, $comment);
+		$isLiking = $this->likeModel->isLiking($profileID, $commentID);
 
 		return $isLiking;
 	}
