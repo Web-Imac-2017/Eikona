@@ -14,7 +14,7 @@ class FrontController
     /**
      * Set trigger path
      */
-    protected $basePath    = "Groupe1/app/do/";
+    protected $basePath    = "Eikona/do/";
 
     /**
      * Init the FrontController

@@ -5,13 +5,19 @@ class UserModel extends DBInterface{
 	private $id = 0;
 	private $u = NULL;
 
-	public function __construct($_id)
+
+	public function __construct($_id = 0)
 	{
 		parent::__construct();
 
 		$this->setUser($_id);
 	}
 
+
+	/**
+	 * Instancie la classe User
+	 * @param int $userID user_id
+	 */
 	public function setUser($userID)
 	{
 		$userID = Sanitize::int($userID);
@@ -51,6 +57,15 @@ class UserModel extends DBInterface{
 		return "success";
 	}
 
+	/*****************/
+	/***** GETTER *****/
+	/*****************/
+
+	public function getFullUser()
+	{
+		return $this->u;
+	}
+
 	/**
 	 * Return user ID
 	 * @return int user_id
@@ -61,6 +76,24 @@ class UserModel extends DBInterface{
 	}
 
 	/**
+	 * Return user name
+	 * @return text user_name
+	 */
+	public function getName()
+	{
+		return $this->u['user_name'];
+	}
+
+	/**
+	 * Return user email
+	 * @return text user_email
+	 */
+	public function getEmail()
+	{
+		return $this->u['user_email'];
+	}	
+
+	/**
 	 * Return if user account is activated
 	 * @return boolean true(1) / false(0)
 	 */
@@ -68,4 +101,188 @@ class UserModel extends DBInterface{
 	{
 		return $this->u['user_activated'];
 	}
+
+	/**
+	 * Return if user id admin
+	 * @return boolean true(1) / false(0)
+	 */
+	public function getAdmin()
+	{
+		return $this->u['user_admin'];
+	}
+
+	/******************/
+	/***** UPDATE *****/
+	/******************/
+
+	/**
+	 * Update user name
+	 * @param  text $newName user_name
+	 * @return boolean       true / false
+	 */
+	public function updateName($newName)
+	{
+		if($this->id == 0) return false;
+
+		$name = Sanitize::userName($newName);
+
+		if(!$name) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_name = :name
+			WHERE user_id = :id");
+		$stmt->execute([":name" => $name,
+						":id"   => $this->id]);
+
+		$this->u['user_name'] = $name;
+		return true;
+	}
+
+
+	/**
+	 * Update user email
+	 * @param  text $newEmail user_email
+	 * @return boolean           true / false
+	 */
+	public function updateEmail($newEmail)
+	{
+		if($this->id == 0) return false;
+
+		$email = Sanitize::userEmail($newEmail);
+
+		if(!$email) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_email = :email
+			WHERE user_id = :id");
+		$stmt->execute([":email" => $email,
+			            ":id"    => $this->id]);
+
+		$this->u['user_email'] = $email;
+
+		return true;
+	}
+
+	/**
+	 * Update user password
+	 * @param  text $newPasswd user_passwd
+	 */
+	public function updatePassword($newPasswd){
+		if($this->id == 0) return false;
+
+		$pwd = hash('sha256', $newPasswd);
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_passwd = :pwd
+			WHERE user_id = :id");
+		$stmt->execute([":pwd" => $pwd,
+			            ":id"  => $this->id]);
+
+		$this->u['user_passwd'] = $pwd;
+
+		return true;
+	}
+
+	/******************/
+	/***** SETTER *****/
+	/******************/
+
+	/**
+	 * L'utilisateur devient un modérateur
+	 * @param int $id user_id
+	 */
+	public function setModerator($id)
+	{
+		if($this->id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_moderator = true
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $id]);
+
+		$this->u['user_moderator'] = true;
+
+		return true;
+	}
+
+	/**
+	 * L'utilisateur devient un admin
+	 * @param int $id user_id
+	 */
+	public function setAdmin($id)
+	{
+		if($this->id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_admin = true,
+			    user_moderator = true
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $id]);
+
+		$this->u['user_moderator'] = true;
+		$this->u['user_admin'] = true;
+
+		return true;
+	}
+
+	/**
+	 * L'utilisateur devient un simple user
+	 * @param int $id user_id
+	 */
+	public function setToUser($id)
+	{
+		if($this->id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			UPDATE users
+			SET user_admin = false,
+			    user_moderator = false
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $id]);
+
+		$this->u['user_moderator'] = false; 
+		$this->u['user_admin'] = false;
+
+		return true;
+	}
+
+	/******************/
+	/***** OTHERS *****/
+	/******************/
+
+	/**
+	 * Vérifie si l'utilisateur est unique
+	 * @param  text $email user_email
+	 * @return boolean	    true / false
+	 */
+	public function isUnique($email)	
+	{
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM users
+			WHERE user_email = :email");	
+		$stmt->execute([":email" => $email]);
+
+		return ($stmt->fetchColumn() == 0) ? true : false;
+	}
+
+	/**
+	 * Return if user exists
+	 * @param  int $id user_id
+	 * @return boolean     true / false
+	 */
+	public function userExists($id)
+	{
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM users
+			WHERE user_id = :id");	
+		$stmt->execute([":id" => $id]);
+
+		return ($stmt->fetchColumn() == 1) ? true : false;
+	}
+
 }

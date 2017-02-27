@@ -16,7 +16,7 @@ class AuthModel extends DBInterface{
 	 * @param  text $email user_email
 	 * @return boolean	    true / false
 	 */
-	public function uniqueUser($email)	
+	public function isUnique($email)	
 	{
 		$stmt = $this->cnx->prepare("
 			SELECT COUNT(*) FROM users
@@ -40,12 +40,13 @@ class AuthModel extends DBInterface{
 		$pwd = hash('sha256', $passwd);
 
 		$stmt = $this->cnx->prepare("
-			INSERT INTO users (user_name, user_email, user_passwd, user_register_time)
-			VALUES (:name, :email, :pwd, :time)");
-		$stmt->execute([":name"  => $name,
-			            ":email" => $email,
-			            ":pwd"   => $pwd,
-			            ":time"  => $time]);
+			INSERT INTO users (user_name, user_email, user_passwd, user_register_time, user_last_activity)
+			VALUES (:name, :email, :pwd, :time, :lastAct)");
+		$stmt->execute([":name"    => $name,
+			            ":email"   => $email,
+			            ":pwd"     => $pwd,
+			            ":time"    => $time,
+			            ":lastAct" => $time]);
 
 		return $this->cnx->lastInsertId();
 	}
@@ -69,8 +70,7 @@ class AuthModel extends DBInterface{
                    'MIME-Version: 1.0' . "\r\n" .
                    'Content-type: text/html; charset=utf-8';
 
-        mail($email, $subject);
-
+       return (mail($email, $subject, $content, $headers)) ? true : false;
     }
 
 	/**********************/
@@ -83,7 +83,7 @@ class AuthModel extends DBInterface{
 	 * @param  int  $key clé_cryptée
 	 * @return boolean   true / false
 	 */
-	public function checkUserExists($id, $key)
+	public function checkActivation($id, $key)
 	{
 		$stmt = $this->cnx->prepare("
 			SELECT user_id, user_register_time, user_activated FROM users
@@ -91,8 +91,8 @@ class AuthModel extends DBInterface{
 			AND :key = sha1(user_register_time)");
 		$stmt->execute([":id"  => $id,
 			            ":key" => $key]);
-
-		return ($stmt->rowCount() == 1) ? true : false;
+		
+		return ($stmt->fetchColumn() != 0) ? true : false;
 	}
 
 	/**
@@ -113,14 +113,29 @@ class AuthModel extends DBInterface{
 	/*********************/
 
 	/**
-	 * Connexion (ou non) de l'utilisateur
+	 * Return if email exists in database
+	 * @param  text $email user_email
+	 * @return boolean        true / false
+	 */
+	public function checkEmail($email)
+	{
+		//Savoir si l'user est inscrit
+		$stmt = $this->cnx->prepare("
+			SELECT user_id FROM users
+			WHERE :email = user_email");
+		$stmt->execute([":email" => $email]);
+
+		return ($stmt->fetchColumn() != null) ? true : false;
+	}
+
+	/**
+	 * Return User (qu'il existe ou non)
 	 * @param  text $email  user_email
 	 * @param  text $passwd user_passwd
-	 * @return boolean      user_id / null
+	 * @return User         
 	 */
-	public function checkAuth($email, $passwd)
+	public function checkConnection($email, $passwd)
 	{
-		//cryptage du passwd
 		$pwd = hash('sha256', $passwd);
 		$stmt = $this->cnx->prepare("
 			SELECT user_id FROM  users
@@ -132,4 +147,36 @@ class AuthModel extends DBInterface{
 		$u = $stmt->fetch(PDO::FETCH_ASSOC);
 		return new UserModel($u['user_id']);
 	}
+
+	/***********************/
+	/***** SUPPRESSION *****/
+	/***********************/
+
+	public function checkDelete($id, $passwd)
+	{
+
+		$pwd = hash("sha256", $passwd);
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM users
+			WHERE :pwd = user_passwd
+			AND :id = user_id");
+		$stmt->execute([":pwd" => $pwd,
+			            ":id"  => $id]);
+
+		return ($stmt->fetchColumn() == 1) ? true : false;
+	}
+
+	public function delete($id)
+	{
+		if($id == 0) return false;
+
+		$stmt = $this->cnx->prepare("
+			DELETE FROM users
+			WHERE :id = user_id");
+		$stmt->execute([":id" => $id]);
+
+		return true;
+	}
+
 }
