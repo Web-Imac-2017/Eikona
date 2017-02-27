@@ -154,42 +154,5 @@ class AuthController{
 		Session::remove("userID");
 		Session::remove("profileID");
 	}
-
-	/**
-	 * Supprime le compt ede l'user
-	 * @return [type] [description]
-	 */
 	
-	/* TODO : SUPPRIMER LES PROFILS LORS DE LA SUPPRESSION DU COMPTE */
-
-	public function delete()
-	{
-		$resp = new Response();
-
-		$userID = Session::read("userID");
-
-		if($userID){
-			if(!empty($_POST['user_passwd'])){
-				if($this->model->checkDelete($userID, $_POST['user_passwd'])){
-					if($this->model->delete($userID)){
-						$resp->setSuccess(200, "account deleted")
-						     ->bindValue("userID", $userID)
-						     ->send();
-						$this->signOut(true);
-						return;
-					}else{
-						$resp->setFailure(403, "fail to delete");
-					}
-				}else{
-					$resp->setFailure(409, "incorrect password");
-				}
-			}else{
-				$resp->setFailure(400, "tous les champs ne sont pas remplis");
-			}
-		}else{
-			$resp->setFailure(401, "You are not authorized to do this action.");
-		}
-
-		$resp->send();
-	}
 }
