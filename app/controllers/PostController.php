@@ -207,24 +207,17 @@ class PostController
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
+		if(!$this->setPost($postID))
+			return;
+
 		if(!$profileID){
 			$rsp->setFailure(401, "You do not have current profile selected")
 			    ->send();	
 			return;
 		}
 
-		if(!isAuthorized::editProfile($profileID)){
+		if(!isAuthorized::editPost($postID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
-			    ->send();
-			return;
-		}	
-
-		$post = $this->setPost($postID);
-		if(!$post)
-			return;
-
-		if($this->model->getProfileID($profileID) != $profileID){
-			$rsp->setFailure(401, "You can not delete the post. Wrong current profile")
 			    ->send();
 			return;
 		}
