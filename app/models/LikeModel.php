@@ -8,6 +8,20 @@ class LikeModel extends DBInterface{
 
 	}
 
+	public function isLiked($postID, $profileID)
+	{
+		if($postID == 0 || $profileID == 0) return true;
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM post_likes
+			WHERE :postID = post_id
+			AND :profileID = profile_id");
+		$stmt->execute([":postID"    => $postID,
+			            ":profileID" => $profileID]);
+
+		return ($stmt->fetchColumn() == 0) ? false : true;
+	}
+
 	public function like($postID, $profileID)
 	{
 		if($postID == 0 || $profileID == 0) return false;
