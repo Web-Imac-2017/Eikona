@@ -1,6 +1,6 @@
 <template lang="html">
   <div id="home">
-    <profile-selection></profile-selection>
+    <profile-selection id="pop-up"></profile-selection>
     <md-layout :md-gutter="8" md-align="center">
       <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
         <description id="description" class="home-top-element"></description>
@@ -18,7 +18,7 @@ import connection from './Connection.vue'
 import inscription from './Inscription.vue'
 import description from './Home-description.vue'
 
-//Test
+// Test
 import profileSelection from './Profil-selection.vue'
 
 export default {
@@ -33,7 +33,10 @@ export default {
 </script>
 
 <style lang="css">
-
+#pop-up {
+  width: 50%;
+  padding: 100px;
+}
 #home {
   text-align: center;
 }

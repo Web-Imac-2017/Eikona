@@ -11,8 +11,8 @@
 import inscriptionForm from './InscriptionForm.vue'
 
 export default {
-	name:'inscription',
-	components:{
+	name: 'inscription',
+	components: {
 		inscriptionForm
 	}
 }

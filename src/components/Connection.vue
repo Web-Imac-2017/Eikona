@@ -35,18 +35,18 @@ export default {
   methods: {
     send () {
       // vérifer validitée des champs
-      console.log('Send : ' + this.user_email + '  ' +  this.user_passwd)
+      console.log('Send : ' + this.user_email + '  ' + this.user_passwd)
       this.$http.post('/do/auth/signIn/', {
         user_email: this.user_email,
         user_passwd: this.user_passwd
       }).then((response) => {
         console.log('Connected', response)
         store.commit('SET_USER', response.data.userID, response.data.userEmail, true)
-        //ouverture pop-up selection profil OU redirection vers page perso, vec pop-up choix de profil
+        // ouverture pop-up selection profil OU redirection vers page perso, vec pop-up choix de profil
       }, (response) => {
         console.log('Not connected', response)
         store.commit('SET_USER', '', '', false)
-        switch(response.code){
+        switch (response.code) {
           case 400:
             console.log('Bad request')
             this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
@@ -58,11 +58,11 @@ export default {
           case 404:
             console.log('Not found')
             this.error_mail = true
-            document.getElementById('connection-id').className += " md-input-invalid"
+            document.getElementById('connection-id').className += ' md-input-invalid'
             break
           case 409:
             console.log('Conflict')
-            thi.error_password = true
+            this.error_password = true
             break
           default:
             console.log('Unknown error')

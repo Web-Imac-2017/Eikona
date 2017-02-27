@@ -12,14 +12,14 @@
 
 <script>
 export default {
-  data (){
+  data () {
     return {
-      keywords: ""
+      keywords: ''
     }
   },
   methods: {
     search () {
-      console.log('Search')
+      console.log('Search : ', this.keywords)
     }
   }
 }

@@ -7,7 +7,6 @@
 </template>
 
 <script>
-
 import topHeader from './components/Header.vue'
 import mainFooter from './components/mainFooter.vue'
 

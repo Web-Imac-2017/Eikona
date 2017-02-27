@@ -1,15 +1,16 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-Vue.use(Vuex);
+Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
     user: {
-      id: '',
-      email: '',
-      connected: false
+      id: 'jean99',
+      email: 'jean.michel@gmail.com',
+      connected: true
     },
+    // profiles de tests, reel à recupérer en fonction de l'utilisateur co
     profiles: [{
       id: 'Jean Jean',
       avatarPath: './assets/Eiko.png',
@@ -41,8 +42,9 @@ export default new Vuex.Store({
   },
   getters: {
     user: state => {
-      if(state.user.connected)
+      if (state.user.connected) {
         return state.user
+      }
       return false
     }
   },

@@ -2,8 +2,8 @@
   <div>
     <md-whiteframe md-elevation="8">
       <h1>Bonjour {{ user.id }} !</h1>
-      <p>Veuillez sélecionner un profile :</p>
-      <profile v-for="(profile, index) in profiles"></profile>
+      <p>Veuillez sélecionner un profil :</p>
+      <profile v-for="(profile, index) in profiles" :profile="profile"></profile>
       <md-layout>
         <md-layout><md-button class="md-icon-button md-raised md-primary"><md-icon>add</md-icon></md-button></md-layout>
         <md-layout>
@@ -24,7 +24,7 @@ export default {
   components: {
     profile
   },
-  computed:{
+  computed: {
     user () {
       return this.$store.state.user
     },
