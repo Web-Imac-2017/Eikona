@@ -25,25 +25,30 @@ class AuthController{
 
 			//Si passwd == passwd confirm
 			if($_POST['user_passwd'] == $_POST['user_passwd_confirm']){
-				//si user est unique
-				if($this->model->isUnique($_POST['user_email'])){
-					//insertion dans la base de données
-					$user_register_time = time();
-					$id = $this->model->addUser(
-						$_POST['user_name'],
-						$_POST['user_email'],
-						$_POST['user_passwd'],
-						$user_register_time);
-					//envoi d'un mail d'activation
-					$this->model->sendMail(
-						$id,
-						$_POST['user_email'],
-						$user_register_time);
-					$resp->setSuccess(201, "user added")
-					     ->bindValue("email", $_POST['user_email'])
-					     ->bindValue("userID", $id);
+				//Si le mail est valide
+				if(filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)){
+					//si user est unique
+					if($this->model->isUnique($_POST['user_email'])){
+						//insertion dans la base de données
+						$user_register_time = time();
+						$id = $this->model->addUser(
+							$_POST['user_name'],
+							$_POST['user_email'],
+							$_POST['user_passwd'],
+							$user_register_time);
+						//envoi d'un mail d'activation
+						if($this->model->sendMail($id, $_POST['user_email'], $user_register_time)){
+							$resp->setSuccess(201, "user added and activation mail sent")
+						         ->bindValue("email", $_POST['user_email'])
+						         ->bindValue("userID", $id);
+						}else{
+							$resp->setFailure(400, "mail not sent");
+						}						
+					}else{
+						$resp->setFailure(403, "user already exists");
+					}				
 				}else{
-					$resp->setFailure(403, "user already exists");
+					$resp->setFailure(409, "user_email is not an email");
 				}				
 			}else{
 				$resp->setFailure(409, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
@@ -123,7 +128,6 @@ class AuthController{
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
 		}
-
 		//envoi de la réponse
 		$resp->send();
 	}
@@ -132,15 +136,60 @@ class AuthController{
 	 * Deconnexion
 	 * @return Response JSON
 	 */
-	public function signOut()
+	public function signOut($silence = false)
 	{		
-		$resp = new Response();
-		$resp->setSuccess(200, "user deconnected")
-			 ->bindValue("id", Session::read("userID"))
-			 ->send();
+		if(!$silence){
+			$resp = new Response();
 
+			if(!Session::read("userID")){
+				$resp->setFailure(400, "User not connected");
+			}else{
+				$resp->setSuccess(200, "user deconnected")
+				     ->bindValue("id", Session::read("userID"));
+			}
+			$resp->send();
+		}
+		
 		Session::renewKey();
 		Session::remove("userID");
 		Session::remove("profileID");
+	}
+
+	/**
+	 * Supprime le compt ede l'user
+	 * @return [type] [description]
+	 */
+	
+	/* TODO : SUPPRIMER LES PROFILS LORS DE LA SUPPRESSION DU COMPTE */
+
+	public function delete()
+	{
+		$resp = new Response();
+
+		$userID = Session::read("userID");
+
+		if($userID){
+			if(!empty($_POST['user_passwd'])){
+				if($this->model->checkDelete($userID, $_POST['user_passwd'])){
+					if($this->model->delete($userID)){
+						$resp->setSuccess(200, "account deleted")
+						     ->bindValue("userID", $userID)
+						     ->send();
+						$this->signOut(true);
+						return;
+					}else{
+						$resp->setFailure(403, "fail to delete");
+					}
+				}else{
+					$resp->setFailure(409, "incorrect password");
+				}
+			}else{
+				$resp->setFailure(400, "tous les champs ne sont pas remplis");
+			}
+		}else{
+			$resp->setFailure(401, "You are not authorized to do this action.");
+		}
+
+		$resp->send();
 	}
 }

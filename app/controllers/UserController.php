@@ -3,11 +3,12 @@
 class UserController{
 	
 	private $model;
-
+	private $profileModel;
 
 	public function __construct()
 	{
 		$this->model = new UserModel();
+		$this->profileModel = new ProfileModel();
 	}
 
 	/**
@@ -62,6 +63,35 @@ class UserController{
 		     ->bindValue("userAdmin", $userInfos['user_admin'])
 		     ->bindValue("userActivated", $userInfos['user_activated'])
 		     ->send();
+	}
+
+	/**
+	 * Return all profiles of an user
+	 * @return Response    JSON
+	 */
+	public function profiles()
+	{
+		$userID = Session::read("userID");
+
+		if(!$this->setUser($userID)){
+			return;
+		}
+
+		$profiles = $this->profileModel->getUserProfiles($userID);
+
+		$resp = new Response();
+
+		if($profiles){
+			$resp->setSuccess(200, "user profiles returned")
+			     ->bindValue("userID", $profiles[0]['user_id'])
+			     ->bindValue("nbOfProfiles", count($profiles))
+			     ->bindValue("profiles", $profiles);
+		}else{
+			$resp->setFailure(404, "user profiles not found");
+		}	
+
+		//envoi de la réponse
+		$resp->send();
 	}
 
 	/**
@@ -169,7 +199,7 @@ class UserController{
 		}
 
 		//User is authorized ?
-		if(!isAuthorized::isUser($userID)){
+		if(!isAuthorized::isAdmin($this->model->getAdmin())){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
 
@@ -182,21 +212,17 @@ class UserController{
 			case "setModerator":
 
 				if(!empty($_POST['id'])){
-					if(isAuthorized::isAdmin($this->model->getAdmin())){
-						if($this->model->userExists($_POST['id'])){
-							if($this->model->setModerator($_POST['id'])){	
-								$resp->setSuccess(200, "user is now moderator")
-								 	 ->bindValue("userModeratorID", $_POST['id'])
-								 	 ->bindValue("userModerator", 1);
-								Session::renewKey();
-							}else{
-								$resp->setFailure(409, "incorrect id");
-							}						
+					if($this->model->userExists($_POST['id'])){
+						if($this->model->setModerator($_POST['id'])){	
+							$resp->setSuccess(200, "user is now moderator")
+							 	 ->bindValue("userModeratorID", $_POST['id'])
+							 	 ->bindValue("userModerator", 1);
+							Session::renewKey();
 						}else{
-							$resp->setFailure(404, "Given user ID does not exist");	
-						}
+							$resp->setFailure(409, "incorrect id");
+						}						
 					}else{
-						$resp->setFailure(401, "You are not authorized to do this action.");
+						$resp->setFailure(404, "Given user ID does not exist");	
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
@@ -207,22 +233,18 @@ class UserController{
 			case "setAdmin":
 
 				if(!empty($_POST['id'])){
-					if(isAuthorized::isAdmin($this->model->getAdmin())){
-						if($this->model->userExists($_POST['id'])){
-							if($this->model->setAdmin($_POST['id'])){
-								$resp->setSuccess(200, "user is now admin")
-								 	 ->bindValue("userAdminID", $_POST['id'])
-								 	 ->bindValue("userModerator", 1)
-								 	 ->bindValue("userAdmin", 1);
-								Session::renewKey();
-							}else{
-								$resp->setFailure(409, "incorrect ID");
-							}
+					if($this->model->userExists($_POST['id'])){
+						if($this->model->setAdmin($_POST['id'])){
+							$resp->setSuccess(200, "user is now admin")
+							 	 ->bindValue("userAdminID", $_POST['id'])
+							 	 ->bindValue("userModerator", 1)
+							 	 ->bindValue("userAdmin", 1);
+							Session::renewKey();
 						}else{
-							$resp->setFailure(404, "Given user admin ID does not exist");	
+							$resp->setFailure(409, "incorrect ID");
 						}
 					}else{
-						$resp->setFailure(401, "You are not authorized to do this action");
+						$resp->setFailure(404, "Given user admin ID does not exist");	
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted");
@@ -233,22 +255,18 @@ class UserController{
 			case "setUser":
 
 				if(!empty($_POST['id'])){
-					if(isAuthorized::isAdmin($this->model->getAdmin())){
-						if($this->model->userExists($_POST['id'])){
-							if($this->model->setToUser($_POST['id'])){
-								$resp->setSuccess(200, "user is now just user")
-								 	 ->bindValue("oldModeratorAdminID", $_POST['id'])
-								 	 ->bindValue("userModerator", 0)
-								 	 ->bindValue("userAdmin", 0);
-								Session::renewKey();
-							}else{
-								$resp->setFailure(409, "incorrect ID");
-							}
+					if($this->model->userExists($_POST['id'])){
+						if($this->model->setToUser($_POST['id'])){
+							$resp->setSuccess(200, "user is now just user")
+							 	 ->bindValue("oldModeratorAdminID", $_POST['id'])
+							 	 ->bindValue("userModerator", 0)
+							 	 ->bindValue("userAdmin", 0);
+							Session::renewKey();
 						}else{
-							$resp->setFailure(404, "Given user admin ID does not exist");	
+							$resp->setFailure(409, "incorrect ID");
 						}
 					}else{
-						$resp->setFailure(401, "You are not authorized to do this action");
+						$resp->setFailure(404, "Given user admin ID does not exist");	
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted");

@@ -36,7 +36,7 @@ class ProfileController
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
 
-        $uID = 1; //Get current user ID
+        $uID = Session::read("userID"); //Get current user ID
 
         $result = $this->model->create($uID, $name, $desc, $isPrivate);
 
@@ -52,7 +52,7 @@ class ProfileController
         }
         else
         {
-            $rsp->setSuccess(201)
+            $rsp->setSuccess(201, "profile created")
                 ->bindValue("profileID", $result);
         }
 
@@ -92,6 +92,42 @@ class ProfileController
         }
 
         return true;
+    }
+
+    /**
+     * Set the profile to use with the model
+     * @param  integer $profileID Profile ID to use with the model
+     * @return boolean  true on success, false on failure
+     */
+    public function setCurrent($profileID)
+    {
+        $result = $this->model->setProfile($profileID);
+
+        $userID = Session::read("userID");
+
+        $rsp = new Response();
+
+        if(!$userID)
+        {
+            $rsp->setFailure(400, "You must be connected to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!isAuthorized::ownProfile($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to use this profile.")
+                ->send();
+
+            return;
+        }
+
+        Session::write("profileID", $profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->send();
     }
 
 
@@ -253,7 +289,7 @@ class ProfileController
      */
     public function posts($profileID, ...$args)
     {
-        if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts())
+        if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts($profileID))
             return;
 
         $limit = 4096;
@@ -324,7 +360,7 @@ class ProfileController
 
 
         //Exclude all failure possibilities
-        if(!isAuthorized::updateProfile())
+        if(!isAuthorized::editProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
                 ->send();
@@ -406,7 +442,7 @@ class ProfileController
     {
         $rsp = new Response();
 
-        if(!isAuthorized::updateProfile())
+        if(!isAuthorized::editProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
                 ->send();
@@ -492,7 +528,7 @@ class ProfileController
      */
     public function delete($profileID)
     {
-        if(!isAuthorized::updateProfile())
+        if(!isAuthorized::editProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
                 ->send();
