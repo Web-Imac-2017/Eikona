@@ -14,30 +14,43 @@ export default new Vuex.Store({
     profiles: [{
       id: 'Jean Jean',
       avatarPath: './assets/Eiko.png',
-      publications: 4,
+      posts: 4,
       followers: 6,
       followings: 10
     },
     {
       id: 'Jean Michel',
       avatarPath: './assets/Eiko.png',
-      publications: 5,
+      posts: 5,
       followers: 6,
       followings: 0
     },
     {
       id: 'Jean Jean',
       avatarPath: './assets/Eiko.png',
-      publications: 0,
+      posts: 0,
       followers: 2,
       followings: 10
-    }]
+    }],
+    currentProfile: 0
   },
   mutations: {
     SET_USER: (state, id, email, isConnected) => {
       state.user.id = id
       state.user.email = email
       state.user.connected = isConnected
+    },
+    SET_LIST_PROFILES: (state) => {
+      this.$http.post('/Eikona/do/user/profiles/', {}).then((response) => {
+        for (profile in response.data) {
+          state.profiles.push(profile);
+        }
+      }, (response) => {
+        console.log('ERR: récupération des profils', response)
+      })
+    },
+    SET_CURRENT_PROFILE: (state, index) => {
+      state.currentProfile = index
     }
   },
   getters: {

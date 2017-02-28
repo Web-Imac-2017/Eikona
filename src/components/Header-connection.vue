@@ -1,12 +1,12 @@
 <template lang="html">
   <div>
     <div v-if="user.connected">
-        <md-button @click="settings"> {{ user.id }}</md-button>
-        <md-button @click="deconnect" class="md-icon-button"><md-icon>power_settings_new</md-icon></md-button>
+        <md-button v-on:click="settings"> {{ user.id }}</md-button>
+        <md-button v-on:click="deconnect" class="md-icon-button"><md-icon>power_settings_new</md-icon></md-button>
     </div>
     <div v-else>
-      <md-button @click="connexion">Connexion</md-button>
-      <md-button @click="inscription">Inscription</md-button>
+      <md-button v-on:click="connexion">Connexion</md-button>
+      <md-button v-on:click="inscription">Inscription</md-button>
     </div>
   </div>
 </template>
@@ -25,20 +25,20 @@ export default {
   methods: {
     connexion () {
       console.log('connexion')
-      window.location = '/#connectionForm'
-      document.getElementById('connection-id').focus()
+      //window.location = '/#connectionForm'
+      //document.getElementById('connection-id').focus()
     },
     inscription () {
       console.log('inscription')
-      window.location = '/#inscriptionForm'
+      //window.location = '/#inscriptionForm'
     },
     deconnect () {
       console.log('deconnect')
-      this.$store.commit('SET_USER', '', '', false)
+      //this.$store.commit('SET_USER', '', '', false)
     },
     settings () {
       console.log('settings')
-      window.location = '/user/' + this.user.id + '/settings'
+      //window.location = '/user/' + this.user.id + '/settings'
     }
   }
 }

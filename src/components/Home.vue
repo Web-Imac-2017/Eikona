@@ -1,6 +1,6 @@
 <template lang="html">
   <div id="home">
-    <profile-selection id="pop-up"></profile-selection>
+    <profile-selection id="pop"></profile-selection>
     <md-layout :md-gutter="8" md-align="center">
       <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
         <description id="description" class="home-top-element"></description>
@@ -33,10 +33,6 @@ export default {
 </script>
 
 <style lang="css">
-#pop-up {
-  width: 50%;
-  padding: 100px;
-}
 #home {
   text-align: center;
 }
