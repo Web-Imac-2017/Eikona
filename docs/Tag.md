@@ -26,8 +26,7 @@ do/tag/add/{{postID}}/<tagName>
 
 ### Succès
 
-  * **Code:** 201 CREATED <br />
-    **Data:** `{ profileID : ID du profil créé }`
+  * **Code:** 201 TAG ADDED <br />
  
 ### Erreurs
 
@@ -69,13 +68,7 @@ do/tag/delete/{{postID}}/<tagName>
 
 ### Succès
 
-  * **Code:** 200 OK
-Data:
-```json
-{
-    tag deleted
-}
-```
+  * **Code:** 200 TAG DELETED
 
 ### Erreurs
 
@@ -89,7 +82,7 @@ Data:
 
   OU
 
-  * **Code:** 409 CONFLICT <br />
+  * **Code:** 404 NOT FOUND <br />
     **Explication** Le tag pour ce post n'existe pas.
 
 
