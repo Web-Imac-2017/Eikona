@@ -124,19 +124,6 @@ class ProfileModel extends DBInterface
     }
 
     /**
-     * Return the path to the profile picture
-     */
-    public function getPic()
-    {
-        if(file_exists("PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg"))
-        {
-            return "PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg";
-        }
-
-        return "PATH/TO/DEFAULT/PROFILE/PICTURE";
-    }
-
-    /**
      * Return the name of the profile
      */
     public function getName()

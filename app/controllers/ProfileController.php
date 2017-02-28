@@ -150,6 +150,7 @@ class ProfileController
             ->bindValue("ownerID", $profileInfos['user_id'])
             ->bindValue("profileName", $profileInfos['profile_name'])
             ->bindValue("profileDesc", $profileInfos['profile_desc'])
+            ->bindValue("profilePict", Response::read("Profile", "picture", $profileID)['data']['profilePicture'])
             ->bindValue("profileCreateTime", $profileInfos['profile_create_time'])
             ->bindValue("profileViews", $profileInfos['profile_views'])
             ->bindValue("profileIsPrivate", $profileInfos['profile_views'] == 1)
@@ -204,10 +205,16 @@ class ProfileController
      */
     public function picture($profileID)
     {
-        if(!$this->setProfile($profileID))
-            return;
+        $profileID = Sanitize::int($profileID);
 
-        $pic = $this->model->getPic();
+        if(file_exists("/app/medias/profilesPictures/".$profileID.".jpg"))
+        {
+            $pic = "/app/medias/profilesPictures/".$profileID.".jpg";
+        }
+        else
+        {
+            $pic = "/app/medias/profilesPictures/default.jpg";
+        }
 
         //Send JSON response
         $rsp = new Response();
