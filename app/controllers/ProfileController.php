@@ -52,7 +52,7 @@ class ProfileController
         }
         else
         {
-            $rsp->setSuccess(201)
+            $rsp->setSuccess(201, "profile created")
                 ->bindValue("profileID", $result);
         }
 

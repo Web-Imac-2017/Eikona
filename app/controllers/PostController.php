@@ -18,15 +18,30 @@ class PostController
 	public function create()
 	{
 
-		$type = $_POST['postType'];
-		$desc = isset($_POST['postDescription']) && !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
-
 		$rsp = new Response(); 
 
-		if(!isAuthorized::isUser(Session::read("userID"))){
-			$rsp->setFailure(401, "You are not authorized to do this action.")
-			     ->send();
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
+
+		if(!isAuthorized::isUser($userID)){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}
+
+		if(!$profileID){
+			$rsp->setFailure(401, "You don't have current profile selected")
+			    ->send();
+			return;
+		}
+
+		$type = $_POST['postType'];
+		$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+
+		if(empty($_FILES['img'])){
+			$rsp->setFailure(400, "no file selected")
+			    ->send();
 			return;
 		}
 
@@ -53,19 +68,32 @@ class PostController
 				$extension = 'jpg';
 			}
 
+			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+
+			//Création des dossiers
+			if(!is_dir($root.$userID)){
+				mkdir($root.$userID);
+			}
+			if(!is_dir($root.$userID."/".$profileID)){
+				mkdir($root.$userID."/".$profileID);
+			}
+
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
 			
 
+			//Si img enregistrée dans bdd et uploadée
 			if($postID)
 			{
 				/* Storing of the picture*/
-				imagejpeg($imSource, 'medias/img/' . $postID . '.' . $extension);
+				imagejpeg($imSource, $root.$userID."/".$profileID."/".$postID.".".$extension);
 
-				$rsp->setSuccess(201)
-					->bindValue("ProfileID", $postID);
-			} else {
-				$rsp->setFailure(400);
+				$rsp->setSuccess(201, "post created")
+					->bindValue("userID", $userID)
+					->bindValue("profileID", $profileID)
+					->bindValue("postID", $postID);
+			}else{
+				$rsp->setFailure(400, "echec lors de l'ajout à la bdd");
 			}
 		}else{
 			$rsp->setFailure(400, "file not uploaded");
@@ -105,23 +133,34 @@ class PostController
 	*/
 	public function delete($postID)
 	{
-
 		$rsp = new Response();
 
-		if(!isAuthorized::isUser(Session::read("userID"))){
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
+
+		if(!$this->setPost($postID))
+			return;
+
+		if(!$profileID){
+			$rsp->setFailure(401, "You do not have current profile selected")
+			    ->send();
+			return;
+		}
+
+		if(!isAuthorized::editPost($postID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
 		}
 
-		$this->model->setPost($postID);
-
-		//TODO : VERIFIER SI LE PROFIL COURANT EST LE MEME QUE CELUI DU POST A SUPPRIME
-
 		if($this->model->delete())
 		{
-			unlink("medias/img/".$postID.".jpg");
-        	$rsp->setSuccess(200, "post deleted")
+			//Suppression sans connaitre l'extension
+			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+			$pattern = $root.$userID."/".$profileID."/".$postID.".*";
+			array_map("unlink", glob($pattern));
+
+	       	$rsp->setSuccess(200, "post deleted")
 				->bindValue("postId", $postID);
 		} else {
 			$rsp->setFailure(404, "post not deleted");
@@ -141,7 +180,7 @@ class PostController
 		}
 
 		$rsp = new Response();
-		$rsp->setSuccess(200)
+		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postId", $postID)
 			->bindValue("profileID", $this->model->getProfileID())
 			->bindValue("desc", $this->model->getDescription())
@@ -162,14 +201,30 @@ class PostController
 	 */
 	public function update($field, $postID)
 	{
-		$this->model->setPost($postID);
-
 		$rsp = new Response();
+
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
+
+		if(!$this->setPost($postID))
+			return;
+
+		if(!$profileID){
+			$rsp->setFailure(401, "You do not have current profile selected")
+			    ->send();
+			return;
+		}
+
+		if(!isAuthorized::editPost($postID)){
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+			    ->send();
+			return;
+		}
 
 		switch($field)
 		{
 			case "description" :
-				if(isset($_POST['desc']))
+				if(!empty($_POST['desc']))
 				{
 					$desc = $this->model->updateDescription($_POST['desc']);
 
@@ -178,13 +233,16 @@ class PostController
 						$rsp->setFailure(400);
 					} else {
 						$rsp->setSuccess(200)
-							->bindValue("postDescription", $this->model->getDescription());
+							->bindValue("postID", $postID)
+							->bindValue("postDescription", $_POST['desc']);
 					}
+				} else {
+					$rsp->setFailure(400, "Missing value. Edit aborted.");
 				}
 			break;
 
 			case "geo" :
-				if(isset($_POST['post_geo_lat']) && isset($_POST['post_geo_lng']) && isset($_POST['post_geo_name']) )
+				if(!empty($_POST['post_geo_lat']) && !empty($_POST['post_geo_lng']) && !empty($_POST['post_geo_name']) )
 				{
 					$lat = $this->model->updateLatitude($_POST['post_geo_lat']);
 					$lng = $this->model->updateLongitude($_POST['post_geo_lng']);
@@ -194,8 +252,11 @@ class PostController
 						$rsp->setFailure(400);
 					} else {
 						$rsp->setSuccess(200)
+							->bindValue("postID", $postID)
 							->bindValue("postGeo", $this->model->getGeo());
 					}
+				} else {
+					$rsp->setFailure(400, "Missing value. Edit aborted.");
 				}
 			break;
 
@@ -206,6 +267,7 @@ class PostController
 					$rsp->setFailure(400);
 				} else {
 					$rsp->setSuccess(200)
+						->bindValue("postID", $postID)
 						->bindValue("allowComments", $this->model->allowComments());
 				}
 			break;
@@ -217,6 +279,7 @@ class PostController
 					$rsp->setFailure(400);
 				} else {
 					$rsp->setSuccess(200)
+						->bindValue("postID", $postID)
 						->bindValue("disableComments", $this->model->disableComments());
 				}
 			break;
@@ -228,6 +291,7 @@ class PostController
 					$rsp->setFailure(400);
 				} else {
 					$rsp->setSuccess(200)
+						->bindValue("postID", $postID)
 						->bindValue("postApproved", $this->model->updatePostApproved());
 				}
 			break;
@@ -254,6 +318,7 @@ class PostController
 			$rsp->setFailure(400);
 		} else {
 			$rsp->setSuccess(200)
+				->bindValue("postID", $postID)
 				->bindValue("state", $this->model->getState());
 		}
 
@@ -263,7 +328,7 @@ class PostController
 	/*
 	 * Get the geo of the post with the given ID
 	 */
-	public function getGeo($postID)
+	public function geo($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -288,7 +353,7 @@ class PostController
 	/*
 	 * Get the description of the post with the given ID
 	 */
-	public function getDescription($postID)
+	public function description($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -313,7 +378,7 @@ class PostController
 	/*
 	 * Get the time the post was publish with the given ID
 	 */
-	public function getPublishTime($postID)
+	public function publishTime($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -339,7 +404,7 @@ class PostController
 	 * Get the state of the post with the given ID
 	 * 1 if publish, 2 is moderation, not visible
 	 */
-	public function getState($postID)
+	public function state($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -365,7 +430,7 @@ class PostController
 	 * Get if the comments are allowed of the post with the given ID
 	 * 1 is allowed, 0 isn't allowed
 	 */
-	public function getAllowComments($postID)
+	public function allowComments($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -391,7 +456,7 @@ class PostController
 	 * Get if the post with the given ID is approved
 	 * 1 is approved, 0 isn't approved yet
 	 */
-	public function getApproved($postID)
+	public function approved($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -416,7 +481,7 @@ class PostController
 	/*
 	 * Get the time the post with the given ID is update
 	 */
-	public function getUpdateTime($postID)
+	public function updateTime($postID)
 	{
 		if(!$this->setPost($postID))
 		{

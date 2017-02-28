@@ -76,6 +76,21 @@ class Sanitize
         }
     }
 
+    static public function booleanToInt($bool)
+    {
+        switch (strtolower($bool))
+        {
+            case '1':
+            case 'true':
+            case 'on':
+            case 'yes':
+            case 'y':
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
     /**
      * Format the given string to an acceptable string for profiles
      *

@@ -29,18 +29,16 @@ class isAuthorized
 
         $userProfiles = Response::read("user", "profiles")['data'];
 
-        //print_r($userProfiles);
-
         if($userProfiles["nbOfProfiles"] == 0)
             return false;
 
         //prevent error until user->profiles gets updated
-        if(!isset($userProfiles["profiles"]))
-            return true;
+        if(empty($userProfiles["profiles"]))
+            return false;
 
         foreach ($userProfiles["profiles"] as $profile)
         {
-            if (isset($profile["user_id"]) && $profile["user_id"] == $profileID)
+            if (isset($profile["user_id"]) && $profile["profile_id"] == $profileID)
                 return true;
         }
 
@@ -53,8 +51,19 @@ class isAuthorized
         if(self::ownProfile($profileID))
             return true;
 
-        //Current user is an administrator?
-        if(self::isAdmin(Session::read("userID")))
+        if(self::isAdmin(Response::read("user", "get")['data']['userAdmin']) == true)
+            return true;
+
+        return false;
+    }
+
+    static public function editPost($postID)
+    {
+        $profileID = Session::read("profileID");
+        //profile_id du post = profileID
+        $data = Response::read("post", "display", $postID)['data'];
+
+        if($data['profileID'] == $profileID)
             return true;
 
         return false;
