@@ -36,7 +36,6 @@ class PostController
 			return;
 		}
 
-		$type = $_POST['postType'];
 		$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
 
 		if(empty($_FILES['img'])){
@@ -44,6 +43,8 @@ class PostController
 			    ->send();
 			return;
 		}
+
+		$validFormat = array("jpg", "jpeg", "png");
 
 		/*
 		 * Management of the picture
@@ -53,20 +54,8 @@ class PostController
 		{
 			$source = $_FILES['img']['tmp_name'];
 			$format = getimagesize($source);
-			$tab;
 
-			if(preg_match('#(png|gif|jpeg)$#i', $format['mime'], $tab))
-			{
-				$imSource = imagecreatefromjpeg($source);
-				if($tab[1] == "jpeg")
-					$tab[1] = "jpg";
-				$extension = $tab[1];
-			}
-
-			if($format['mime'] == "image/png")
-			{
-				$extension = 'jpg';
-			}
+			$extension = explode("/", $format['mime'])[1];
 
 			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
 
@@ -78,6 +67,28 @@ class PostController
 				mkdir($root.$userID."/".$profileID);
 			}
 
+			//detect if extension is allowed
+			if(in_array($extension, $validFormat))
+			{
+				$type = "image";
+
+				switch($extension){
+					case "jpeg":
+					case "jpg":
+						$imgSource = imagecreatefromjpeg($source);
+						break;
+					case "png":
+						$imgSource = imagecreatefrompng($source);
+						break;
+				}
+				
+	
+			}else{
+				$rsp->setFailure(400, "File do not have good extension")
+			        ->send();
+			    return;
+			}
+
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
 			
@@ -85,14 +96,17 @@ class PostController
 			//Si img enregistrée dans bdd et uploadée
 			if($postID)
 			{
-				/* Storing of the picture*/
-				imagejpeg($imSource, $root.$userID."/".$profileID."/".$postID.".".$extension);
-
-				$rsp->setSuccess(201, "post created")
-					->bindValue("userID", $userID)
-					->bindValue("profileID", $profileID)
-					->bindValue("postID", $postID);
+				if(imagejpeg($imgSource, $root.$userID."/".$profileID."/".$postID.".jpg", 100)){
+					$rsp->setSuccess(201, "post created")
+						->bindValue("userID", $userID)
+						->bindValue("profileID", $profileID)
+						->bindValue("postID", $postID);
+				}else{
+					$this->model->delete();
+					$rsp->setFailure(400, "echec lors de l'upload");
+				}			
 			}else{
+				
 				$rsp->setFailure(400, "echec lors de l'ajout à la bdd");
 			}
 		}else{
