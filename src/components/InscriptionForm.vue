@@ -25,40 +25,36 @@
 
 
 <script>
-
 export default {
-	name : "inscriptionForm",
+	name: 'inscriptionForm',
 	data () {
 		return {
-			email: "",
-			name: "",
-			password: "",
-			confirmation: ""
+			email: '',
+			name: '',
+			password: '',
+			confirmation: ''
 		}
 	},
-	methods :{
+	methods: {
 		register () {
-			console.log("register")
+			console.log('register')
 			// vérifer validitée des champs
       this.$http.post('/do/auth/register/', {
-				user_name : this.name,
-				user_email : this.email,
-				user_passwd : this.password,
-				user_passwd_confirm : this.confirmation
+				user_name: this.name,
+				user_email: this.email,
+				user_passwd: this.password,
+				user_passwd_confirm: this.confirmation
       }).then((response) => {
         console.log('Sign up success', response)
-				//Notifier l'envoi du mail
+				// Notifier l'envoi du mail
       }, (response) => {
         console.log('Sign up error', response)
-        switch(response.code){
+        switch (response.code) {
           case 400:
             console.log('Bad request')
             break
-          case 401:
-            console.log('Unauthorized')
-            break
-          case 404:
-            console.log('Not found')
+          case 403:
+            console.log('Forbidden')
             break
           case 409:
             console.log('Conflict')
@@ -67,9 +63,6 @@ export default {
       })
 		}
 	}
-
-
-
 }
 </script>
 

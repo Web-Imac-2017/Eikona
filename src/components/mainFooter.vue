@@ -7,10 +7,8 @@
 </template>
 
 <script>
-
-
 export default {
-	name: "mainFooter"
+	name: 'mainFooter'
 }
 </script>
 
@@ -18,7 +16,7 @@ export default {
 @import url('https://fonts.googleapis.com/css?family=Lato');
 #footer{
 	text-align: center;
-	width: 100%;	
+	width: 100%;
 }
 
 #footer a{

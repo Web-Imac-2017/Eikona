@@ -13,7 +13,7 @@
       <span v-if="error_password" class="md-error">Mot de passe incorrect</span>
     </md-input-container>
     <p>Les champs marqués d'un * sont obligatoires.</p>
-    <md-button  class="md-raised" type="submit">SE CONNECTER</md-button>
+    <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
   </form>
 </template>
 
@@ -34,7 +34,6 @@ export default {
   },
   methods: {
     send () {
-      // vérifer validitée des champs
       console.log('Send : ' + this.user_email + '  ' +  this.user_passwd)
       this.$http.post('/Eikona/do/auth/signIn/', {
         user_email: this.user_email,
@@ -42,10 +41,11 @@ export default {
       }).then((response) => {
         console.log('Connected', response)
         store.commit('SET_USER', response.data.userID, response.data.userEmail, true)
+        // ouverture pop-up selection profil OU redirection vers page perso, vec pop-up choix de profil
       }, (response) => {
         console.log('Not connected', response)
         store.commit('SET_USER', '', '', false)
-        switch(response.code){
+        switch (response.code) {
           case 400:
             console.log('Bad request')
             this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
@@ -57,11 +57,11 @@ export default {
           case 404:
             console.log('Not found')
             this.error_mail = true
-            document.getElementById('connection-id').className += " md-input-invalid"
+            document.getElementById('connection-id').className += ' md-input-invalid'
             break
           case 409:
             console.log('Conflict')
-            thi.error_password = true
+            this.error_password = true
             break
           default:
             console.log('Unknown error')

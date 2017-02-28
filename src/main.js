@@ -43,7 +43,7 @@ const router = new VueRouter({
     path: '/',
     component: require('./components/Home.vue')
   }, {
-    path: '/user/:id/settings',
+    path: '/user/settings',
     component: require('./components/Settings.vue')
   },
   {

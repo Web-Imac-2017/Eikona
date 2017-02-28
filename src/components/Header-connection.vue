@@ -13,7 +13,6 @@
 
 <script>
 import store from './connectionStore.js'
-import Vuex from 'vuex'
 
 export default {
   name: 'header-connection',
