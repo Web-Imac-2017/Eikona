@@ -72,7 +72,7 @@ class PostModel extends DBInterface
         $description = Sanitize::string($description);
 
 		// To change when there will be profile
-		$profile = 1;
+		$profile = Session::read("profileID");
 
         $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_edit_time, post_publish_time) VALUES (:profile, :type, :extension, :description, :editTime, :publishTime)");
         $stmt->execute([ ":profile" => $profile,
@@ -82,8 +82,6 @@ class PostModel extends DBInterface
 						 ":editTime" => time(),
 						 ":publishTime" => time()
         ]);
-
-        var_dump("ok");
 
         $postID = $this->cnx->lastInsertId();
 
@@ -423,4 +421,14 @@ class PostModel extends DBInterface
 
 		return true;
     }
+
+    /*
+     * Vérfie si le post a supprimé appartient à l'user courant
+     * 
+     */
+    public function checkProfileBeforeDeletion($postID, $profileID)
+    {
+        
+    }
+
 }
