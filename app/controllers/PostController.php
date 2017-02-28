@@ -529,13 +529,10 @@ class PostController
 		if(!$this->likeModel->isLiked($postID, $profileID)){
 			if($this->model->getProfileID() != $profileID){
 				if(!isAuthorized::isPrivateProfile($this->model->getProfileID())){
-					if($this->likeModel->like($postID, $profileID)){
-						$resp->setSuccess(200, "post liked")
-					         ->bindValue("postID", $postID)
-					         ->bindValue("profileID", $profileID);
-					}else{
-						$resp->setFailure(400, "post is not liked");
-					}
+					$this->likeModel->like($postID, $profileID);
+					$resp->setSuccess(200, "post liked")
+					     ->bindValue("postID", $postID)
+					     ->bindValue("profileID", $profileID);
 				}else{
 					$resp->setFailure(400, "profile is private");
 				}				
@@ -569,18 +566,30 @@ class PostController
 		}
 
 		if($this->likeModel->isLiked($postID, $profileID)){
-			if($this->likeModel->unlike($postID, $profileID)){
-				$resp->setSuccess(200, "post unliked")
-				     ->bindValue("postID", $postID)
-				     ->bindValue("profileID", $profileID);
-			}else{
-				$resp->setFailure(400, "post not liked");
-			}
+			$this->likeModel->unlike($postID, $profileID);
+			$resp->setSuccess(200, "post unliked")
+			     ->bindValue("postID", $postID)
+			     ->bindValue("profileID", $profileID);
 		}else{
 			$resp->setFailure(400, "post not liked");
 		}
 
 		$resp->send();
+	}
+
+	public function likes($postID)
+	{
+		if(!$this->setPost($postID))
+			return;
+
+		$resp = new Response();
+
+		$count = $this->likeModel->countLike($postID);
+		
+		$resp->setSuccess(200, "likes returned")
+		     ->bindValue("postID", $postID)
+		     ->bindValue("likeCount", $count)
+		     ->send();
 	}
 
 }
