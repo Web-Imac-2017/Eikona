@@ -72,6 +72,15 @@ class isAuthorized
         return false;
     }
 
+    static public function isPrivateProfile($profileID)
+    {
+        $data = Response::read("profile", "isPrivate", $profileID)['data'];
+        if($data['profileIsPrivate'] == 1)
+            return true;
+
+        return false;
+    }
+
     static public function getProfilePosts()
     {
         return true;
