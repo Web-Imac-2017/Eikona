@@ -90,7 +90,7 @@ class UserController{
 			     ->bindValue("profiles", $profiles);
 		}else{
 			$resp->setFailure(404, "user profiles not found");
-		}	
+		}
 
 		//envoi de la réponse
 		$resp->send();
