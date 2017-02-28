@@ -1,5 +1,5 @@
 <template>
-	<form id="inscriptionForm">
+	<form id="inscriptionForm" @submit.stop.prevent="register">
 		<md-input-container>
 			<label>Email</label>
 			<md-input required type="email" v-model="email"></md-input>
@@ -18,7 +18,7 @@
 		</md-input-container>
 		<p id="validation">En m'inscrivant j'accepte les <a href="CGU.html">CGU</a> et la <a href="confidentialite.html">Politique de confidentialité</a></p>
 		<p>Les champs marqués d'un * sont obligatoires.</p>
-		<md-button class="md-primary md-raised" @click="register">JE M'INSCRIS</md-button>
+		<md-button class="md-primary md-raised" type="submit">JE M'INSCRIS</md-button>
 	</form>
 
 </template>
