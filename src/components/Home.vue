@@ -1,6 +1,5 @@
 <template lang="html">
   <div id="home">
-    <profile-selection id="pop"></profile-selection>
     <md-layout :md-gutter="8" md-align="center">
       <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
         <description id="description" class="home-top-element"></description>
@@ -9,7 +8,9 @@
         <connection id="connect" class="home-top-element"></connection>
       </md-layout>
     </md-layout>
-    <md-whiteframe md-elevation="8" id="register"><inscription></inscription></md-whiteframe>
+    <md-whiteframe md-elevation="8" id="register">
+      <inscription></inscription>
+    </md-whiteframe>
   </div>
 </template>
 
@@ -18,16 +19,12 @@ import connection from './Connection.vue'
 import inscription from './Inscription.vue'
 import description from './Home-description.vue'
 
-// Test
-import profileSelection from './Profil-selection.vue'
-
 export default {
   name: 'home',
   components: {
     connection,
     inscription,
-    description,
-    profileSelection
+    description
   }
 }
 </script>
