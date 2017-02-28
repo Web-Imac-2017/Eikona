@@ -76,7 +76,6 @@ class PostController
 			}
 			if(!is_dir($root.$userID."/".$profileID)){
 				mkdir($root.$userID."/".$profileID);
-				var_dump("ok");
 			}		
 
 			/* Call to the postModel and creation of the JSON response */
