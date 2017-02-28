@@ -1,21 +1,18 @@
 <?php
-class ProfilesModel extends DBInterface
+class ProfileModel extends DBInterface
 {
     /**
      * Internal varibales
      */
-    private $pID = 0;
+    private $pID = -1;
     private $p   = NULL;
-
-
-
 
     /**
      * Class constructor
      *
      * @param $profileID Profile to be used unique ID
      */
-    public function __construct($profileID = 0)
+    public function __construct($profileID = -1)
     {
         parent::__construct();
 
@@ -34,11 +31,16 @@ class ProfilesModel extends DBInterface
     {
         $profileID = Sanitize::int($profileID);
 
-        if($profileID < 1 || $profileID == $this->pID)
+        if($profileID == $this->pID)
         {
-            $this->p = 0;
-            $this->pID = NULL;
             return;
+        }
+
+        if($profileID < -1)
+        {
+            $this->p = NULL;
+            $this->pID = -1;
+            return "wrongFormat";
         }
 
         //Confirm the id before doing anything
@@ -48,9 +50,9 @@ class ProfilesModel extends DBInterface
         //Profile ID not found
         if($stmt->fetchColumn() == 0)
         {
-            $this->p = 0;
-            $this->pID = NULL;
-            return;
+            $this->p = NULL;
+            $this->pID = -1;
+            return "notFound";
         }
 
         //profile found
@@ -59,10 +61,9 @@ class ProfilesModel extends DBInterface
 
         $this->pID = $profileID;
         $this->p = $stmt->fetch();
+
+        return "success";
     }
-
-
-
 
 
     /**
@@ -78,17 +79,24 @@ class ProfilesModel extends DBInterface
         $uID = Sanitize::int($userID);
         $name = Sanitize::profileName($name, true);
         $desc = Sanitize::string($desc);
-        $private = Sanitize::boolean($private);
+        $private = Sanitize::booleanToInt($private);
 
         if($uID < 1)
-            return 0;
+            return "badUserID";
 
-        $stmt = $this->cnx->prepare("INSERT INTO profiles(user_id, profile_name, profile_desc, profile_private, profile_create_time) VALUES(:uID, :name, :desc, :private, :create)");
-        $stmt->execute([":uID" => $uID,
-                        ":name" => $name,
-                        ":desc" => $desc,
-                        ":private" => $private,
-                        ":create" => time()]);
+        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_name = :pName");
+        $stmt->execute([":pName" => $name]);
+
+        if($stmt->fetchColumn() != 0)
+            return "userNameAlreadyExists";
+
+        $stmt = $this->cnx->prepare("INSERT INTO profiles (user_id, profile_name, profile_desc, profile_create_time, profile_private) VALUES (:uID, :name, :desc, :create, :private)");
+
+        $stmt->execute([":uID"     => $uID,
+                        ":name"    => $name,
+                        ":desc"    => $desc,
+                        ":create"  => time(),
+                        ":private" => $private]);
 
         $pID = $this->cnx->lastInsertId();
 
@@ -96,9 +104,6 @@ class ProfilesModel extends DBInterface
 
         return $pID;
     }
-
-
-
 
     /**
      * Return the ID of the profile
@@ -108,17 +113,26 @@ class ProfilesModel extends DBInterface
         return $this->pID;
     }
 
-    /**
-     * Return the path to the profile picture
-     */
-    public function getPic()
+    public function getFullProfile()
     {
-        if(file_exists("PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg"))
-        {
-            return "PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg";
-        }
+        return $this->p;
+    }
 
-        return "PATH/TO/DEFAULT/PROFILE/PICTURE";
+    /**
+     * Return infos of all profile of current User
+     * @return [type] [description]
+     */
+    public function getUserProfiles($id)
+    {
+        if($id == 0) return false;
+
+        $stmt = $this->cnx->prepare("
+            SELECT profile_id, user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private
+            FROM profiles
+            WHERE :id = user_id");
+        $stmt->execute([":id" => $id]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -126,7 +140,7 @@ class ProfilesModel extends DBInterface
      */
     public function getName()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_name'];
@@ -137,7 +151,7 @@ class ProfilesModel extends DBInterface
      */
     public function getDesc()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_desc'];
@@ -148,7 +162,7 @@ class ProfilesModel extends DBInterface
      */
     public function getViews()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_views'];
@@ -159,7 +173,7 @@ class ProfilesModel extends DBInterface
      */
     public function isPrivate()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_private'];
@@ -170,7 +184,7 @@ class ProfilesModel extends DBInterface
      */
     public function getOwner($returnID = false)
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         if($returnID)
@@ -178,27 +192,7 @@ class ProfilesModel extends DBInterface
             return $this->p['user_id'];
         }
 
-        return new Users($this->p['user_id']);
-    }
-
-    /**
-     * Return the last X posts published by the profile
-     *
-     * @param $limit int Number of posts to return. Defautl 30.
-     */
-    public function getPosts($limit = 30)
-    {
-        $limit = Sanitize::int($limit);
-
-        if($this->pID == 0 || $limit == 0)
-            return;
-
-        $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE profile_id = :pID ORDER BY post_publish_time DESC LIMIT :limit");
-        $posts = $stmt->execute([":pID" => $this->pID,
-                                 ":limit" => $limit]);
-        var_dump($posts);
-
-        return $posts;
+        return $this->p['user_id'];
     }
 
 
@@ -213,8 +207,8 @@ class ProfilesModel extends DBInterface
      */
     public function updateName($newName)
     {
-        if($this->pID == 0)
-            return;
+        if($this->pID == -1)
+            return false;
 
         $name = Sanitize::profileName($newName);
 
@@ -223,7 +217,8 @@ class ProfilesModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_name'] = $name;
-        return $name;
+
+        return true;
     }
 
     /**
@@ -233,8 +228,8 @@ class ProfilesModel extends DBInterface
      */
     public function updateDesc($newDesc)
     {
-        if($this->pID == 0)
-            return;
+        if($this->pID == -1)
+            return false;
 
         $desc = Sanitize::string($newDesc);
 
@@ -244,7 +239,7 @@ class ProfilesModel extends DBInterface
 
         $this->p['profile_desc'] = $desc;
 
-        return $desc;
+        return true;
     }
 
     /**
@@ -259,8 +254,8 @@ class ProfilesModel extends DBInterface
      */
     public function addView($nbr = 1)
     {
-        if($this->pID == 0)
-            return;
+        if($this->pID == -1)
+            return false;
 
         if(!ctype_digit(strval($nbr)) || $nbr < 1)
             $nbr = 1;
@@ -270,7 +265,8 @@ class ProfilesModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_views'] += $nbr;
-        return $this->p['profile_views'];
+
+        return true;
     }
 
 
@@ -279,13 +275,15 @@ class ProfilesModel extends DBInterface
      */
     public function setPrivate()
     {
-        if($this->pID == 0)
-            return;
+        if($this->pID == -1)
+            return false;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 1 WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
 
         $this->p['profile_private'] = 1;
+
+        return true;
     }
 
     /**
@@ -293,13 +291,15 @@ class ProfilesModel extends DBInterface
      */
     public function setPublic()
     {
-        if($this->pID == 0)
-            return;
+        if($this->pID == -1)
+            return false;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 0 WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
 
         $this->p['profile_private'] = 0;
+
+        return true;
     }
 
 
@@ -308,11 +308,13 @@ class ProfilesModel extends DBInterface
      */
     public function delete()
     {
-        if($this->pID == 0)
-            return 0;
+        if($this->pID == -1)
+            return false;
 
         $stmt = $this->cnx->prepare("DELETE FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $this->pID]);
+
+        return true;
     }
 }
 ?>
