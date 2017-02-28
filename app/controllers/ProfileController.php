@@ -3,6 +3,7 @@
 class ProfileController
 {
     private $model;
+    private $postModel;
 
     /**
      * Init the constructor and link the model
@@ -11,6 +12,7 @@ class ProfileController
     public function __construct()
     {
         $this->model = new ProfileModel();
+        $this->postModel = new PostModel();
     }
 
     /**
@@ -154,6 +156,7 @@ class ProfileController
             ->bindValue("profileCreateTime", $profileInfos['profile_create_time'])
             ->bindValue("profileViews", $profileInfos['profile_views'])
             ->bindValue("profileIsPrivate", $profileInfos['profile_views'] == 1)
+            ->bindValue("nbrPosts", Response::read("Profile", "nbrPosts", $profileID)['data']['nbrPosts'])
             ->send();
     }
 
@@ -288,6 +291,31 @@ class ProfileController
             ->send();
     }
 
+
+    /**
+     * Return the number of posts from the profile
+     * @param integer $profileID ID of the profile
+     */
+    public function nbrPosts($profileID)
+    {
+        $rsp = new Response();
+
+        if(!isAuthorized::getProfilePosts($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action")
+                ->send();
+
+            return;
+        }
+
+        $nbrPosts = $this->postModel->nbrPosts($profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("nbrPosts", $nbrPosts)
+            ->send();
+    }
+
+
     /**
      * Return the posts of the specified profile
      * @param  integer $profileID ID of the profile
@@ -296,8 +324,15 @@ class ProfileController
      */
     public function posts($profileID, ...$args)
     {
-        if(!$this->setProfile($profileID) || !isAuthorized::getProfilePosts($profileID))
+        $rsp = new Response();
+
+        if(!isAuthorized::getProfilePosts($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action")
+                ->send();
+
             return;
+        }
 
         $limit = 4096;
         $offset = 0;
@@ -341,9 +376,8 @@ class ProfileController
             $waitFor = $arg;
         }
 
-        $posts = $this->model->getPosts($limit, $offset, $after, $before, $order);
+        $posts = $this->postModel->getPosts($profileID, $limit, $offset, $after, $before, $order);
 
-        $rsp= new Response();
         $rsp->setSuccess(200)
             ->bindValue("posts", $posts)
             ->bindValue("nbrPosts", count($posts))
