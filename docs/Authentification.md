@@ -185,48 +185,4 @@ Data:
 * **Code:** 400 BAD REQUEST <br />
   **Explication** L'utilisateur n'est connecté à aucun compte.
 
-## Suppression
 
-Permet à l'utilisateur de supprimer son compte. 
-
-### URL
-```
-/auth/delete/
-```
-
-### Méthode
-**POST**
-
-### Variables POST
-
-* **user_passwd**: Mot de passe de l'utilisateur
-
-### Succès
-
-  * **Code:** 200 OK
-Data: 
-```json
-{
-  userID: ID du user,
-}
-```
-
-### Erreurs
-
-* **Code:** 401 UNAUTHORIZED <br />
-  **Explication** L'utilisateur n'est pas autorisé à faire cette action.
-
-  OU
-
-* **Code:** 400 BAD REQUEST <br />
-  **Explication** Le mot de passe n'a pas été rentré.
-
-  OU
-
-* **Code:** 409 CONFLICT <br />
-  **Explication** Le mot de passe est incorrect.
-
-  OU
-
-* **Code:** 403 FORBIDDEN <br />
-  **Explication** La suppression a échoué. 
