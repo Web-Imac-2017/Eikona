@@ -348,6 +348,53 @@ Data:
 
 
 
+## Nombre de posts d'un profil
+
+Récupère le nombre de posts fait par un profil
+
+### URL
+```
+/profile/nbrposts/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil à utiliser
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ 
+    profileID : ID du profil, 
+    nbrPosts : Nombre de posts
+}
+```
+ 
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
+
+  OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Le profil courant n'est aps autorisé a voir les posts de ce profil
+
+  OU
+
+  * **Code:** 404 NOT FOUND <br />
+    **Explication** Le profil spécifié n'existe pas
+
+
+
+
+
+
 
 ## Posts du profil
 
@@ -386,6 +433,11 @@ Data:
 
   * **Code:** 400 BAD REQUEST <br />
     **Explication** La variable GET **profileID** n'est pas un ID
+
+  OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Le profil courant n'est aps autorisé a voir les posts de ce profil
 
   OU
 
