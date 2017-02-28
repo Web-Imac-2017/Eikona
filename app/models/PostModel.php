@@ -397,7 +397,7 @@ class PostModel extends DBInterface
             return false;
         }
 
-        $stmt = $this->cnx->prepare("UPDATE posts SET post_approved = 1 WHERE post_id = postID");
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_approved = 1 WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
 
         $this->postDatas['post_approved'] = 1;
