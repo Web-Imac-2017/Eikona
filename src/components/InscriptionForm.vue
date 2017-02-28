@@ -17,7 +17,7 @@
 			<input type="password" name="user_passwd_confirm" label="Confirmation">
 		</div>
 		<p id="validation">En m'inscrivant j'accepte les <a href="CGU.html">CGU</a> et la <a href="confidentialite.html">Politique de confidentialité</a></p>
-		<button  value="JE M'INSCRIT">
+		<button  value="JE M'INSCRIS">
 	</form>
 
 </template>

@@ -7,7 +7,7 @@
 
 
 <script>
-let inscriptionForm = require('./InscriptionForm.vue')
+import inscriptionForm from './InscriptionForm.vue'
 
 
 export default {
