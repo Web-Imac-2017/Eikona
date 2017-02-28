@@ -163,12 +163,8 @@ Permet à l'utilisateur de se déconnecter de son compte.
 ```
 
 ### Méthode
+
 **POST**
-
-### Variables POST
-
-* **user_passwd**: Mot de passe de l'utilisateur
-
 
 ### Succès
 
