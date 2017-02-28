@@ -29,6 +29,9 @@ class isAuthorized
 
         $userProfiles = Response::read("user", "profiles")['data'];
 
+        if(empty($userProfiles))
+            return false;
+
         if($userProfiles["nbOfProfiles"] == 0)
             return false;
 
@@ -64,6 +67,15 @@ class isAuthorized
         $data = Response::read("post", "display", $postID)['data'];
 
         if($data['profileID'] == $profileID)
+            return true;
+
+        return false;
+    }
+
+    static public function isPrivateProfile($profileID)
+    {
+        $data = Response::read("profile", "isPrivate", $profileID)['data'];
+        if($data['profileIsPrivate'] == 1)
             return true;
 
         return false;

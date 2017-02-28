@@ -4,6 +4,7 @@ class PostController
 {
 	private $model;
 	private $likeModel;
+	private $profileModel;
 
 	public function __construct()
 	{
@@ -22,7 +23,6 @@ class PostController
 
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
-
 
 		if(!isAuthorized::isUser($userID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
@@ -510,29 +510,45 @@ class PostController
 	public function like($postID)
 	{
 		if(!$this->setPost($postID))
-		{
 			return;
-		}
 
 		$resp = new Response();
 
 		//get ID
 		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
 		if(!isAuthorized::isUser($userID)){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
-
 			return;
 		}
 
-		$profileID = 1;
-
-		if($this->likeModel->like($postID, $profileID)){
-			$resp->setSuccess(200, "post liked");
-		}else{
-			$resp->setFailure(400, "post is not liked");
+		if(!$profileID){
+			$rsp->setFailure(401, "You don't have current profile selected")
+			    ->send();	
+			return;
 		}
+
+
+		if(!$this->likeModel->isLiked($postID, $profileID)){
+			if($this->model->getProfileID() != $profileID){
+				if(!isAuthorized::isPrivateProfile($this->model->getProfileID())){
+					$this->likeModel->like($postID, $profileID);
+					$resp->setSuccess(200, "post liked")
+					     ->bindValue("postID", $postID)
+					     ->bindValue("profileID", $profileID);
+				}else{
+					$resp->setFailure(400, "profile is private");
+				}				
+			}else{
+				$resp->setFailure(400, "You can not like your own post");
+			}			
+		}else{
+			$resp->setFailure(400, "post already liked");
+		}
+
+		
 		$resp->send();
 
 	}
@@ -540,30 +556,45 @@ class PostController
 	public function unlike($postID)
 	{
 		if(!$this->setPost($postID))
-		{
 			return;
-		}
 
 		$resp = new Response();
 
+		//get ID
 		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
 		if(!isAuthorized::isUser($userID)){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
-
 			return;
 		}
-			
-		$profileID = 1;
 
-		if($this->likeModel->unlike($postID, $profileID)){
-			$resp->setSuccess(200, "post unliked");
+		if($this->likeModel->isLiked($postID, $profileID)){
+			$this->likeModel->unlike($postID, $profileID);
+			$resp->setSuccess(200, "post unliked")
+			     ->bindValue("postID", $postID)
+			     ->bindValue("profileID", $profileID);
 		}else{
-			$resp->setFailure(400, "post not unliked");
+			$resp->setFailure(400, "post not liked");
 		}
-		$resp->send();
 
+		$resp->send();
+	}
+
+	public function likes($postID)
+	{
+		if(!$this->setPost($postID))
+			return;
+
+		$resp = new Response();
+
+		$count = $this->likeModel->countLike($postID);
+		
+		$resp->setSuccess(200, "likes returned")
+		     ->bindValue("postID", $postID)
+		     ->bindValue("likeCount", $count)
+		     ->send();
 	}
 
 }

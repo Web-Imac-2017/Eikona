@@ -477,13 +477,4 @@ class PostModel extends DBInterface
 		return true;
     }
 
-    /*
-     * Vérfie si le post a supprimé appartient à l'user courant
-     *
-     */
-    public function checkProfileBeforeDeletion($postID, $profileID)
-    {
-
-    }
-
 }
