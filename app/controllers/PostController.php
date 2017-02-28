@@ -525,13 +525,17 @@ class PostController
 		}
 
 		if(!$this->likeModel->isLiked($postID, $profileID)){
-			if($this->likeModel->like($postID, $profileID)){
-				$resp->setSuccess(200, "post liked")
-				     ->bindValue("postID", $postID)
-				     ->bindValue("profileID", $profileID);
+			if($this->model->getProfileID() != $profileID){
+				if($this->likeModel->like($postID, $profileID)){
+					$resp->setSuccess(200, "post liked")
+				         ->bindValue("postID", $postID)
+				         ->bindValue("profileID", $profileID);
+				}else{
+					$resp->setFailure(400, "post is not liked");
+				}
 			}else{
-				$resp->setFailure(400, "post is not liked");
-			}
+				$resp->setFailure(400, "You can not like your own post");
+			}			
 		}else{
 			$resp->setFailure(400, "post already liked");
 		}
