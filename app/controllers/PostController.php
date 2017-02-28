@@ -28,11 +28,11 @@ class PostController
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
-		}		
+		}
 
 		if(!$profileID){
 			$rsp->setFailure(401, "You don't have current profile selected")
-			    ->send();	
+			    ->send();
 			return;
 		}
 
@@ -76,8 +76,7 @@ class PostController
 			}
 			if(!is_dir($root.$userID."/".$profileID)){
 				mkdir($root.$userID."/".$profileID);
-				var_dump("ok");
-			}		
+			}
 
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
@@ -144,7 +143,7 @@ class PostController
 
 		if(!$profileID){
 			$rsp->setFailure(401, "You do not have current profile selected")
-			    ->send();	
+			    ->send();
 			return;
 		}
 
@@ -212,7 +211,7 @@ class PostController
 
 		if(!$profileID){
 			$rsp->setFailure(401, "You do not have current profile selected")
-			    ->send();	
+			    ->send();
 			return;
 		}
 
@@ -234,6 +233,7 @@ class PostController
 						$rsp->setFailure(400);
 					} else {
 						$rsp->setSuccess(200)
+							->bindValue("postID", $postID)
 							->bindValue("postDescription", $_POST['desc']);
 					}
 				} else {
@@ -252,6 +252,7 @@ class PostController
 						$rsp->setFailure(400);
 					} else {
 						$rsp->setSuccess(200)
+							->bindValue("postID", $postID)
 							->bindValue("postGeo", $this->model->getGeo());
 					}
 				} else {
@@ -266,6 +267,7 @@ class PostController
 					$rsp->setFailure(400);
 				} else {
 					$rsp->setSuccess(200)
+						->bindValue("postID", $postID)
 						->bindValue("allowComments", $this->model->allowComments());
 				}
 			break;
@@ -277,6 +279,7 @@ class PostController
 					$rsp->setFailure(400);
 				} else {
 					$rsp->setSuccess(200)
+						->bindValue("postID", $postID)
 						->bindValue("disableComments", $this->model->disableComments());
 				}
 			break;
@@ -288,6 +291,7 @@ class PostController
 					$rsp->setFailure(400);
 				} else {
 					$rsp->setSuccess(200)
+						->bindValue("postID", $postID)
 						->bindValue("postApproved", $this->model->updatePostApproved());
 				}
 			break;
@@ -314,6 +318,7 @@ class PostController
 			$rsp->setFailure(400);
 		} else {
 			$rsp->setSuccess(200)
+				->bindValue("postID", $postID)
 				->bindValue("state", $this->model->getState());
 		}
 
@@ -323,7 +328,7 @@ class PostController
 	/*
 	 * Get the geo of the post with the given ID
 	 */
-	public function getGeo($postID)
+	public function geo($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -348,7 +353,7 @@ class PostController
 	/*
 	 * Get the description of the post with the given ID
 	 */
-	public function getDescription($postID)
+	public function description($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -373,7 +378,7 @@ class PostController
 	/*
 	 * Get the time the post was publish with the given ID
 	 */
-	public function getPublishTime($postID)
+	public function publishTime($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -399,7 +404,7 @@ class PostController
 	 * Get the state of the post with the given ID
 	 * 1 if publish, 2 is moderation, not visible
 	 */
-	public function getState($postID)
+	public function state($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -425,7 +430,7 @@ class PostController
 	 * Get if the comments are allowed of the post with the given ID
 	 * 1 is allowed, 0 isn't allowed
 	 */
-	public function getAllowComments($postID)
+	public function allowComments($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -451,7 +456,7 @@ class PostController
 	 * Get if the post with the given ID is approved
 	 * 1 is approved, 0 isn't approved yet
 	 */
-	public function getApproved($postID)
+	public function approved($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -476,7 +481,7 @@ class PostController
 	/*
 	 * Get the time the post with the given ID is update
 	 */
-	public function getUpdateTime($postID)
+	public function updateTime($postID)
 	{
 		if(!$this->setPost($postID))
 		{

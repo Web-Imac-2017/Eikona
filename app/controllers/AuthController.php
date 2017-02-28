@@ -43,7 +43,7 @@ class AuthController{
 						         ->bindValue("userID", $id);
 						}else{
 							$resp->setFailure(400, "mail not sent");
-						}						
+						}
 					}else{
 						$resp->setFailure(403, "user already exists");
 					}				
