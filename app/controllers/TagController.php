@@ -41,12 +41,12 @@ class TagController
 
 		if($result == "existAlready")
 		{
-			$rsp->setFailure(401, "This tag already exist for this post.")
+			$rsp->setFailure(409, "This tag already exist for this post.")
 			    ->send();
 			return;
 		}
 
-		$rsp->setSuccess(200, "tag added")
+		$rsp->setSuccess(201, "Tag added")
 			->send();
 	}
 
@@ -80,9 +80,9 @@ class TagController
 
 		if($result == "notFound")
 		{
-			$rsp->setFailure(400, "not found");
+			$rsp->setFailure(404, "not found");
 		} else {
-			$rsp->setSuccess(200, "tag deleted")
+			$rsp->setSuccess(200, "Tag deleted")
 			->bindValue("result", $result);
 		}
 			$rsp->send();
