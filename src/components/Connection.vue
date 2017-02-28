@@ -36,7 +36,7 @@ export default {
     send () {
       // vérifer validitée des champs
       console.log('Send : ' + this.user_email + '  ' +  this.user_passwd)
-      this.$http.post('/do/auth/signIn/', {
+      this.$http.post('/Eikona/do/auth/signIn/', {
         user_email: this.user_email,
         user_passwd: this.user_passwd
       }).then((response) => {
