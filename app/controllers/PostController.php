@@ -6,10 +6,51 @@ class PostController
 	private $likeModel;
 	private $profileModel;
 
+
 	public function __construct()
 	{
 		$this->model = new PostModel();
 		$this->likeModel = new LikeModel();
+	}
+
+	private function createFolder($userID, $profileID)
+	{
+		$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+
+		if(!is_dir($root.$userID)){
+			mkdir($root.$userID);
+		}
+
+		if(!is_dir($root.$userID."/".$profileID)){
+			mkdir($root.$userID."/".$profileID);
+		}
+	}
+
+	private function uploadImg($extension, $userID, $profileID, $postID)
+	{
+		$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+		$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
+		$quality = 100;
+
+		switch($extension){
+
+			case "jpeg":
+			case "jpg":
+				$imgSource = imagecreatefromjpeg($source);
+				imagejpeg($imgSource, $savePath, $quality);
+				break;
+
+			case "png":
+				$image = imagecreatefrompng($source);
+				$bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+				imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+				imagealphablending($bg, TRUE);
+				imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+				imagedestroy($image);
+				imagejpeg($bg, $savePath, $quality);
+				imagedestroy($bg);
+				break;
+		}
 	}
 
 	/*
@@ -34,9 +75,7 @@ class PostController
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
 			return;
-		}
-
-		$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+		}		
 
 		if(empty($_FILES['img'])){
 			$rsp->setFailure(400, "no file selected")
@@ -52,7 +91,10 @@ class PostController
 		 */
 		if(is_uploaded_file($_FILES['img']['tmp_name']))
 		{
+			
+			$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
 			$source = $_FILES['img']['tmp_name'];
+
 			$format = getimagesize($source);
 
 			if(!$format){
@@ -61,17 +103,11 @@ class PostController
 				return;
 			}
 
-			$extension = explode("/", $format['mime'])[1];
-
-			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+			$extension = explode("/", $format['mime'])[1];			
 
 			//Création des dossiers
-			if(!is_dir($root.$userID)){
-				mkdir($root.$userID);
-			}
-			if(!is_dir($root.$userID."/".$profileID)){
-				mkdir($root.$userID."/".$profileID);
-			}
+			$this->createFolder($userID, $profileID);
+			
 
 			//detect if extension is allowed
 			if(in_array($extension, $validFormat))
@@ -83,29 +119,9 @@ class PostController
 					$rsp->setFailure(400, "echec lors de l'upload")
 					    ->send();
 					return;
-				}
+				}				
 
-				$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
-				$quality = 100;
-
-				switch($extension){
-					case "jpeg":
-					case "jpg":
-						$imgSource = imagecreatefromjpeg($source);
-						imagejpeg($imgSource, $savePath, $quality);
-						break;
-
-					case "png":
-						$image = imagecreatefrompng($source);
-						$bg = imagecreatetruecolor(imagesx($image), imagesy($image));
-						imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
-						imagealphablending($bg, TRUE);
-						imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
-						imagedestroy($image);
-						imagejpeg($bg, $savePath, $quality);
-						imagedestroy($bg);
-						break;
-				}
+				$this->uploadImg($extension, $userID, $profileID, $postID);				
 
 				$rsp->setSuccess(201, "post created")
 					->bindValue("userID", $userID)
