@@ -548,6 +548,11 @@ class PostController
 
 	public function like($postID)
 	{
+
+		// TODO ==> VERIFIER SI LE PROFIL EST PUBLIC / PRIVE F
+		//                                    FOLLOWED / PAS FOLLOWED
+		//        VOIR COMMENTCONTROLLER
+
 		if(!$this->setPost($postID))
 			return;
 

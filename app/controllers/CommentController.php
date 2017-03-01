@@ -4,11 +4,13 @@ class CommentController
 {
 	private $model;
 	private $likeModel;
+	private $postModel;
 
 	public function __construct()
 	{
 		$this->model = new CommentModel();
 		$this->likeModel = new CommentLikeModel();
+		$this->postModel = new PostModel();
 	}
 
 
@@ -44,41 +46,50 @@ class CommentController
 	 */
 	public function create($postID)
 	{
-		/*
-		Commenter si seulement on est connecté
-		Commenter si seulement on a un profil actif
-		Commenter si seulement il y a du texte		
-		Commenter si seulement postID renvoie à un post
-
-
-		Commenter si seulement le post ne provient pas d'un profil privé
-		Commenter si seulement les commentaires sont autorisés
-		 */
-
+	
+		//TODO ==> VERIFIER SI LE POST PROVIENT D'UN PROFIL PRIVE OU PUBLIC
+		//         SI PROFIL PUBLIC -> COMMENTAIRES ALLOWED SAUF S'ILS SONT DESACTIVES
+		//         SI PROFIL PRIVE  -> IL FAUT LE FOLLOW POUR COMMENTER / LIKE 
+		//                             VERIFIER SI LES COMMENTAIRES SONT ACTIVES
+		//         
+		//         VERIFICATION COMMENTS ALLOWED EN PREMIER
+	
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
 		$resp = new Response();
 
+		//Si c'est bien un post
 		if(isAuthorized::isPost($postID)){
-			if(!empty($_POST['commentText'])){
-				if(isAuthorized::isUser($userID)){
-					if($profileID){
-						$this->model->create($profileID, $postID, $_POST['commentText']);
-						$resp->setSuccess(200, "Comment posted")
-						     ->bindValue("userID", $userID)
-						     ->bindValue("profileID", $profileID)
-						     ->bindValue("postID", $postID)
-						     ->bindValue("comment", $_POST['commentText']);					
+
+			$this->postModel->setPost($postID);
+
+			//Si les commentaires sont autorisés
+			if($this->postModel->getAllowComments()){
+				//Si le commentaire existe bien
+				if(!empty($_POST['commentText'])){
+					//Si l'user est connecté
+					if(isAuthorized::isUser($userID)){
+						//Si l'utilisateur à un profil d'actif
+						if($profileID){
+							$this->model->create($profileID, $postID, $_POST['commentText']);
+							$resp->setSuccess(200, "Comment posted")
+							     ->bindValue("userID", $userID)
+							     ->bindValue("profileID", $profileID)
+							     ->bindValue("postID", $postID)
+							     ->bindValue("comment", $_POST['commentText']);					
+						}else{
+							$resp->setFailure(401, "You don't have current profile selected");
+						}
 					}else{
-						$resp->setFailure(401, "You don't have current profile selected");
+						$resp->setFailure(401, "You are not authorized to do this action.");
 					}
 				}else{
-					$resp->setFailure(401, "You are not authorized to do this action.");
+					$resp->setFailure(400, "Missing value. Edit aborted.");
 				}
 			}else{
-				$resp->setFailure(400, "Missing value. Edit aborted.");
-			}
+				$resp->setFailure(400, "Comments are disabled for this post");
+			}			
 		}else{
 			$resp->setFailure(404, "Given comment ID does not exist.");
 		}		
