@@ -50,6 +50,16 @@ class CommentModel extends DBInterface
 		return "success";
     }
 
+    /************************/
+    /******** GETTER ********/
+    /************************/
+
+    public function getProfileID()
+    {
+        return $this->commentDatas['profile_id'];
+    }
+
+
     /**
      * Create a new comment
      *
@@ -76,13 +86,11 @@ class CommentModel extends DBInterface
      * Delete the post
      *
      */
-    public function delete()
+    public function delete($commentID)
     {
-        if($this->commentID == 0)
-        {
-            return 0;
-        }
-        $stmt = $this->cnx->prepare("DELETE FROM comments WHERE comment_id = :commentID");
-        $stmt->execute([":commentID" => $this->commentID]);
+        $stmt = $this->cnx->prepare("
+            DELETE FROM comments 
+            WHERE comment_id = :commentID");
+        $stmt->execute([":commentID" => $commentID]);
     }
 }

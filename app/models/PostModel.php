@@ -237,8 +237,6 @@ class PostModel extends DBInterface
     }
 
 
-
-
     public function nbrPosts($profileID)
     {
         $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE profile_id = :profileID");

@@ -103,8 +103,34 @@ class CommentController
 	 */
 	public function delete($commentID)
 	{
-		$this->model->setPost($commentID);
-		$this->model->delete();
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
+
+		if(!$this->setComment($commentID))
+			return;
+
+		$resp = new Response();
+			
+		//si l'user est connecté
+		if(isAuthorized::isUser($userID)){
+			//s'il a un profil courant
+			if($profileID){
+				//Si le profil a bien été commenté par le profil courant
+				if($this->model->getProfileID() == $profileID){
+					$this->model->delete($commentID);
+					$resp->setSuccess(200, "comment deleted")
+						 ->bindValue("commentID", $commentID);
+				}else{
+					$resp->setFailure(401, "You can not delete this comment. Not yours.");
+				}
+			}else{
+				$resp->setFailure(401, "You don't have current profile selected");
+			}
+		}else{
+			$resp->setFailure(401, "You are not authorized to do this action.");
+		}
+
+		$resp->send();
 	}
 
 	/*
