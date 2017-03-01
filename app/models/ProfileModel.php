@@ -66,6 +66,28 @@ class ProfileModel extends DBInterface
     }
 
 
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM profiles
+			WHERE profile_id = :id");
+		$stmt->execute([":id" => $profileID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
     /**
      * Create a new profile
      *

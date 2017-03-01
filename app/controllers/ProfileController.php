@@ -98,6 +98,23 @@ class ProfileController
         return true;
     }
 
+
+
+
+
+    /**
+     * Tell if the specified profile exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($profileID)
+    {
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("exists", $this->model->exists($profileID))
+            ->send();
+    }
+
     /**
      * Set the profile to use with the model
      * @param  integer $profileID Profile ID to use with the model
