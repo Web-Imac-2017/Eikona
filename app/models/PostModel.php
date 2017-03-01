@@ -63,7 +63,7 @@ class PostModel extends DBInterface
      * @param $extension Extension of the picture/video of the post
      * @param $description Description of the post
     */
-    public function create($type, $extension, $description)
+    public function create($type, $extension, $description, $comments)
     {
         //Wait for the upgrade of the Sanitize function
         //$this->extension = Sanitize::string($extension);
@@ -74,14 +74,14 @@ class PostModel extends DBInterface
 		// To change when there will be profile
 		$profile = Session::read("profileID");
 
-        $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_edit_time, post_publish_time) VALUES (:profile, :type, :extension, :description, :editTime, :publishTime)");
-        $stmt->execute([ ":profile" => $profile,
-						 ":type" => $type,
-                         ":extension" => $extension,
+        $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_edit_time, post_publish_time, post_allow_comments) VALUES (:profile, :type, :extension, :description, :editTime, :publishTime, :comments)");
+        $stmt->execute([ ":profile"     => $profile,
+						 ":type"        => $type,
+                         ":extension"   => $extension,
                          ":description" => $description,
-						 ":editTime" => time(),
-						 ":publishTime" => time()
-        ]);
+						 ":editTime"    => time(),
+						 ":publishTime" => time(),
+                         ":comments"    => $comments]);
 
         $postID = $this->cnx->lastInsertId();
 

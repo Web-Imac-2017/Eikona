@@ -92,6 +92,7 @@ class PostController
 		{
 			
 			$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+			$comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
 			$source = $_FILES['img']['tmp_name'];
 
 			$format = getimagesize($source);
@@ -113,7 +114,7 @@ class PostController
 			if(in_array($extension, $validFormat))
 			{
 				$type = "image";
-				$postID = $this->model->create($type, "jpg", $desc);
+				$postID = $this->model->create($type, "jpg", $desc, $comments);
 
 				$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
 				$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
