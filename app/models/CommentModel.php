@@ -93,4 +93,16 @@ class CommentModel extends DBInterface
             WHERE comment_id = :commentID");
         $stmt->execute([":commentID" => $commentID]);
     }
+
+    public function getComments($postID)
+    {
+        $stmt = $this->cnx->prepare("
+            SELECT comment_id, profile_id, post_id, comment_text, comment_time
+            FROM comments
+            WHERE :postID = post_id");
+        $stmt->execute([":postID" => $postID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

@@ -4,13 +4,14 @@ class PostController
 {
 	private $model;
 	private $likeModel;
-	private $profileModel;
+	private $commentModel;
 
 
 	public function __construct()
 	{
-		$this->model = new PostModel();
-		$this->likeModel = new LikeModel();
+		$this->model        = new PostModel();
+		$this->likeModel    = new LikeModel();
+		$this->commentModel = new CommentModel();
 	}
 
 	private function createFolder($userID, $profileID)
@@ -640,5 +641,26 @@ class PostController
 		     ->bindValue("likeCount", $count)
 		     ->send();
 	}
+
+	/************************************/
+	/*********** COMMENTAIRES ***********/
+	/************************************/
+
+	public function comments($postID)
+	{
+		if(!$this->setPost($postID))
+			return;
+
+		$resp = new Response();
+
+		$coms = $this->commentModel->getComments($postID);
+
+		$resp->setSuccess(200, "comments returned")
+			 ->bindValue("postID", $postID)
+			 ->bindValue("nbOfComments", count($coms))
+			 ->bindValue("comments", $coms)
+		     ->send();
+	}
+
 
 }
