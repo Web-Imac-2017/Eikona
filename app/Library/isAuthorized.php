@@ -87,8 +87,9 @@ class isAuthorized
     //Confirm is current user owns the given profile
     static public function ownProfile($profileID)
     {
-        $userID = Session::read("userID");
-
+        if(!self::isUser())
+            return false;
+        
         $userProfiles = Response::read("user", "profiles")['data'];
 
         if(empty($userProfiles))
@@ -117,7 +118,7 @@ class isAuthorized
         if(self::ownProfile($profileID))
             return true;
 
-        if(self::isAdmin(Response::read("user", "get")['data']['userAdmin']) == true)
+        if(self::isAdmin() == true)
             return true;
 
         return false;
