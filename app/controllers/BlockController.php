@@ -65,7 +65,7 @@ class BlockController
     {
         $resp = new Response();
 
-        if ($this->model->isBlocked($blocker_id, $blocked_id))
+        if ($this->model->isBlocking($blocker_id, $blocked_id))
         {
             $resp->setFailure(406, "User already blocked")
                  ->send();
@@ -85,7 +85,7 @@ class BlockController
     {
         $resp = new Response();
 
-        if ( !($this->model->isBlocked($blocker_id, $blocked_id)) )
+        if ( !($this->model->isBlocking($blocker_id, $blocked_id)) )
         {
             $resp->setFailure(406, "User not blocked")
                  ->send();
@@ -100,14 +100,14 @@ class BlockController
         }
     }
 
-    public function isBlocked($blocker_id, $blocked_id)
+    public function isBlocking($blocker_id, $blocked_id)
     {
         if ($this->entryIsOkay($blocker_id, $blocked_id))
         {
             $resp = new Response();
-            $rep = $this->model->isBlocked($blocker_id, $blocked_id);
+            $rep = $this->model->isBlocking($blocker_id, $blocked_id);
             $resp->setSuccess(200)
-                 ->bindValue("isBlocked", $rep)
+                 ->bindValue("isBlocking", $rep)
                  ->send();
         }
     }

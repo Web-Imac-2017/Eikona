@@ -34,12 +34,12 @@ class BlockModel extends DBInterface{
 	}
 
 	/**
-	 * Indique si le premier utilisateur fourni est bloqué par le second.
+	 * Indique si le premier utilisateur fourni est en train de bloquer le second.
 	 * @param  int $blocker_id blocker_id
 	 * @param  int $blocked_id blocked_id
 	 * @return boolean	       true / false
 	 */
-	public function isBlocked($blocker_id, $blocked_id)
+	public function isBlocking($blocker_id, $blocked_id)
 	{
 		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM blocked WHERE blocker_id = :blocker_id AND blocked_id = :blocked_id");
 		$stmt->execute([":blocker_id" => $blocker_id,
