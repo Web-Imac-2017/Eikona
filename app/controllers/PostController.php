@@ -220,7 +220,7 @@ class PostController
 
 		$rsp = new Response();
 		$rsp->setSuccess(200, "get all post informations")
-			->bindValue("postId", $postID)
+			->bindValue("postID", $postID)
 			->bindValue("profileID", $this->model->getProfileID())
 			->bindValue("desc", $this->model->getDescription())
 			->bindValue("publishTime", $this->model->getPublishTime())

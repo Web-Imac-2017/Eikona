@@ -48,6 +48,11 @@ class isAuthorized
         return false;
     }
 
+    /*
+        Retourne si on peut éditer le profil
+        On vérifie si le profile appartient bien à l'user actif 
+        ou bien à un admin
+     */
     static public function editProfile($profileID)
     {
         //Current user owns the profile?
@@ -60,22 +65,41 @@ class isAuthorized
         return false;
     }
 
+    /*
+    Retourne si on peut éditer le post
+    On vérifie si le post appartient bien au profil actif
+     */
     static public function editPost($postID)
     {
         $profileID = Session::read("profileID");
         //profile_id du post = profileID
         $data = Response::read("post", "display", $postID)['data'];
 
-        if($data['profileID'] == $profileID)
+        if(!empty($data) && $data['profileID'] == $profileID)
             return true;
 
         return false;
     }
 
+    /*
+    Retourne si le profil est privé
+     */
     static public function isPrivateProfile($profileID)
     {
         $data = Response::read("profile", "isPrivate", $profileID)['data'];
         if($data['profileIsPrivate'] == 1)
+            return true;
+
+        return false;
+    }
+
+    /*
+    On vérifie si le post existe bien
+     */
+    static public function isPost($postID)
+    {
+        $data = Response::read("post", "display", $postID)['data'];
+        if(!empty($data))
             return true;
 
         return false;

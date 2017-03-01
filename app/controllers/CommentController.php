@@ -4,7 +4,6 @@ class CommentController
 {
 	private $model;
 	private $likeModel;
-	private $view;
 
 	public function __construct()
 	{
@@ -43,12 +42,48 @@ class CommentController
 	 * Création d'un post
 	 *
 	 */
-	public function create($profile, $post)
+	public function create($postID)
 	{
-		$txt = $_POST['commentText'];
-		$time = $_POST['commentTime'];
+		/*
+		Commenter si seulement on est connecté
+		Commenter si seulement on a un profil actif
+		Commenter si seulement il y a du texte		
+		Commenter si seulement postID renvoie à un post
 
-		$this->model->create($profile, $post, $txt, $time);
+
+		Commenter si seulement le post ne provient pas d'un profil privé
+		Commenter si seulement les commentaires sont autorisés
+		 */
+
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
+
+		$resp = new Response();
+
+		if(isAuthorized::isPost($postID)){
+			if(!empty($_POST['commentText'])){
+				if(isAuthorized::isUser($userID)){
+					if($profileID){
+						$this->model->create($profileID, $postID, $_POST['commentText']);
+						$resp->setSuccess(200, "Comment posted")
+						     ->bindValue("userID", $userID)
+						     ->bindValue("profileID", $profileID)
+						     ->bindValue("postID", $postID)
+						     ->bindValue("comment", $_POST['commentText']);					
+					}else{
+						$resp->setFailure(401, "You don't have current profile selected");
+					}
+				}else{
+					$resp->setFailure(401, "You are not authorized to do this action.");
+				}
+			}else{
+				$resp->setFailure(400, "Missing value. Edit aborted.");
+			}
+		}else{
+			$resp->setFailure(404, "Given comment ID does not exist.");
+		}		
+
+		$resp->send();
 	}
 
 	/*

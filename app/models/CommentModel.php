@@ -59,16 +59,17 @@ class CommentModel extends DBInterface
      * @param $time Time the comment was created
      *
     */
-    public function create($profile, $post, $text, $time)
+    public function create($profileID, $postID, $comment)
     {
-    	$text = Sanitize::string($text);
+    	$comment = Sanitize::string($comment);
 
-    	$stmt = $this->cnx->prepare("INSERT INTO comments(profile_id, post_id, comment_text, comment_time) VALUES (:profile, :post, :txt, :time)");
-    	$stmt->execute([	":profile" => $profile,
-    						":post" => $post,
-    						":txt" => $text,
-    						":time" => $time
-    	]);
+        $stmt = $this->cnx->prepare("
+            INSERT INTO comments (profile_id, post_id, comment_text, comment_time)
+            VALUES (:profileID, :postID, :comment, :time)");
+        $stmt->execute([":profileID" => $profileID,
+                        ":postID"    => $postID,
+                        ":comment"   => $comment,
+                        ":time"      => time()]);
     }
 
 	/*
