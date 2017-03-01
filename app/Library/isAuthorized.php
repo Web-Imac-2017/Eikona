@@ -89,7 +89,6 @@ class isAuthorized extends DBInterface
 
         return false;
     }
-<<<<<<< Updated upstream
 
     static public function isPrivateProfile($profileID)
     {
@@ -104,6 +103,4 @@ class isAuthorized extends DBInterface
     {
         return true;
     }
-=======
->>>>>>> Stashed changes
 }
