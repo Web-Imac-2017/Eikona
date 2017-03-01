@@ -72,7 +72,7 @@ class PostModel extends DBInterface
         $description = Sanitize::string($description);
 
 		// To change when there will be profile
-		$profile = 1;
+		$profile = Session::read("profileID");
 
         $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_edit_time, post_publish_time) VALUES (:profile, :type, :extension, :description, :editTime, :publishTime)");
         $stmt->execute([ ":profile" => $profile,
@@ -82,8 +82,6 @@ class PostModel extends DBInterface
 						 ":editTime" => time(),
 						 ":publishTime" => time()
         ]);
-
-        var_dump("ok");
 
         $postID = $this->cnx->lastInsertId();
 
@@ -237,6 +235,61 @@ class PostModel extends DBInterface
         $stmt = $this->cnx->prepare("SELECT post_edit_time FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
     }
+
+
+
+
+    public function nbrPosts($profileID)
+    {
+        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE profile_id = :profileID");
+        $stmt->execute([":profileID" => Sanitize::int($profileID)]);
+
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Return the last X posts published by the profile
+     *
+     * @param $limit int Number of posts to return. Defautl 30.
+     */
+    public function getPosts($profileID, $limit = 4096, $offset = 0, $after = 0, $before = 0, $order = "DESC")
+    {
+        $limit = Sanitize::int($limit);
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID == -1 || $limit == 0)
+            return;
+
+        $where = "";
+        $bindArray = [":pID" => $profileID];
+
+        //Include only useful parameters for optimization
+        if($after != 0)
+        {
+            $where .= " AND post_publish_time > :after";
+            $bindArray[":after"] = Sanitize::int($after);
+        }
+
+        if($before != 0)
+        {
+            $where .= " AND post_publish_time < :before";
+            $bindArray[":before"] = Sanitize::int($before);
+        }
+
+        $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
+
+        //Execute the query
+        $stmt = $this->cnx->prepare($sql);
+        $stmt->execute($bindArray);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
+    }
+
+
+
+
 
     /**
      * Update the description of the post
@@ -399,7 +452,7 @@ class PostModel extends DBInterface
             return false;
         }
 
-        $stmt = $this->cnx->prepare("UPDATE posts SET post_approved = 1 WHERE post_id = postID");
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_approved = 1 WHERE post_id = :postID");
         $stmt->execute([":postID" => $this->postID]);
 
         $this->postDatas['post_approved'] = 1;
@@ -423,4 +476,5 @@ class PostModel extends DBInterface
 
 		return true;
     }
+
 }

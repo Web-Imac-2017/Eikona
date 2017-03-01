@@ -131,21 +131,8 @@ class ProfileModel extends DBInterface
             FROM profiles
             WHERE :id = user_id");
         $stmt->execute([":id" => $id]);
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Return the path to the profile picture
-     */
-    public function getPic()
-    {
-        if(file_exists("PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg"))
-        {
-            return "PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg";
-        }
-
-        return "PATH/TO/DEFAULT/PROFILE/PICTURE";
     }
 
     /**
@@ -206,45 +193,6 @@ class ProfileModel extends DBInterface
         }
 
         return $this->p['user_id'];
-    }
-
-    /**
-     * Return the last X posts published by the profile
-     *
-     * @param $limit int Number of posts to return. Defautl 30.
-     */
-    public function getPosts($limit = 4096, $offset = 0, $after = 0, $before = 0, $order = "DESC")
-    {
-        $limit = Sanitize::int($limit);
-
-        if($this->pID == -1 || $limit == 0)
-            return;
-
-        $where = "";
-        $bindArray = [":pID" => $this->pID];
-
-        //Include only useful parameters for optimization
-        if($after != 0)
-        {
-            $where .= " AND post_publish_time > :after";
-            $bindArray[":after"] = Sanitize::int($after);
-        }
-
-        if($before != 0)
-        {
-            $where .= " AND post_publish_time < :before";
-            $bindArray[":before"] = Sanitize::int($before);
-        }
-
-        $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
-
-        //Execute the query
-        $stmt = $this->cnx->prepare($sql);
-        $stmt->execute($bindArray);
-
-        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
     }
 
 
@@ -353,6 +301,47 @@ class ProfileModel extends DBInterface
 
         return true;
     }
+
+
+    /******* Followers ********/
+
+    /**
+     * Return a list of the followers of the given profile
+     * @param  integer $profileID Profile to use
+     * @return array   Followers list
+     */
+    public function getFollowers($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.follower_id = profiles.profile_id WHERE followings.followed_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Return the list of the profile followed by the given account
+     * @param  integer $profileID Profile to use
+     * @return array   Following list
+     */
+    public function getFollowings($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.followed_id = profiles. profile_id WHERE followings.follower_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+
+
+
+
+
 
 
     /**
