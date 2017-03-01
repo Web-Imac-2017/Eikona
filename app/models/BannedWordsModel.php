@@ -39,7 +39,7 @@ class BannedWordsModel extends DBInterface
     {
         $stmt = $this->cnx->prepare("DELETE FROM banned_words WHERE word = :word");
         $stmt->execute([":word" => $word]);
-        
+
         return true;
     }
 

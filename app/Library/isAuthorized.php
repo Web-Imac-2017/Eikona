@@ -12,7 +12,7 @@ class isAuthorized
     {
         $checkUser = 0;
 
-        if($user === null)
+        if($userID === null)
         {
             $checkWith = Session::read("userID");
         }
@@ -29,7 +29,7 @@ class isAuthorized
     {
         $checkUser = 0;
 
-        if($user === null)
+        if($userID === null)
         {
             $checkWith = Session::read("userID");
         }
@@ -46,7 +46,7 @@ class isAuthorized
     {
         $checkUser = 0;
 
-        if($user === null)
+        if($userID === null)
         {
             $checkWith = Session::read("userID");
         }
@@ -63,13 +63,13 @@ class isAuthorized
     {
         $checkUser = 0;
 
-        if($user === null)
+        if($profileID === null)
         {
             $checkWith = Session::read("userID");
         }
         else
         {
-            $checkWith = Sanitize::int($userID);
+            $checkWith = Sanitize::int($profileID);
         }
 
         return Response::read("profile", "exists", $checkWith);
