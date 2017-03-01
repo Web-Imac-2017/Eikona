@@ -3,7 +3,7 @@
 /**
  * isAuthorized - Functions handling authorizations
  */
-class isAuthorized
+class isAuthorized extends DBInterface
 {
     /***** Global verifications *****/
     static public function isUser($userID)
@@ -19,6 +19,16 @@ class isAuthorized
     static public function isAdmin($userAdmin)
     {
         return ($userAdmin == true) ? true : false;
+    }
+
+    static public function isProfile($profileID)
+    {
+        $dbi = new DBInterface();
+
+        $stmt = $dbi->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_id = :profileID");
+        $stmt->execute([":profileID" => Sanitize::int($profileID)]);
+
+        return $stmt->fetchColumn();
     }
 
     /***** Profiles verifications *****/
@@ -60,6 +70,14 @@ class isAuthorized
         return false;
     }
 
+    static public function seeFullProfile($profileID) //Always true if profile is public, Depends if profile is private.
+    {
+        return true;
+    }
+
+    /***** Posts verifications *****/
+
+
     static public function editPost($postID)
     {
         $profileID = Session::read("profileID");
@@ -71,6 +89,7 @@ class isAuthorized
 
         return false;
     }
+<<<<<<< Updated upstream
 
     static public function isPrivateProfile($profileID)
     {
@@ -85,4 +104,6 @@ class isAuthorized
     {
         return true;
     }
+=======
+>>>>>>> Stashed changes
 }

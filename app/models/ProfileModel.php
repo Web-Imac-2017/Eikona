@@ -303,6 +303,47 @@ class ProfileModel extends DBInterface
     }
 
 
+    /******* Followers ********/
+
+    /**
+     * Return a list of the followers of the given profile
+     * @param  integer $profileID Profile to use
+     * @return array   Followers list
+     */
+    public function getFollowers($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.follower_id = profiles.profile_id WHERE followings.followed_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Return the list of the profile followed by the given account
+     * @param  integer $profileID Profile to use
+     * @return array   Following list
+     */
+    public function getFollowings($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.followed_id = profiles. profile_id WHERE followings.follower_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+
+
+
+
+
+
+
     /**
      * Delete the profile
      */

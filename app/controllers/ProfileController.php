@@ -4,6 +4,7 @@ class ProfileController
 {
     private $model;
     private $postModel;
+    private $followModel;
 
     /**
      * Init the constructor and link the model
@@ -13,6 +14,7 @@ class ProfileController
     {
         $this->model = new ProfileModel();
         $this->postModel = new PostModel();
+        $this->followModel = new FollowModel();
     }
 
     /**
@@ -157,6 +159,8 @@ class ProfileController
             ->bindValue("profileViews", $profileInfos['profile_views'])
             ->bindValue("profileIsPrivate", $profileInfos['profile_views'] == 1)
             ->bindValue("nbrPosts", Response::read("Profile", "nbrPosts", $profileID)['data']['nbrPosts'])
+            ->bindValue("nbrFollowers", Response::read("Profile", "nbrFollowers", $profileID)['data']['nbrFollowers'])
+            ->bindValue("nbrFollowings", Response::read("Profile", "nbrFollowings", $profileID)['data']['nbrFollowings'])
             ->send();
     }
 
@@ -300,7 +304,7 @@ class ProfileController
     {
         $rsp = new Response();
 
-        if(!isAuthorized::getProfilePosts($profileID))
+        if(!isAuthorized::seeFullProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action")
                 ->send();
@@ -326,7 +330,7 @@ class ProfileController
     {
         $rsp = new Response();
 
-        if(!isAuthorized::getProfilePosts($profileID))
+        if(!isAuthorized::seeFullProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action")
                 ->send();
@@ -478,7 +482,10 @@ class ProfileController
     }
 
 
-
+    /**
+     * Set the pricture for the given picture
+     * @param integer $profileID Profile to change the picture
+     */
     public function setPicture($profileID)
     {
         $rsp = new Response();
@@ -592,6 +599,297 @@ class ProfileController
         }
 
         $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->send();
+    }
+
+
+
+    /************* FOLLOW *************/
+
+    /**
+     * Return the number of followers of the asked profile
+     * @param integer $profileID Profile to get the followers
+     */
+    public function nbrFollowers($profileID)
+    {
+        $rsp = new Response();
+
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID < 1)
+        {
+            $rsp->setFailure(400, "The given parameter is not a profile ID");
+        }
+
+        $nbrFollower = $this->followModel->nbrFollowers($profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("nbrFollowers", $nbrFollower)
+            ->send();
+    }
+
+
+    /**
+     * Return the number of profile the given profile if following
+     * @param integer $profileID profile ID
+     */
+    public function nbrFollowings($profileID)
+    {
+        $rsp = new Response();
+
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID < 1)
+        {
+            $rsp->setFailure(400, "The given parameter is not a profile ID");
+        }
+
+        $nbrFollowing = $this->followModel->nbrFollowings($profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("nbrFollowings", $nbrFollowing)
+            ->send();
+    }
+
+
+    /**
+     * Follow the given profile with the current user
+     * @param integer $profileID       Profile to follow
+     * @param boolean [$subscribe      = 0] Shall we also subscribe?
+     */
+    public function follow($profileID, $subscribe = 0)
+    {
+        $rsp = new Response();
+
+        $currentUser = Session::read("profileID");
+
+        if(!isAuthorized::editProfile($currentUser))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!$currentUser)
+        {
+            echo "Hi mom!";
+            $rsp->setFailure(401, "You must be connected to do this.")
+                ->send();
+
+            return;
+        }
+
+        if($profileID === $currentUser)
+        {
+            $rsp->setFailure(401, "You cannot follow yourself.")
+                ->send();
+
+            return;
+        }
+
+        //Do the request
+        $result = $this->followModel->follow($profileID, $subscribe);
+
+        if($result === "notAProfile")
+        {
+            $rsp->setFailure(400, "The given parameter is not a valid profile ID.")
+                ->send();
+
+            return;
+        }
+
+        if($result === "alreadyFollowing")
+        {
+            $rsp->setFailure(409, "You are already following this profile.")
+                ->send();
+
+            return;
+        }
+
+        $rsp->setSuccess(200)
+            ->send();
+    }
+
+
+
+    /**
+     * Unfollow the given profile with the current profile
+     * @param integer $profileID profile to unfollow
+     */
+    public function unfollow($profileID)
+    {
+        $rsp = new Response();
+
+        $currentUser = Session::read("profileID");
+
+        if(!isAuthorized::editProfile($currentUser))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!$currentUser)
+        {
+            echo "Hi mom!";
+            $rsp->setFailure(401, "You must be connected to do this.")
+                ->send();
+
+            return;
+        }
+
+        if($profileID === $currentUser)
+        {
+            $rsp->setFailure(401, "You cannot unfollow yourself.")
+                ->send();
+
+            return;
+        }
+
+        $result = $this->followModel->unfollow($profileID);
+
+        if($result === "notAProfile")
+        {
+            $rsp->setFailure(400, "The given parameter is not a valid profile ID.")
+                ->send();
+
+            return;
+        }
+
+        if($result === "alreadyNotFollowing")
+        {
+            $rsp->setFailure(409, "You are already following this profile.")
+                ->send();
+
+            return;
+        }
+
+        $rsp->setSuccess(200)
+            ->send();
+    }
+
+
+    /**
+     * Return the list of followers of the given profile
+     * @param integer $profileID ProfileID
+     */
+    public function followers($profileID)
+    {
+        $rsp = new Response();
+
+        if(!isAuthorized::seeFullProfile($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action")
+                ->send();
+
+            return;
+        }
+
+        $followers = $this->model->getFollowers($profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", Sanitize::int($profileID))
+            ->bindValue("followers", $followers)
+            ->bindValue("nbrFollowers", count($followers))
+            ->send();
+    }
+
+    /**
+     * Return the followings of the given profile
+     * @param integer $profileID profile ID
+     */
+    public function followings($profileID)
+    {
+        $rsp = new Response();
+
+        if(!isAuthorized::seeFullProfile($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action")
+                ->send();
+
+            return;
+        }
+
+        $followings = $this->model->getFollowings($profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("profileID", Sanitize::int($profileID))
+            ->bindValue("followings", $followings)
+            ->bindValue("nbrFollowings", count($followings))
+            ->send();
+    }
+
+    public function subscribe($profileID)
+    {
+        $rsp = new Response();
+
+        $currentUser = Session::read("profileID");
+
+        if(!isAuthorized::editProfile($currentUser))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!$currentUser)
+        {
+            echo "Hi mom!";
+            $rsp->setFailure(401, "You must be connected to do this.")
+                ->send();
+
+            return;
+        }
+
+        if(!$this->followModel->subscribe($profileID))
+        {
+            $rsp->setFailure(400, "You cannot subscribed to a profile you are not following.")
+                ->send();
+
+            return;
+        }
+
+        $rsp->setSuccess(200)
+            ->send();
+    }
+
+    public function unsubscribe($profileID)
+    {
+        $rsp = new Response();
+
+        $currentUser = Session::read("profileID");
+
+        if(!isAuthorized::editProfile($currentUser))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!$currentUser)
+        {
+            echo "Hi mom!";
+            $rsp->setFailure(401, "You must be connected to do this.")
+                ->send();
+
+            return;
+        }
+
+        if(!$this->followModel->unsubscribe($profileID))
+        {
+            $rsp->setFailure(400, "You cannot unsubscribed from a profile you are not following.")
+                ->send();
+
+            return;
+        }
+
         $rsp->setSuccess(200)
             ->send();
     }
