@@ -550,7 +550,7 @@ class PostController
 	public function like($postID)
 	{
 
-		// TODO ==> VERIFIER SI LE PROFIL EST PUBLIC / PRIVE F
+		// TODO ==> VERIFIER SI LE PROFIL EST PUBLIC / PRIVE 
 		//                                    FOLLOWED / PAS FOLLOWED
 		//        VOIR COMMENTCONTROLLER
 
@@ -575,17 +575,15 @@ class PostController
 			return;
 		}
 
-
+		//Si le post n'est pas encore like
 		if(!$this->likeModel->isLiked($postID, $profileID)){
+			//Si ce n'est pas son propre post
 			if($this->model->getProfileID() != $profileID){
-				if(!isAuthorized::isPrivateProfile($this->model->getProfileID())){
-					$this->likeModel->like($postID, $profileID);
-					$resp->setSuccess(200, "post liked")
-					     ->bindValue("postID", $postID)
-					     ->bindValue("profileID", $profileID);
-				}else{
-					$resp->setFailure(400, "profile is private");
-				}				
+				//TODO => FOLLOW OU PAS FOLLOW
+				$this->likeModel->like($postID, $profileID);
+				$resp->setSuccess(200, "post liked")
+				     ->bindValue("postID", $postID)
+				     ->bindValue("profileID", $profileID);			
 			}else{
 				$resp->setFailure(400, "You can not like your own post");
 			}			
