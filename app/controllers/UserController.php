@@ -134,7 +134,7 @@ class UserController{
 
 		if($profiles){
 			$resp->setSuccess(200, "user profiles returned")
-			     ->bindValue("userID", $profiles[0]['user_id'])
+			     ->bindValue("userID", $userID)
 			     ->bindValue("nbOfProfiles", count($profiles))
 			     ->bindValue("profiles", $profiles);
 		}else{

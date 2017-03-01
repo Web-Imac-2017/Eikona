@@ -41,14 +41,14 @@ class LikeModel extends DBInterface{
 			            ":profileID" => $profileID]);
 	}
 
-	public function countLike($postID)
+	public function getAllLikes($postID)
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT COUNT(*) FROM post_likes
+			SELECT profile_id, like_time FROM post_likes
 			WHERE :postID= post_id");
 		$stmt->execute([":postID" => $postID]);
 
-		return $stmt->fetchColumn();
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 }
