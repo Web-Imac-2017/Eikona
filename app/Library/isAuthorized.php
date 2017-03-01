@@ -3,36 +3,88 @@
 /**
  * isAuthorized - Functions handling authorizations
  */
-class isAuthorized extends DBInterface
+class isAuthorized
 {
     /***** Global verifications *****/
-    static public function isUser($userID)
+
+    //Confirm the given user is a real user, or tell if we are currently connected if the parameter is ommited
+    static public function isUser($userID = null)
     {
-        return (Session::read("userID") === $userID && $userID != null) ? true : false;
+        $checkUser = 0;
+
+        if($user === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($userID);
+        }
+
+        return Response::read("user", "exists", $checkWith);
     }
     
-    static public function isModerator($userModerator)
-    {   
-        return ($userModerator == true) ? true : false;
-    }
-
-    static public function isAdmin($userAdmin)
+    //Tell if the current user, or the given one, is a moderator
+    static public function isModerator($userID = null)
     {
-        return ($userAdmin == true) ? true : false;
+        $checkUser = 0;
+
+        if($user === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($userID);
+        }
+
+        return Response::read("user", "isModerator", $checkWith);
     }
 
+    //Tell if the current user, or the given one, is an admin
+    static public function isAdmin($userID = null)
+    {
+        $checkUser = 0;
+
+        if($user === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($userID);
+        }
+
+        return Response::read("user", "isAdmin", $checkWith);
+    }
+
+    //Confirm the given profile is a real profile, or tell if we have a current profile if the parameter is ommited
     static public function isProfile($profileID)
     {
-        $dbi = new DBInterface();
+        $checkUser = 0;
 
-        $stmt = $dbi->cnx->prepare("SELECT COUNT(*) FROM profiles WHERE profile_id = :profileID");
-        $stmt->execute([":profileID" => Sanitize::int($profileID)]);
+        if($user === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($userID);
+        }
 
-        return $stmt->fetchColumn();
+        return Response::read("profile", "exists", $checkWith);
     }
+
+
+
+
+
+
+
 
     /***** Profiles verifications *****/
 
+    //Confirm is current user owns the given profile
     static public function ownProfile($profileID)
     {
         $userID = Session::read("userID");
@@ -58,6 +110,7 @@ class isAuthorized extends DBInterface
         return false;
     }
 
+    //Confirm the current user can edit the given profile
     static public function editProfile($profileID)
     {
         //Current user owns the profile?
@@ -70,10 +123,18 @@ class isAuthorized extends DBInterface
         return false;
     }
 
-    static public function seeFullProfile($profileID) //Always true if profile is public, Depends if profile is private.
+    //TODO
+    //Confirm the current user can view fully the given profile
+    static public function seeFullProfile($profileID)
     {
         return true;
     }
+
+
+
+
+
+
 
     /***** Posts verifications *****/
 
@@ -97,10 +158,5 @@ class isAuthorized extends DBInterface
             return true;
 
         return false;
-    }
-
-    static public function getProfilePosts()
-    {
-        return true;
     }
 }
