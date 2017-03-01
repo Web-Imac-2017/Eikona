@@ -97,7 +97,7 @@ class CommentModel extends DBInterface
     public function getComments($postID)
     {
         $stmt = $this->cnx->prepare("
-            SELECT comment_id, profile_id, post_id, comment_text, comment_time
+            SELECT comment_id, profile_id, comment_text, comment_time
             FROM comments
             WHERE :postID = post_id");
         $stmt->execute([":postID" => $postID]);

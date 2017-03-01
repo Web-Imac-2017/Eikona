@@ -634,11 +634,12 @@ class PostController
 
 		$resp = new Response();
 
-		$count = $this->likeModel->countLike($postID);
+		$likes = $this->likeModel->getAllLikes($postID);
 		
 		$resp->setSuccess(200, "likes returned")
 		     ->bindValue("postID", $postID)
-		     ->bindValue("likeCount", $count)
+		     ->bindValue("nbOfLikes", count($likes))
+		     ->bindValue("like", $likes)
 		     ->send();
 	}
 
