@@ -26,10 +26,8 @@ class PostController
 		}
 	}
 
-	private function uploadImg($extension, $userID, $profileID, $postID)
+	private function uploadImg($extension, $source, $savePath)
 	{
-		$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
-		$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
 		$quality = 100;
 
 		switch($extension){
@@ -65,6 +63,7 @@ class PostController
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
+
 		if(!isAuthorized::isUser($userID)){
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
@@ -97,6 +96,7 @@ class PostController
 
 			$format = getimagesize($source);
 
+			//prevent format is wrong
 			if(!$format){
 				$rsp->setFailure(400, "File do not have good extension")
 					->send();
@@ -115,13 +115,16 @@ class PostController
 				$type = "image";
 				$postID = $this->model->create($type, "jpg", $desc);
 
+				$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+				$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
+
 				if(!$postID){
 					$rsp->setFailure(400, "echec lors de l'upload")
 					    ->send();
 					return;
 				}				
 
-				$this->uploadImg($extension, $userID, $profileID, $postID);				
+				$this->uploadImg($extension, $source, $savePath);				
 
 				$rsp->setSuccess(201, "post created")
 					->bindValue("userID", $userID)
