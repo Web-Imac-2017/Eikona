@@ -66,6 +66,28 @@ class ProfileModel extends DBInterface
     }
 
 
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM profiles
+			WHERE profile_id = :id");
+		$stmt->execute([":id" => $profileID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
     /**
      * Create a new profile
      *
@@ -301,6 +323,47 @@ class ProfileModel extends DBInterface
 
         return true;
     }
+
+
+    /******* Followers ********/
+
+    /**
+     * Return a list of the followers of the given profile
+     * @param  integer $profileID Profile to use
+     * @return array   Followers list
+     */
+    public function getFollowers($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.follower_id = profiles.profile_id WHERE followings.followed_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Return the list of the profile followed by the given account
+     * @param  integer $profileID Profile to use
+     * @return array   Following list
+     */
+    public function getFollowings($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.followed_id = profiles. profile_id WHERE followings.follower_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+
+
+
+
+
 
 
     /**
