@@ -348,6 +348,53 @@ Data:
 
 
 
+## Nombre de posts d'un profil
+
+Récupère le nombre de posts fait par un profil
+
+### URL
+```
+/profile/nbrposts/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil à utiliser
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ 
+    profileID : ID du profil, 
+    nbrPosts : Nombre de posts
+}
+```
+ 
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
+
+  OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Le profil courant n'est aps autorisé a voir les posts de ce profil
+
+  OU
+
+  * **Code:** 404 NOT FOUND <br />
+    **Explication** Le profil spécifié n'existe pas
+
+
+
+
+
+
 
 ## Posts du profil
 
@@ -379,13 +426,18 @@ Data:
 ```json
 { 
     nbrPosts : Nombre de posts trouvés, 
-    posts : Tableau avec les ID de touts les posts trouvés
+    posts : Tableau avec les détails de touts les posts trouvés
 }
 ```
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
     **Explication** La variable GET **profileID** n'est pas un ID
+
+  OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Le profil courant n'est aps autorisé a voir les posts de ce profil
 
   OU
 
@@ -597,3 +649,332 @@ Data:
 
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le profil spécifié n'existe pas
+
+
+
+
+
+
+
+## Nombre d'abonnés à profil
+
+Retourne le nombre de profils abonnés au profil donné
+
+### URL
+```
+/profile/nbrFollowers/<profileID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+    profileID: ID du profil,
+    nbrFollowers: Nombre de followers
+}
+```
+
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID OU la variable FILE profilePicture est absente
+
+
+
+
+
+
+
+## Nombre d'abonnements d'un profil
+
+Retourne le nombre d'abonnement du profil donné
+
+### URL
+```
+/profile/nbrFollowings/<profileID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+    profileID: ID du profil,
+    nbrFollowings: Nombre de followers
+}
+```
+
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID OU la variable FILE profilePicture est absente
+
+
+
+
+
+
+
+## Abonnement à un profil
+
+Abonne le profil courant au profil spécifié
+
+### URL
+```
+/profile/follow/<profileID>[/<subscribe>]
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+  
+  **Valeur optionnelle**
+  
+  * **subscribe** 1 ou 0 si l'on souhaite recevoir des notifications
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ }
+```
+
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
+    
+    OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Il n'y a pas de profile connecté OU Vous n'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même
+    
+    OU
+
+  * **Code:** 409 CONFLICT <br />
+    **Explication** Vous suivez déjà ce profil
+
+
+
+
+
+
+
+## Désabonnement à un profil
+
+Désabonne le profil courant du profil spécifié
+
+### URL
+```
+/profile/follow/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ }
+```
+
+### Erreurs
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
+    
+    OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Il n'y a pas de profile connecté OU Vous n'avez pas les droits sur ce profil OU Vous ne pouvez pas arrêter de vous suivre vous-même.
+    
+    OU
+
+  * **Code:** 409 CONFLICT <br />
+    **Explication** Vous ne suivez déjà pas ce profil
+
+
+
+
+
+
+
+## Liste des abonnés à un profil
+
+Retourne la liste des abonnés à un profil
+
+### URL
+```
+/profile/followers/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+    profileID: ID du profil,
+    nbrFollowers: Nombre de followers
+    followers: Tableau avec les détails de tous les profils retournés
+}
+```
+
+### Erreurs
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Vous n'avez pas le droit de voir cette liste
+
+
+
+
+
+
+
+## Liste des abonnements d'un profil
+
+Retourne la liste des abonnement d'un profil
+
+### URL
+```
+/profile/followings/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+    profileID: ID du profil,
+    nbrFollowings: Nombre d'abonnements'
+    followings: Tableau avec les détails de tous les profils retournés
+}
+```
+
+### Erreurs
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Vous n'avez pas le droit de voir cette liste
+
+
+
+
+
+
+
+## Recevoir les notifications pour un abonnement
+
+Active les notifications pour le profil courant pour l'abonnement
+
+### URL
+```
+/profile/subscribe/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ }
+```
+
+### Erreurs
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Vous n'êtes pas autorisé à modifier ce profil OU Vous n'êtes pas connecté
+    
+    OU
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** Vous ne pouvez pas recevoir les notification si vous n'êtes pas abonné
+
+
+
+
+
+
+
+## Ne plus recevoir les notifications pour un abonnement
+
+Désactive les notifications pour le profil courant pour l'abonnement
+
+### URL
+```
+/profile/subscribe/<profileID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du profil
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ }
+```
+
+### Erreurs
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Vous n'êtes pas autorisé à modifier ce profil OU Vous n'êtes pas connecté
+    
+    OU
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** Vous ne pouvez pas ne plus recevoir les notification si vous n'êtes pas abonné
+    

@@ -4,6 +4,8 @@
 Les posts sont gérés par le **postController**.
 Celui-ci permet d'accéder à toutes les informations relatives à ces derniers.
 
+
+
 ## Création d'un post
 
 Créer un post pour l'utilisateur courant.
@@ -34,66 +36,63 @@ Créer un post pour l'utilisateur courant.
 
   * **Code:** 400 BAD REQUEST <br />
 
-## Supprimer un post
 
-Supprime un post du profil courant ainsi que la photo du dossier medias/img/
+
+
+
+## Affichage des informations d'un post
+
+Créer un post pour l'utilisateur courant.
 
 ### URL
 ```
-/profile/delete/<postID>/
+/post/display/<postID>
 ```
 
 ### Méthode
 **GET**
 
-### Variable GET
+### Variables POST
 
-  * **profileID** : ID du post à supprimer
+  * **postID** : ID du post
 
 ### Succès
 
-  * **Code:** 200 OK
-
+  * **Code:** 200 OK <br />
+    **Data:** `{ 
+	
+	postId: Id du post,
+	profileID: ID du profil du post en question
+	desc: Description du post
+	publishTime: Moment où le post a été publié
+	allowComments: Si le post autorise les commentaires
+	approved: Si le post est approuvé
+	updateTime: Moment où le post a été mis à jour
+	state: Etat du post
+	geo: Nom, latitude et longitude du post
+	}`
+ 
 ### Erreurs
+ 
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **postID** n'est pas un ID
+
+  OU
 
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le post spécifié n'existe pas
 
 
-## Informations d'un post
 
-Récupère toutes les informations d'un profil
 
-### URL
-```
-/profile/get/<postID>
-```
 
-### Méthode
-**GET**
+## Récupère une info d'un post
 
-### Variable GET
-
-  * **postID** : ID du post à utiliser
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{
-    postID: ID du post,
-	// A définir ce dont vous avez besoin
-}
-```
-
-## Nom d'un profil
-
-Récupère le nom d'un profil
+Récupère une information passée en paramètre d'un post
 
 ### URL
 ```
-/profile/name/<profileID>
+/post/<field>/<postID>
 ```
 
 ### Méthode
@@ -102,6 +101,7 @@ Récupère le nom d'un profil
 ### Variable GET
 
   * **profileID** : ID du profil à utiliser
+    **field** : Nom du champ à récupérer `DESCRIPTION|GEO|PUBLISHTIME|STATE|ALLOWCOMMENTS|APPROVED|UPDATETIME`
 
 ### Succès
 
@@ -110,7 +110,7 @@ Data:
 ```json
 { 
     profileID : ID du profil, 
-    profileName : Nom du profil 
+    <field> : Informations du field
 }
 ```
  
@@ -125,154 +125,8 @@ Data:
     **Explication** Le profil spécifié n'existe pas
 
 
-## Description d'un profil
-
-Récupère la description d'un profil
-
-### URL
-```
-/profile/description/<profileID>
-```
-
-### Méthode
-**GET**
-
-### Variable GET
-
-  * **profileID** : ID du profil à utiliser
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    profileID : ID du profil, 
-    profileDesc : Description du profil
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** La variable GET **profileID** n'est pas un ID
-
-  OU
-
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le profil spécifié n'existe pas
-
-## Vues d'un profil
-
-Récupère le nombre de fois ou le profil a été vu.
-
-### URL
-```
-/profile/views/<profileID>
-```
-
-### Méthode
-**GET**
-
-### Variable GET
-
-  * **profileID** : ID du profil à utiliser
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    profileID : ID du profil, 
-    profileViews : Nombre de vues du profil
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** La variable GET **profileID** n'est pas un ID
-
-  OU
-
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le profil spécifié n'existe pas
 
 
-## Confidentialité d'un profil
-
-Récupère le paramètre de confidentialité (Privé/Publique) du profil.
-
-### URL
-```
-/profile/isprivate/<profileID>
-```
-
-### Méthode
-**GET**
-
-### Variable GET
-
-  * **profileID** : ID du profil à utiliser
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    profileID : ID du profil, 
-    profileIsPrivate : Indique si le profile est privé (true/false)
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** La variable GET **profileID** n'est pas un ID
-
-  OU
-
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le profil spécifié n'existe pas
-
-## Propriétaire du profil
-
-Récupère l'identifiant de l'utilisateur propriétaire du profil
-
-### URL
-```
-/profile/owner/<profileID>
-```
-
-### Méthode
-**GET**
-
-### Variable GET
-
-  * **profileID** : ID du profil à utiliser
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    profileID : ID du profil, 
-    profileOwner : UserID du propriétaire du profil
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** La variable GET **profileID** n'est pas un ID
-
-  OU
-
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le profil spécifié n'existe pas
 
 
 ## Mise à jour d'un post
@@ -281,7 +135,7 @@ Met à jour le champ indiqué du post
 
 ### URL
 ```
-/profile/update/<field>/<profileID>
+/post/update/<field>/<postID>
 ```
 
 ### Méthode
@@ -289,8 +143,8 @@ Met à jour le champ indiqué du post
 
 ### Variable GET
 
-  * **field** : Nom du champ a modifier `DESCRIPTION|GEO|ALLOWCOMMENTS|DISABLECOMMENTS|POSTAPPROVED`
-  * **profileID** : ID du profil à utiliser
+  * **field** : Nom du champ à modifier `DESCRIPTION|GEO|ALLOWCOMMENTS|DISABLECOMMENTS|POSTAPPROVED`
+    **postID** : ID du post à utiliser
 
 ### Variable POST
 
@@ -324,3 +178,145 @@ Data:
 
   * **Code:** 405 METHOD NOT ALLOWED <br />
     **Explication** Le field spécifié n'est pas supporté.
+	
+  OU
+
+  * **Code:** 400 MISSING VALUE <br />
+    **Explication** Il manque la nouvelle valeur du field.
+  
+  
+  
+  
+## Mise à jour du state d'un post
+
+Met à jour l'état d'un post
+
+### URL
+```
+/post/updateState/<postID>
+```
+
+### Méthode
+**POST**
+
+### Variable GET
+
+  * **postID** : ID du post à utiliser
+  
+### Variable POST
+  
+  * **state** : Nouvel état du post
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ 
+    postID : ID du post, 
+    state: Etat mis à jour
+}
+```
+ 
+### Erreurs
+
+  * **Code:** 400 FAILURE <br />
+
+
+
+
+
+## Supprimer un post
+
+Supprime un post du profil courant ainsi que la photo du dossier medias/img/
+
+### URL
+```
+/profile/delete/<postID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du post à supprimer
+
+### Succès
+
+  * **Code:** 200 OK
+
+### Erreurs
+
+  * **Code:** 404 NOT FOUND <br />
+    **Explication** Le post spécifié n'existe pas
+
+
+
+
+
+## Liker un post
+
+Like un post avec le profil courant
+
+### URL
+```
+/post/like/<postID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **postID** : ID du post à liker
+
+### Succès
+
+  * **Code:** 200 OK
+
+### Erreurs
+
+  * **Code:** 401 NOT AUTHORIZED <br />
+    **Explication** Le post spécifié n'existe pas
+
+  OU
+
+  * **Code:** 400 NOT AUTHORIZED <br />
+    **Explication** Le post n'a pas pu être liké
+
+
+
+
+
+## dé-Liker un post
+
+dé-Like un post avec le profil courant
+
+### URL
+```
+/post/like/<postID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **postID** : ID du post à dé-liker
+
+### Succès
+
+  * **Code:** 200 OK
+
+### Erreurs
+
+  * **Code:** 401 NOT AUTHORIZED <br />
+    **Explication** Le post spécifié n'existe pas
+
+  OU
+
+  * **Code:** 400 NOT AUTHORIZED <br />
+    **Explication** Le post n'a pas pu être dé-liké
+	
+	
