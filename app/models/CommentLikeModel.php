@@ -8,7 +8,7 @@ class CommentLikeModel extends DBInterface
 		parent::__construct();
 	}
 
-	public function isLiked($commentID, $profileID)
+	public function isLiked($profileID, $commentID)
 	{
 		$stmt = $this->cnx->prepare("
 			SELECT COUNT(*) FROM comment_likes
@@ -48,10 +48,10 @@ class CommentLikeModel extends DBInterface
 	{
 		$stmt = $this->cnx->prepare("
 			DELETE FROM comment_likes 
-			WHERE profile_id = :profile 
-			AND comment_id = :comment");
-		$stmt->execute([":profile" => $profileID,
-						":comment" => $commentID]);
+			WHERE profile_id = :profileID 
+			AND comment_id = :commentID");
+		$stmt->execute([":profileID" => $profileID,
+						":commentID" => $commentID]);
 	}
 
     /**
@@ -62,15 +62,13 @@ class CommentLikeModel extends DBInterface
     */
 	public function getLikes($commentID)
 	{
-		$cmnt = Sanitize::int($commentID);
-		
-		if($cmnt < 1)
-            return false;
+		$stmt = $this->cnx->prepare("
+			SELECT profile_id, comment_id, like_time
+			FROM comment_likes
+			WHERE :commentID = comment_id");
+		$stmt->execute([":commentID" => $commentID]);
 
-		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM comment_likes WHERE comment_id = :comment");
-		$stmt->execute(["comment" => $cmnt]);
-
-		return $stmt->fetchColumn();
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 }

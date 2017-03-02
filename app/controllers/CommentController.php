@@ -154,7 +154,7 @@ class CommentController
 			//S'il a un profil courant
 			if($profileID){
 				//S'il n'a pas encore aimé le post
-				if(!$this->likeModel->isLiked($commentID, $profileID)){
+				if(!$this->likeModel->isLiked($profileID, $commentID)){
 					//Si ce n'est pas son propre comment
 					if($this->model->getProfileID() != $profileID){
 						$this->likeModel->like($profileID, $commentID);
@@ -184,6 +184,44 @@ class CommentController
 	 */
 	public function unlike($commentID)
 	{
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
+		if(!$this->setComment($commentID))
+			return;
+
+		$resp = new Response();
+
+		if(isAuthorized::isUser($userID)){
+			if($this->likeModel->isLiked($profileID, $commentID)){
+				$this->likeModel->unlike($profileID, $commentID);
+				$resp->setSuccess(200, "comment unliked")
+			         ->bindValue("commentID", $commentID)
+			         ->bindValue("profileID", $profileID);
+			}else{
+				$resp->setFailure(400, "post not liked");
+			}
+		}else{
+			$resp->setFailure(401, "You are not authorized to do this action.");
+		}
+
+		$resp->send();
 	}
+
+	public function likes($commentID)
+	{
+		if(!$this->setComment($commentID))
+			return;
+			
+		$resp = new Response();
+
+		$likes = $this->likeModel->getLikes($commentID);
+
+		$resp->setSuccess(200, "likes comment returnded")
+		     ->bindValue("commentID", $commentID)
+		     ->bindValue("nbOfLikes", count($likes))
+		     ->bindValue("likes", $likes)
+		     ->send();	
+	}
+
 }
