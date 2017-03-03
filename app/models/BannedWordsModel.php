@@ -16,7 +16,7 @@ class BannedWordsModel extends DBInterface
     {
         $rsp = new Response();
 
-        if($this->duplicate($word))
+        if($this->exists($word))
         {
             $rsp->setFailure(400, "The word is already marked as forbidden")
                 ->send();
@@ -49,7 +49,7 @@ class BannedWordsModel extends DBInterface
      */
     public function getAll()
     {
-        $stmt = $this->cnx->prepare("SELECT * FROM banned_words ORDER BY word");
+        $stmt = $this->cnx->prepare("SELECT word FROM banned_words ORDER BY word");
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,7 +60,7 @@ class BannedWordsModel extends DBInterface
      * @param  string  $word Word to compare
      * @return integer 0 if the word is absent, 1 if it is already there
      */
-    private function duplicate($word)
+    public function exists($word)
     {
         $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM banned_words WHERE word = :word");
         $stmt->execute([":word" => $word]);
