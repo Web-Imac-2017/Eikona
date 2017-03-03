@@ -56,7 +56,7 @@ class ProfileModel extends DBInterface
         }
 
         //profile found
-        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
+        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $profileID]);
 
         $this->pID = $profileID;
@@ -127,7 +127,7 @@ class ProfileModel extends DBInterface
         if($id == 0) return false;
 
         $stmt = $this->cnx->prepare("
-            SELECT profile_id, user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private
+            SELECT profile_id, user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private
             FROM profiles
             WHERE :id = user_id");
         $stmt->execute([":id" => $id]);
@@ -155,6 +155,15 @@ class ProfileModel extends DBInterface
             return;
 
         return $this->p['profile_desc'];
+    }
+
+
+    public function getPict()
+    {
+        if($this->pID == -1)
+            return;
+
+        return $this->p['profile_picture'];
     }
 
     /**
@@ -238,6 +247,24 @@ class ProfileModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_desc'] = $desc;
+
+        return true;
+    }
+
+
+
+    public function updatePict($newPictName)
+    {
+        if($this->pID == -1)
+            return false;
+
+        $newPictName = Sanitize::string($newPictName);
+
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_picture = :pict WHERE profile_id = :pID");
+        $stmt->execute([":pict" => $newPictName,
+                        ":pID" => $this->pID]);
+
+        $this->p['profile_picture'] = $newPictName;
 
         return true;
     }

@@ -208,16 +208,12 @@ class ProfileController
      */
     public function picture($profileID)
     {
-        $profileID = Sanitize::int($profileID);
+        if(!$this->setProfile($profileID))
+            return;
 
-        if(file_exists("/app/medias/profilesPictures/".$profileID.".jpg"))
-        {
-            $pic = "/app/medias/profilesPictures/".$profileID.".jpg";
-        }
-        else
-        {
-            $pic = "/app/medias/profilesPictures/default.jpg";
-        }
+        $path = "/app/medias/profilesPictures/";
+
+        $pic = $this->model->getPict();
 
         //Send JSON response
         $rsp = new Response();
@@ -523,11 +519,16 @@ class ProfileController
             $extension = 'jpg';
         }
 
+        $newPictName = $profileID.'.'.$extension;
+
         /*enregistrement de l'image*/
-        imagejpeg($imSource, 'medias/profilesPictures/' . $profileID . '.' . $extension);
+        imagejpeg($imSource, 'medias/profilesPictures/'.$newPictName);
+
+        //Update DB
+        $this->model->updatePict($newPictName);
 
         $rsp->setSuccess(200)
-            ->bindValue("ProfilePicture", "/app/medias/profilesPictures/".$profileID.".jpg'")
+            ->bindValue("ProfilePicture", "/app/medias/profilesPictures/".$newPictName)
             ->send();
     }
 
