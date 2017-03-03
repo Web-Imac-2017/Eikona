@@ -4,11 +4,52 @@ class PostController
 {
 	private $model;
 	private $likeModel;
+	private $commentModel;
+
 
 	public function __construct()
 	{
-		$this->model = new PostModel();
-		$this->likeModel = new LikeModel();
+		$this->model        = new PostModel();
+		$this->likeModel    = new LikeModel();
+		$this->commentModel = new CommentModel();
+	}
+
+	private function createFolder($userID, $profileID)
+	{
+		$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+
+		if(!is_dir($root.$userID)){
+			mkdir($root.$userID);
+		}
+
+		if(!is_dir($root.$userID."/".$profileID)){
+			mkdir($root.$userID."/".$profileID);
+		}
+	}
+
+	private function uploadImg($extension, $source, $savePath)
+	{
+		$quality = 100;
+
+		switch($extension){
+
+			case "jpeg":
+			case "jpg":
+				$imgSource = imagecreatefromjpeg($source);
+				imagejpeg($imgSource, $savePath, $quality);
+				break;
+
+			case "png":
+				$image = imagecreatefrompng($source);
+				$bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+				imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+				imagealphablending($bg, TRUE);
+				imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+				imagedestroy($image);
+				imagejpeg($bg, $savePath, $quality);
+				imagedestroy($bg);
+				break;
+		}
 	}
 
 	/*
@@ -34,10 +75,7 @@ class PostController
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
 			return;
-		}
-
-		$type = $_POST['postType'];
-		$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+		}		
 
 		if(empty($_FILES['img'])){
 			$rsp->setFailure(400, "no file selected")
@@ -45,55 +83,57 @@ class PostController
 			return;
 		}
 
+		$validFormat = array("jpg", "jpeg", "png");
+
 		/*
 		 * Management of the picture
 		 * Management of the video is missing
 		 */
 		if(is_uploaded_file($_FILES['img']['tmp_name']))
 		{
+			
+			$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+			$comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
 			$source = $_FILES['img']['tmp_name'];
+
 			$format = getimagesize($source);
-			$tab;
 
-			if(preg_match('#(png|gif|jpeg)$#i', $format['mime'], $tab))
-			{
-				$imSource = imagecreatefromjpeg($source);
-				if($tab[1] == "jpeg")
-					$tab[1] = "jpg";
-				$extension = $tab[1];
+			//prevent format is wrong
+			if(!$format){
+				$rsp->setFailure(400, "File do not have good extension")
+					->send();
+				return;
 			}
 
-			if($format['mime'] == "image/png")
-			{
-				$extension = 'jpg';
-			}
-
-			$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+			$extension = explode("/", $format['mime'])[1];			
 
 			//Création des dossiers
-			if(!is_dir($root.$userID)){
-				mkdir($root.$userID);
-			}
-			if(!is_dir($root.$userID."/".$profileID)){
-				mkdir($root.$userID."/".$profileID);
-			}
-
-			/* Call to the postModel and creation of the JSON response */
-			$postID = $this->model->create($type, $extension, $desc);
+			$this->createFolder($userID, $profileID);
 			
 
-			//Si img enregistrée dans bdd et uploadée
-			if($postID)
+			//detect if extension is allowed
+			if(in_array($extension, $validFormat))
 			{
-				/* Storing of the picture*/
-				imagejpeg($imSource, $root.$userID."/".$profileID."/".$postID.".".$extension);
+				$type = "image";
+				$postID = $this->model->create($type, "jpg", $desc, $comments);
+
+				$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+				$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
+
+				if(!$postID){
+					$rsp->setFailure(400, "echec lors de l'upload")
+					    ->send();
+					return;
+				}				
+
+				$this->uploadImg($extension, $source, $savePath);				
 
 				$rsp->setSuccess(201, "post created")
 					->bindValue("userID", $userID)
 					->bindValue("profileID", $profileID)
-					->bindValue("postID", $postID);
+					->bindValue("postID", $postID);		
 			}else{
-				$rsp->setFailure(400, "echec lors de l'ajout à la bdd");
+				$rsp->setFailure(400, "File do not have good extension");
 			}
 		}else{
 			$rsp->setFailure(400, "file not uploaded");
@@ -181,7 +221,7 @@ class PostController
 
 		$rsp = new Response();
 		$rsp->setSuccess(200, "get all post informations")
-			->bindValue("postId", $postID)
+			->bindValue("postID", $postID)
 			->bindValue("profileID", $this->model->getProfileID())
 			->bindValue("desc", $this->model->getDescription())
 			->bindValue("publishTime", $this->model->getPublishTime())
@@ -509,30 +549,49 @@ class PostController
 
 	public function like($postID)
 	{
+
+		// TODO ==> VERIFIER SI LE PROFIL EST PUBLIC / PRIVE 
+		//                                    FOLLOWED / PAS FOLLOWED
+		//        VOIR COMMENTCONTROLLER
+
 		if(!$this->setPost($postID))
-		{
 			return;
-		}
 
 		$resp = new Response();
 
 		//get ID
 		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
 		if(!isAuthorized::isUser($userID)){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
-
 			return;
 		}
 
-		$profileID = 1;
-
-		if($this->likeModel->like($postID, $profileID)){
-			$resp->setSuccess(200, "post liked");
-		}else{
-			$resp->setFailure(400, "post is not liked");
+		if(!$profileID){
+			$rsp->setFailure(401, "You don't have current profile selected")
+			    ->send();	
+			return;
 		}
+
+		//Si le post n'est pas encore like
+		if(!$this->likeModel->isLiked($postID, $profileID)){
+			//Si ce n'est pas son propre post
+			if($this->model->getProfileID() != $profileID){
+				//TODO => FOLLOW OU PAS FOLLOW
+				$this->likeModel->like($postID, $profileID);
+				$resp->setSuccess(200, "post liked")
+				     ->bindValue("postID", $postID)
+				     ->bindValue("profileID", $profileID);			
+			}else{
+				$resp->setFailure(400, "You can not like your own post");
+			}			
+		}else{
+			$resp->setFailure(400, "post already liked");
+		}
+
+		
 		$resp->send();
 
 	}
@@ -540,30 +599,67 @@ class PostController
 	public function unlike($postID)
 	{
 		if(!$this->setPost($postID))
-		{
 			return;
-		}
 
 		$resp = new Response();
 
+		//get ID
 		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
 		if(!isAuthorized::isUser($userID)){
 			$resp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
-
 			return;
 		}
-			
-		$profileID = 1;
 
-		if($this->likeModel->unlike($postID, $profileID)){
-			$resp->setSuccess(200, "post unliked");
+		if($this->likeModel->isLiked($postID, $profileID)){
+			$this->likeModel->unlike($postID, $profileID);
+			$resp->setSuccess(200, "post unliked")
+			     ->bindValue("postID", $postID)
+			     ->bindValue("profileID", $profileID);
 		}else{
-			$resp->setFailure(400, "post not unliked");
+			$resp->setFailure(400, "post not liked");
 		}
-		$resp->send();
 
+		$resp->send();
 	}
+
+	public function likes($postID)
+	{
+		if(!$this->setPost($postID))
+			return;
+
+		$resp = new Response();
+
+		$likes = $this->likeModel->getAllLikes($postID);
+		
+		$resp->setSuccess(200, "likes returned")
+		     ->bindValue("postID", $postID)
+		     ->bindValue("nbOfLikes", count($likes))
+		     ->bindValue("like", $likes)
+		     ->send();
+	}
+
+	/************************************/
+	/*********** COMMENTAIRES ***********/
+	/************************************/
+
+	public function comments($postID)
+	{
+		if(!$this->setPost($postID))
+			return;
+
+		$resp = new Response();
+
+		$coms = $this->commentModel->getComments($postID);
+
+		$resp->setSuccess(200, "comments returned")
+			 ->bindValue("postID", $postID)
+			 ->bindValue("nbOfComments", count($coms))
+			 ->bindValue("comments", $coms)
+		     ->send();
+	}
+
 
 }

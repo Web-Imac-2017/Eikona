@@ -39,6 +39,55 @@ class UserController{
 		return true;
 	}
 
+
+    /*********************/
+    /**** Confirm user methods */
+    /*********************/
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($userID)
+    {
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("exists", $this->model->exists($userID))
+            ->send();
+    }
+
+
+
+    /**
+     * Tell if the specified user is a moderator
+     * @param integer $userID User ID to verify
+     */
+    public function isModerator($userID)
+    {
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("isModerator", $this->model->isModerator($userID))
+            ->send();
+    }
+
+
+
+    /**
+     * Tell if the specified user is an administrator
+     * @param integer $userID User ID to verify
+     */
+    public function isAdmin($userID)
+    {
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("isAdmin", $this->model->isAdmin($userID))
+            ->send();
+    }
+
 	/**
 	 * Return all elements of an user
 	 * @return Response JSON
@@ -85,7 +134,7 @@ class UserController{
 
 		if($profiles){
 			$resp->setSuccess(200, "user profiles returned")
-			     ->bindValue("userID", $profiles[0]['user_id'])
+			     ->bindValue("userID", $userID)
 			     ->bindValue("nbOfProfiles", count($profiles))
 			     ->bindValue("profiles", $profiles);
 		}else{
