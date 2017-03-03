@@ -25,6 +25,7 @@ class BanController implements BanInterface
     public function __construct()
     {
         $this->wordsModel = new BannedWordsModel();
+        $this->emailsModel = new BannedEmailsModel();
     }
 
     public function add($type)
@@ -67,6 +68,32 @@ class BanController implements BanInterface
             ->send();
     }
 
+    private function addEmail()
+    {
+        $email = strtolower($_POST['email']);
+        
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            $rsp->setSuccess(400, "The given value is not an email.")
+                ->send();
+
+            return;
+        }
+        
+        $rsp = new Response();
+
+        if($this->emailsModel->add($email))
+        {
+            $rsp->setSuccess(200)
+                ->send();
+
+            return;
+        }
+
+        $rsp->setFailure(409, "The email is already banned")
+            ->send();
+    }
+
 
 
 
@@ -104,32 +131,60 @@ class BanController implements BanInterface
             ->send();
     }
 
+    private function removeEmail()
+    {
+        $email = strtolower($_POST['email']);
+        
+        $rsp = new Response();
+
+        $this->emailsModel->remove($email);
+        
+        $rsp->setSuccess(200)
+            ->send();
+    }
 
 
 
-    public function is($type)
+
+    public function is($type, $givenElt = NULL)
     {
         $rsp = new Response();
 
-        if($type === "word" && isset($_POST['word']))
-            return $this->isWordBan();
-
-        if($type === "email" && isset($_POST['email']))
-            return $this->isEmailBan();
-
+        if($type === "word" && (isset($_POST['word']) || !empty($givenElt)))
+        {
+            $word = isset($_POST['word']) ? $_POST['word'] : $givenElt;
+            return $this->isWordBan($word);
+        }
+           
+        if($type === "email" && (isset($_POST['email']) || !empty($givenElt)))
+        {
+            $email = isset($_POST['email']) ? $_POST['email'] : $givenElt;
+            return $this->isEmailBan($email);
+        }
+           
         $rsp->setFailure(400, "Your request couldn't be executed. Check for wrong arguments or missing values.")
             ->send();
     }
 
-    private function isWordBan()
+    private function isWordBan($word)
     {
-        $word = strtolower($_POST['word']);
+        $word = strtolower($word);
 
         $rsp = new Response();
         $rsp->setSuccess(200)
             ->bindValue("exists", $this->wordsModel->exists($word))
             ->send();
 
+    }
+
+    private function isEmailBan($email)
+    {
+        $email = strtolower($email);
+        
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("exists", $this->emailsModel->exists($email))
+            ->send();
     }
 
 
@@ -159,6 +214,17 @@ class BanController implements BanInterface
             ->bindValue("nbrWords", count($list))
             ->send();
 
+    }
+
+    private function getAllEmails()
+    {
+        $list = $this->emailsModel->getAll();
+
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("emails", $list)
+            ->bindValue("nbrEmails", count($list))
+            ->send();
     }
 
 
