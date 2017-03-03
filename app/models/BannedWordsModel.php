@@ -49,7 +49,7 @@ class BannedWordsModel extends DBInterface
      */
     public function getAll()
     {
-        $stmt = $this->cnx->prepare("SELECT * FROM banned_words ORDER BY word");
+        $stmt = $this->cnx->prepare("SELECT word FROM banned_words ORDER BY word");
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
