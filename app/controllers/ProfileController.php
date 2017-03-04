@@ -317,14 +317,6 @@ class ProfileController
     {
         $rsp = new Response();
 
-        if(!isAuthorized::seeFullProfile($profileID))
-        {
-            $rsp->setFailure(401, "You are not authorized to do this action")
-                ->send();
-
-            return;
-        }
-
         $nbrPosts = $this->postModel->nbrPosts($profileID);
 
         $rsp->setSuccess(200)
@@ -345,7 +337,7 @@ class ProfileController
 
         if(!isAuthorized::seeFullProfile($profileID))
         {
-            $rsp->setFailure(401, "You are not authorized to do this action")
+            $rsp->setFailure(401, "You cannot see this profile.")
                 ->send();
 
             return;
@@ -800,7 +792,7 @@ class ProfileController
 
         if(!isAuthorized::seeFullProfile($profileID))
         {
-            $rsp->setFailure(401, "You are not authorized to do this action")
+            $rsp->setFailure(401, "You cannot see this profile.")
                 ->send();
 
             return;
@@ -825,7 +817,7 @@ class ProfileController
 
         if(!isAuthorized::seeFullProfile($profileID))
         {
-            $rsp->setFailure(401, "You are not authorized to do this action")
+            $rsp->setFailure(401, "You cannot see this profile.")
                 ->send();
 
             return;
@@ -946,7 +938,7 @@ class ProfileController
      */
     public function confirmFollow($follower)
     {
-        $followed = Session::read("profileID") : $follower;
+        $followed = Session::read("profileID");
         $rsp = new Response();
 
         if(!isAuthorized::editProfile($followed))
@@ -973,7 +965,7 @@ class ProfileController
             return;
         }
 
-        $result = $this->followModel->confirmFollow($follower, $followed))
+        $result = $this->followModel->confirmFollow($follower, $followed);
 
         if($result === "notAProfile")
         {

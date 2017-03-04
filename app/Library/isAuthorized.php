@@ -123,9 +123,19 @@ class isAuthorized
      */
 
     //TODO
-    //Confirm the current user can view fully the given profile
+    //Confirm the current profile can view fully the given profile
     static public function seeFullProfile($profileID)
     {
+        if(self::isPrivateProfile($profileID))
+        {
+            if(Response::read("profile", "isFollowing", $profileID)['data']['isConfirmed'] === 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         return true;
     }
 
@@ -150,7 +160,8 @@ class isAuthorized
     static public function isPrivateProfile($profileID)
     {
         $data = Response::read("profile", "isPrivate", $profileID)['data'];
-        if($data['profileIsPrivate'] == 1)
+
+        if(isset($data['profileIsPrivate']) && $data['profileIsPrivate'] == 1)
             return true;
 
         return false;
