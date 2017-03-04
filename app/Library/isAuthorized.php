@@ -122,6 +122,30 @@ class isAuthorized
     On vérifie si le post appartient bien au profil actif
      */
 
+    //TODO
+    //Confirm the current profile can view fully the given profile
+    static public function seeFullProfile($profileID)
+    {
+        if(Session::read("profileID") == $profileID)
+        {
+            return true;
+        }
+
+        if(self::isPrivateProfile($profileID))
+        {
+            if(Response::read("profile", "isFollowing", $profileID)['data']['isConfirmed'] === 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+
     /***** Posts verifications *****/
 
     static public function editPost($postID)
@@ -131,6 +155,19 @@ class isAuthorized
         $data = Response::read("post", "display", $postID)['data'];
 
         if(!empty($data) && $data['profileID'] == $profileID)
+            return true;
+
+        return false;
+    }
+
+
+    Retourne si le profil est privé
+     */
+    static public function isPrivateProfile($profileID)
+    {
+        $data = Response::read("profile", "isPrivate", $profileID)['data'];
+
+        if(isset($data['profileIsPrivate']) && $data['profileIsPrivate'] == 1)
             return true;
 
         return false;
@@ -146,11 +183,6 @@ class isAuthorized
             return true;
 
         return false;
-    }
-
-    static public function seeFullProfile()
-    {
-        return true;
     }
 
 }

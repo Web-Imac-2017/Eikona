@@ -26,7 +26,7 @@ class FollowModel extends DBInterface
     }
 
     /**
-     * Tell is the current profile is already following the given profile
+     * Tell is the follower profile is already following the followed profile
      * @param  integer        $profileID profile followed
      * @param  integer        $profileID profile following
      * @return boolean string on failure, true on success
@@ -37,11 +37,49 @@ class FollowModel extends DBInterface
         $stmt->execute([":followed" => Sanitize::int($followed),
                         ":follower" => Sanitize::int($follower)]);
 
-        return $stmt->fetchColumn();
+        return intval($stmt->fetchColumn());
+    }
+    
+
+    /**
+     * Tell is the follower profile is subscribed to the followed profile
+     * @param  integer        $profileID profile followed
+     * @param  integer        $profileID profile following
+     * @return boolean string on failure, true on success
+     */
+    public function isSubscribed($follower, $followed)
+    {
+        if(!$this->isFollowing($follower, $followed))
+            return 0;
+            
+        $stmt = $this->cnx->prepare("SELECT follower_subscribed FROM followings WHERE followed_id = :followed AND follower_id = :follower");
+        $stmt->execute([":followed" => Sanitize::int($followed),
+                        ":follower" => Sanitize::int($follower)]);
+
+        return intval($stmt->fetchColumn());
+    }
+
+
+    /**
+     * Tell is the follower profile is subscribed to the followed profile
+     * @param  integer        $profileID profile followed
+     * @param  integer        $profileID profile following
+     * @return boolean string on failure, true on success
+     */
+    public function isConfirmed($follower, $followed)
+    {
+        if(!$this->isFollowing($follower, $followed))
+            return 0;
+
+        $stmt = $this->cnx->prepare("SELECT follow_confirmed FROM followings WHERE followed_id = :followed AND follower_id = :follower");
+        $stmt->execute([":followed" => Sanitize::int($followed),
+                        ":follower" => Sanitize::int($follower)]);
+
+        return intval($stmt->fetchColumn());
     }
 
     /**
-     * Follow a profile
+     * Follow a profile 
      * @param  integer        $profileID Profile to follow
      * @param  boolean        $subscribe Does the user want to subscribe
      * @return string|boolean true on success, string otherwise
@@ -62,13 +100,19 @@ class FollowModel extends DBInterface
             return "alreadyFollowing";
         }
 
+        $confirmed = 1;
+
+        if(isAuthorized::isPrivateProfile($profileID))
+            $confirmed = 0;
+
         $subscribe = Sanitize::boolean($subscribe);
 
-        $stmt = $this->cnx->prepare("INSERT INTO followings(follower_id, followed_id, following_time, follower_subscribed) VALUES(:follower, :followed, :time, :subscribe)");
+        $stmt = $this->cnx->prepare("INSERT INTO followings(follower_id, followed_id, following_time, follower_subscribed, follow_confirmed) VALUES(:follower, :followed, :time, :subscribe, :confirmed)");
         $stmt->execute([":follower" => $currentProfile,
                         ":followed" => $profileID,
                         ":time" => time(),
-                        ":subscribe" => $subscribe]);
+                        ":subscribe" => $subscribe,
+                        ":confirmed" => $confirmed]);
 
         return true;
     }
@@ -162,7 +206,7 @@ class FollowModel extends DBInterface
 
 
     /**
-     * Update subscription to stop receiving notifications
+     * Update subscription with given setting
      * @param  integer $profileID
      * @return boolean success or failure
      */
@@ -191,6 +235,37 @@ class FollowModel extends DBInterface
         $stmt = $this->cnx->prepare("UPDATE followings SET follower_subscribed = :newValue WHERE follower_id = :follower AND followed_id = :followed");
         $stmt->execute([":newValue" => $newValue,
                         ":follower" => $follower,
+                        ":followed" => $followed]);
+
+        return true;
+    }
+
+
+    /**
+     * Tell is the follower profile is subscribed to the followed profile
+     * @param  integer        $followed profile followed
+     * @param  integer        $follower profile following
+     * @return boolean string on failure, true on success
+     */
+    public function confirmFollow($follower, $followed)
+    {
+        $follower = Sanitize::int($follower);
+        $followed = Sanitize::int($followed);
+
+        $allow = $this->authorizeAction($followed, $follower);
+
+        if($allow !== "ok")
+        {
+            return $allow;
+        }
+
+        if(!$this->isFollowing($follower, $followed))
+        {
+            return false;
+        }
+
+        $stmt = $this->cnx->prepare("UPDATE followings SET follower_confirmed = 1 WHERE follower_id = :follower AND followed_id = :followed");
+        $stmt->execute([":follower" => $follower,
                         ":followed" => $followed]);
 
         return true;
