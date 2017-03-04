@@ -56,7 +56,7 @@ class ProfileModel extends DBInterface
         }
 
         //profile found
-        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
+        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $profileID]);
 
         $this->pID = $profileID;
@@ -65,6 +65,28 @@ class ProfileModel extends DBInterface
         return "success";
     }
 
+
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM profiles
+			WHERE profile_id = :id");
+		$stmt->execute([":id" => $profileID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
 
     /**
      * Create a new profile
@@ -127,7 +149,7 @@ class ProfileModel extends DBInterface
         if($id == 0) return false;
 
         $stmt = $this->cnx->prepare("
-            SELECT profile_id, user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private
+            SELECT profile_id, user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private
             FROM profiles
             WHERE :id = user_id");
         $stmt->execute([":id" => $id]);
@@ -155,6 +177,15 @@ class ProfileModel extends DBInterface
             return;
 
         return $this->p['profile_desc'];
+    }
+
+
+    public function getPict()
+    {
+        if($this->pID == -1)
+            return;
+
+        return $this->p['profile_picture'];
     }
 
     /**
@@ -242,6 +273,24 @@ class ProfileModel extends DBInterface
         return true;
     }
 
+
+
+    public function updatePict($newPictName)
+    {
+        if($this->pID == -1)
+            return false;
+
+        $newPictName = Sanitize::string($newPictName);
+
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_picture = :pict WHERE profile_id = :pID");
+        $stmt->execute([":pict" => $newPictName,
+                        ":pID" => $this->pID]);
+
+        $this->p['profile_picture'] = $newPictName;
+
+        return true;
+    }
+
     /**
      * Update the profile picture
      */
@@ -301,6 +350,47 @@ class ProfileModel extends DBInterface
 
         return true;
     }
+
+
+    /******* Followers ********/
+
+    /**
+     * Return a list of the followers of the given profile
+     * @param  integer $profileID Profile to use
+     * @return array   Followers list
+     */
+    public function getFollowers($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.follower_id = profiles.profile_id WHERE followings.followed_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Return the list of the profile followed by the given account
+     * @param  integer $profileID Profile to use
+     * @return array   Following list
+     */
+    public function getFollowings($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, followings.follower_subscribed FROM profiles JOIN followings ON followings.followed_id = profiles. profile_id WHERE followings.follower_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+
+
+
+
+
 
 
     /**

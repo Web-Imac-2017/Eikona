@@ -8,7 +8,7 @@ class CommentController
 
 	public function __construct()
 	{
-		$this->model = new CommentModel();
+		$this->model     = new CommentModel();
 		$this->likeModel = new CommentLikeModel();
 		$this->postModel = new PostModel();
 	}
@@ -139,30 +139,43 @@ class CommentController
 	 */
 	public function like($commentID)
 	{
-		$rsp = new Response();
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
-		$profile = Session::read("profileID");
-		
-		if(!$profile)
-		{
-			$rsp->setFailure(401, "You must be connected to be able to like.")
-				->send();
-
+		if(!$this->setComment($commentID))
 			return;
-		}
-		
-		$rslt = $this->likeModel->like($profile, $commentID);
 
-		if(!$rslt)
-		{
-			$rsp->setFailure(400, "Wrong given parameters")
-				->send();
+		$resp = new Response();
 
-			return;
-		}
+		// TODO : LIKE QUE SI POST NE PROVIENT PAS D'UN PROFIL PRIVE
 
-		$rsp->setSuccess(201)
-			->send();
+		//Si l'user est connecté
+		if(isAuthorized::isUser($userID)){
+			//S'il a un profil courant
+			if($profileID){
+				//S'il n'a pas encore aimé le post
+				if(!$this->likeModel->isLiked($profileID, $commentID)){
+					//Si ce n'est pas son propre comment
+					if($this->model->getProfileID() != $profileID){
+						$this->likeModel->like($profileID, $commentID);
+						$resp->setSuccess(201, "comment liked")
+					    	 ->bindValue("commentID", $commentID)
+					     	 ->bindValue("profileID", $profileID);
+					}else{
+						$resp->setFailure(400, "You can not like your own comment");
+				   	}	
+				}else{
+					$resp->setFailure(400, "comment already liked");
+				}				
+			}else{
+				$resp->setFailure(401, "You don't have current profile selected");
+			}
+		}else{
+			$resp->setFailure(401, "You are not authorized to do this action.");
+		}	
+
+		$resp->send();
+
 	}
 
 	/*
@@ -171,59 +184,44 @@ class CommentController
 	 */
 	public function unlike($commentID)
 	{
-		$rsp = new Response();
+		$userID = Session::read("userID");
+		$profileID = Session::read("profileID");
 
-		$profile = Session::read("profileID");
-		
-		if(!$profile)
-		{
-			$rsp->setFailure(401, "You must be connected to be able to unlike.")
-				->send();
-
+		if(!$this->setComment($commentID))
 			return;
+
+		$resp = new Response();
+
+		if(isAuthorized::isUser($userID)){
+			if($this->likeModel->isLiked($profileID, $commentID)){
+				$this->likeModel->unlike($profileID, $commentID);
+				$resp->setSuccess(200, "comment unliked")
+			         ->bindValue("commentID", $commentID)
+			         ->bindValue("profileID", $profileID);
+			}else{
+				$resp->setFailure(400, "post not liked");
+			}
+		}else{
+			$resp->setFailure(401, "You are not authorized to do this action.");
 		}
 
-		if(!$this->isLiking($profile, $commentID))
-		{
-			$rsp->setFailure(400, "You don't like this comment")
-				->send();
-
-			return;
-		}
-
-		$rslt = $this->likeModel->unlike($profile, $commentID);
-		
-		if(!$rslt)
-		{
-			$rsp->setFailure(400, "Wrong given parameters")
-				->send();
-
-			return;
-		}
-
-		$rsp->setSuccess(201)
-			->send();
+		$resp->send();
 	}
 
-	/*
-	 * renvoie le nombre de likes d'un commentaire
-	 *
-	 */
-	public function getLikes($commentID)
+	public function likes($commentID)
 	{
-		$nbLikes = $this->likeModel->getLikes($commentID);
+		if(!$this->setComment($commentID))
+			return;
+			
+		$resp = new Response();
 
-		return $nbLikes;
+		$likes = $this->likeModel->getLikes($commentID);
+
+		$resp->setSuccess(200, "likes comment returnded")
+		     ->bindValue("commentID", $commentID)
+		     ->bindValue("nbOfLikes", count($likes))
+		     ->bindValue("likes", $likes)
+		     ->send();	
 	}
 
-	/*
-	 * renvoie true si le commentaire est déja aimé par le profil, false sinon
-	 *
-	 */
-	public function isLiking($profileID, $commentID)
-	{
-		$isLiking = $this->likeModel->isLiking($profileID, $commentID);
-
-		return $isLiking;
-	}
 }

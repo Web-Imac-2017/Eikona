@@ -59,7 +59,6 @@ class CommentModel extends DBInterface
         return $this->commentDatas['profile_id'];
     }
 
-
     /**
      * Create a new comment
      *
