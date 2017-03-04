@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <topHeader></topHeader>
-    <inscription></inscription>
     <router-view></router-view>
     <mainFooter></mainFooter>
   </div>
@@ -25,4 +24,4 @@ export default {
 </script>
 
 <style lang="css" scoped>
-</style>s
+</style>
