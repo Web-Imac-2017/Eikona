@@ -105,7 +105,7 @@ class FollowModel extends DBInterface
         if(isAuthorized::isPrivateProfile($profileID))
             $confirmed = 0;
 
-        $subscribe = Sanitize::boolean($subscribe);
+        $subscribe = Sanitize::booleanToInt($subscribe);
 
         $stmt = $this->cnx->prepare("INSERT INTO followings(follower_id, followed_id, following_time, follower_subscribed, follow_confirmed) VALUES(:follower, :followed, :time, :subscribe, :confirmed)");
         $stmt->execute([":follower" => $currentProfile,
