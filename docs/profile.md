@@ -1012,6 +1012,49 @@ Data:
 {
     isFollowing : 1 si le followed est suivant par le profil follower, 0 sinon.
     isSubscribed : 1 si le follower est abonné au profil followed, 0 sinon.
+    isConfirmed : 1 si l'abonnement est confirmé, 0 sinon
 }
 ```
     
+    
+
+
+
+
+
+
+
+## Confirmer un abonnement
+
+Confirme une demande d'abonnement lorsque le profil est privée
+
+### URL
+```
+/profile/confirmFollow/<followerID>
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **followerID** : Profil ayant fait la demande de following
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ }
+```
+
+### Erreurs
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Vous n'êtes pas autorisé à modifier ce profil OU Vous n'êtes pas connecté
+    
+    OU
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** Vous ne pouvez pas ne plus recevoir les notification si vous n'êtes pas abonné
+    confirmFollow
