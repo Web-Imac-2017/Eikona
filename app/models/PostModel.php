@@ -4,6 +4,7 @@ class PostModel extends DBInterface
 {
     private $postID = -1;
     private $postDatas = null;
+	private $tags = null;
 
     public function __construct($postID = -1)
     {
@@ -474,5 +475,26 @@ class PostModel extends DBInterface
 
 		return true;
     }
+
+	/*
+	 * Get all the post with the tagName given
+	 * Do we need a limit ?
+	 */
+	public function tag($tagName)
+	{
+		$stmt = $this->cnx->prepare("SELECT post_id FROM tags WHERE tag_name = :tagName ORDER BY use_time DESC");
+        $stmt->execute([":tagName" => $tagName]);
+
+// C'est la où ça merde
+//		$stmt->bindColumn(1, $post_id);
+//
+//		while ($row = $stmt->fetch(PDO::FETCH_BOUND)) {
+//			$data = $post_id;
+//			echo $data . "\n";
+//    	}
+//
+//		return $data;
+	}
+
 
 }
