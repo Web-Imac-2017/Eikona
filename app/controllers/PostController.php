@@ -336,6 +336,12 @@ class PostController
 				}
 			break;
 
+			case "state":
+				var_dump(isAuthorized::isAdmin($userID));
+				var_dump(isAuthorized::isModerator($userID));
+				die();
+			break;
+
 			default;
 				$rsp->setFailure(405);
 		}
@@ -365,10 +371,18 @@ class PostController
 		$rsp->send();
 	}
 
+	/*****************************************************************************/
+	/*
+		LES METHODES QUI SUIVENT SONT DES GETTER ET N'ONT PAS LEIU D'ETRE DANS LE 
+		CONTROLLER. POUR LES UTILISER DEPUIS UN AUTRE CONTROLLER, IL FAUT INCLURE 
+		LE MODELE POST.
+    */
+	/*****************************************************************************/
+
 	/*
 	 * Get the geo of the post with the given ID
 	 */
-	public function geo($postID)
+	/*public function geo($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -388,12 +402,12 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get the description of the post with the given ID
 	 */
-	public function description($postID)
+	/*public function description($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -413,12 +427,12 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get the time the post was publish with the given ID
 	 */
-	public function publishTime($postID)
+	/*public function publishTime($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -438,13 +452,13 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get the state of the post with the given ID
 	 * 1 if publish, 2 is moderation, not visible
 	 */
-	public function state($postID)
+	/*public function state($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -465,12 +479,12 @@ class PostController
 
 		$rsp->send();
 	}
-
+*/
 	/*
 	 * Get if the comments are allowed of the post with the given ID
 	 * 1 is allowed, 0 isn't allowed
 	 */
-	public function allowComments($postID)
+	/*public function allowComments($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -490,13 +504,13 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get if the post with the given ID is approved
 	 * 1 is approved, 0 isn't approved yet
 	 */
-	public function approved($postID)
+	/*public function approved($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -516,7 +530,7 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get the time the post with the given ID is update
