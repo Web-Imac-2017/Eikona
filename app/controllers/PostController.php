@@ -337,14 +337,13 @@ class PostController
 			break;
 
 			case "state":
-				if(isAuthorized::isModerator($userID)['data']['isModerator'] == true ||
-				   isAuthorized::isAdmin($userID)['data']['isAdmin'] == true){
+				if(isAuthorized::isModerator($userID) || isAuthorized::isAdmin($userID)){
 					if(!empty($_POST['state'])){
 						if($_POST['state'] == 1 || $_POST['state'] == 2){
 							$newState = $this->model->updateState($_POST['state']);
 
 							if($newState === false){
-								$rsp->setFailure(400);
+								$rsp->setFailure(400, "error during request");
 							}else{
 								$rsp->setSuccess(200)
 									->bindValue("postID", $postID)
@@ -356,7 +355,7 @@ class PostController
 					}else{
 						$rsp->setFailure(400, "Edit aborted. Missing value.");
 					}
-				}else{
+				}else{  
 					$rsp->setFailure(401, "You are not authorized to do this action.");
 				}
 			break;
@@ -365,30 +364,15 @@ class PostController
 				$rsp->setFailure(405);
 		}
 
-		$rsp->send();
-	}
-
-	/*
-	 * Update the state of a post
-	 */
-	public function updateState($postID)
-	{
-		$this->model->setPost($postID);
-
-		$newState = $this->model->updateState($_POST['state']);
-
-		$rsp = new Response();
-
-		if($newState === false){
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("state", $this->model->getState());
+		$code = $rsp->getCode();
+		if($code >= 200 && $code <= 210){
+			$date = $this->model->updateTime($postID);
+			$rsp->bindValue("updateTime", $date);
 		}
 
 		$rsp->send();
 	}
+
 
 	/*****************************************************************************/
 	/*
@@ -551,30 +535,6 @@ class PostController
 		$rsp->send();
 	}*/
 
-	/*
-	 * Get the time the post with the given ID is update
-	 */
-	public function updateTime($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$updateTime = $this->model->getUpdateTime();
-		$rsp = new Response();
-
-		if($updateTime === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("UpdateTime", $updateTime);
-		}
-
-		$rsp->send();
-	}
 
 	/************************************/
 	/*************** LIKE ***************/

@@ -401,6 +401,18 @@ class PostModel extends DBInterface
 		return $name;
     }
 
+    public function updateTime($postID)
+    {
+        $time = time();
+        
+        $stmt = $this->cnx->prepare("
+            UPDATE posts SET post_edit_time = :time
+            WHERE :postID = post_id");
+        $stmt->execute([":time" => $time,
+                        ":postID" => $postID]);
+        return $time;
+    }
+
     /*
      * Allow comments for the post
      *

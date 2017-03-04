@@ -143,6 +143,10 @@ class Response
         echo json_encode($json);
     }
 
+    public function getCode(){
+        return $this->code;
+    }
+
     /**
      * Send the response
      */

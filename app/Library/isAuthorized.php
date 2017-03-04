@@ -160,7 +160,7 @@ class isAuthorized
         return false;
     }
 
-
+    /*
     Retourne si le profil est privé
      */
     static public function isPrivateProfile($profileID)
