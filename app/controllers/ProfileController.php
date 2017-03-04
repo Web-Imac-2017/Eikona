@@ -694,7 +694,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -754,7 +753,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -842,6 +840,13 @@ class ProfileController
             ->send();
     }
 
+
+
+    /**
+     * Update subscription with given setting
+     * @param  integer $profileID
+     * @return boolean success or failure
+     */
     public function subscribe($profileID)
     {
         $rsp = new Response();
@@ -858,7 +863,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -877,6 +881,13 @@ class ProfileController
             ->send();
     }
 
+
+
+    /**
+     * Update subscription with given setting
+     * @param  integer $profileID
+     * @return boolean success or failure
+     */
     public function unsubscribe($profileID)
     {
         $rsp = new Response();
@@ -893,7 +904,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -910,6 +920,80 @@ class ProfileController
 
         $rsp->setSuccess(200)
             ->send();
+    }
+
+    /**
+     * Tell if the follower is following the followed
+     * @param integer $follower Follower ID
+     * @param integer $followed ID of profile followed
+     */
+    public function isFollowing($followed, $follower = -1)
+    {
+        $follower = $follower == -1 ? Session::read("profileID") : $follower;
+
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("isFollowing", $this->followModel->isFollowing($follower, $followed))
+            ->bindValue("isSubscribed", $this->followModel->isSubscribed($follower, $followed))
+            ->bindValue("isConfirmed", $this->followModel->isConfirmed($follower, $followed))
+            ->send();
+    }
+
+    /**
+     * Confirm the follow request
+     * @param integer $follower Follower ID
+     * @param integer $followed ID of profile followed
+     */
+    public function confirmFollow($follower)
+    {
+        $followed = Session::read("profileID") : $follower;
+        $rsp = new Response();
+
+        if(!isAuthorized::editProfile($followed))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+
+            return;
+        }
+
+        if(!$followed)
+        {
+            $rsp->setFailure(401, "You must be connected to do this.")
+                ->send();
+
+            return;
+        }
+
+        if($followed === $follower)
+        {
+            $rsp->setFailure(401, "You cannot do this.")
+                ->send();
+
+            return;
+        }
+
+        $result = $this->followModel->confirmFollow($follower, $followed))
+
+        if($result === "notAProfile")
+        {
+            $rsp->setFailure(400, "The given parameter is not a valid profile ID.")
+                ->send();
+
+            return;
+        }
+
+        if($result === false)
+        {
+
+            $rsp->setFailure(400, "This following does not exist")
+                ->send();
+
+            return;
+        }
+
+        $rsp->setSuccess(200)
+            ->send;
     }
 }
 ?>
