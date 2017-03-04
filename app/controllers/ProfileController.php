@@ -913,8 +913,10 @@ class ProfileController
      * @param integer $follower Follower ID
      * @param integer $followed ID of profile followed
      */
-    public function isFollowing($follower, $followed)
+    public function isFollowing($followed, $follower = -1)
     {
+        $follower = $follower == -1 ? Session::read("profileID") : $follower;
+
         $rsp = new Response();
         $rsp->setSuccess(200)
             ->bindValue("isFollowing", $this->followModel->isFollowing($follower, $following))
