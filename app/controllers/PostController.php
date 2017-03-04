@@ -215,21 +215,24 @@ class PostController
 	public function display($postID)
 	{
 		if(!$this->setPost($postID))
-		{
 			return;
-		}
+
+		$data = $this->model->getFullPost();
 
 		$rsp = new Response();
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
-			->bindValue("profileID", $this->model->getProfileID())
-			->bindValue("desc", $this->model->getDescription())
-			->bindValue("publishTime", $this->model->getPublishTime())
-			->bindValue("allowComments", $this->model->getAllowComments())
-			->bindValue("approved", $this->model->getApproved())
-			->bindValue("getUpdateTime", $this->model->getUpdateTime())
-			->bindValue("state", $this->model->getState())
-			->bindValue("geo", $this->model->getGeo())
+			->bindValue("profileID", $data['profile_id'])
+			->bindValue("desc", $data['post_description'])
+			->bindValue("publishTime", $data['post_publish_time'])
+			->bindValue("updateTime", $data['post_edit_time'])
+			->bindValue("allowComments", $data['post_allow_comments'])
+			->bindValue("approved", $data['post_approved'])
+			->bindValue("state", $data['post_state'])
+			->bindValue("geo", ['lat' => $data['post_geo_lat'],
+				                'lng' => $data['post_geo_lng'],
+							    'name' => $data['post_geo_name']
+								])
 			->send();
 	}
 
