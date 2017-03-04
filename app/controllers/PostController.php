@@ -223,21 +223,24 @@ class PostController
 	public function display($postID)
 	{
 		if(!$this->setPost($postID))
-		{
 			return;
-		}
+
+		$data = $this->model->getFullPost();
 
 		$rsp = new Response();
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
-			->bindValue("profileID", $this->model->getProfileID())
-			->bindValue("desc", $this->model->getDescription())
-			->bindValue("publishTime", $this->model->getPublishTime())
-			->bindValue("allowComments", $this->model->getAllowComments())
-			->bindValue("approved", $this->model->getApproved())
-			->bindValue("getUpdateTime", $this->model->getUpdateTime())
-			->bindValue("state", $this->model->getState())
-			->bindValue("geo", $this->model->getGeo())
+			->bindValue("profileID", $data['profile_id'])
+			->bindValue("desc", $data['post_description'])
+			->bindValue("publishTime", $data['post_publish_time'])
+			->bindValue("updateTime", $data['post_edit_time'])
+			->bindValue("allowComments", $data['post_allow_comments'])
+			->bindValue("approved", $data['post_approved'])
+			->bindValue("state", $data['post_state'])
+			->bindValue("geo", ['lat' => $data['post_geo_lat'],
+				                'lng' => $data['post_geo_lng'],
+							    'name' => $data['post_geo_name']
+								])
 			->send();
 	}
 
@@ -301,7 +304,10 @@ class PostController
 					} else {
 						$rsp->setSuccess(200)
 							->bindValue("postID", $postID)
-							->bindValue("postGeo", $this->model->getGeo());
+							->bindValue("postGeo", ["lat" => $lat,
+								                    "lng" => $lng,
+								                    "name" => $name
+								                   ]);
 					}
 				} else {
 					$rsp->setFailure(400, "Missing value. Edit aborted.");
@@ -316,7 +322,7 @@ class PostController
 				} else {
 					$rsp->setSuccess(200)
 						->bindValue("postID", $postID)
-						->bindValue("allowComments", $this->model->allowComments());
+						->bindValue("allowComments", $allowComments);
 				}
 			break;
 
@@ -328,7 +334,7 @@ class PostController
 				} else {
 					$rsp->setSuccess(200)
 						->bindValue("postID", $postID)
-						->bindValue("disableComments", $this->model->disableComments());
+						->bindValue("disableComments", $disableComments);
 				}
 			break;
 
@@ -340,7 +346,31 @@ class PostController
 				} else {
 					$rsp->setSuccess(200)
 						->bindValue("postID", $postID)
-						->bindValue("postApproved", $this->model->updatePostApproved());
+						->bindValue("postApproved", $postApproved);
+				}
+			break;
+
+			case "state":
+				if(isAuthorized::isModerator($userID) || isAuthorized::isAdmin($userID)){
+					if(!empty($_POST['state'])){
+						if($_POST['state'] == 1 || $_POST['state'] == 2){
+							$newState = $this->model->updateState($_POST['state']);
+
+							if($newState === false){
+								$rsp->setFailure(400, "error during request");
+							}else{
+								$rsp->setSuccess(200)
+									->bindValue("postID", $postID)
+									->bindValue("state", $newState);
+							}
+						}else{
+							$rsp->setFailure(400, "Wrong value for state");
+						}						
+					}else{
+						$rsp->setFailure(400, "Edit aborted. Missing value.");
+					}
+				}else{  
+					$rsp->setFailure(401, "You are not authorized to do this action.");
 				}
 			break;
 
@@ -348,35 +378,28 @@ class PostController
 				$rsp->setFailure(405);
 		}
 
-		$rsp->send();
-	}
-
-	/*
-	 * Update the state of a post
-	 */
-	public function updateState($postID)
-	{
-		$this->model->setPost($postID);
-
-		$newState = $this->model->updateState($_POST['state']);
-
-		$rsp = new Response();
-
-		if($newState === false){
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("state", $this->model->getState());
+		$code = $rsp->getCode();
+		if($code >= 200 && $code <= 210){
+			$date = $this->model->updateTime($postID);
+			$rsp->bindValue("updateTime", $date);
 		}
 
 		$rsp->send();
 	}
 
+
+	/*****************************************************************************/
+	/*
+		LES METHODES QUI SUIVENT SONT DES GETTER ET N'ONT PAS LEIU D'ETRE DANS LE 
+		CONTROLLER. POUR LES UTILISER DEPUIS UN AUTRE CONTROLLER, IL FAUT INCLURE 
+		LE MODELE POST.
+    */
+	/*****************************************************************************/
+
 	/*
 	 * Get the geo of the post with the given ID
 	 */
-	public function geo($postID)
+	/*public function geo($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -396,12 +419,12 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get the description of the post with the given ID
 	 */
-	public function description($postID)
+	/*public function description($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -421,12 +444,12 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get the time the post was publish with the given ID
 	 */
-	public function publishTime($postID)
+	/*public function publishTime($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -446,13 +469,13 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get the state of the post with the given ID
 	 * 1 if publish, 2 is moderation, not visible
 	 */
-	public function state($postID)
+	/*public function state($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -473,12 +496,12 @@ class PostController
 
 		$rsp->send();
 	}
-
+*/
 	/*
 	 * Get if the comments are allowed of the post with the given ID
 	 * 1 is allowed, 0 isn't allowed
 	 */
-	public function allowComments($postID)
+	/*public function allowComments($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -498,13 +521,13 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
 	/*
 	 * Get if the post with the given ID is approved
 	 * 1 is approved, 0 isn't approved yet
 	 */
-	public function approved($postID)
+	/*public function approved($postID)
 	{
 		if(!$this->setPost($postID))
 		{
@@ -524,32 +547,8 @@ class PostController
 		}
 
 		$rsp->send();
-	}
+	}*/
 
-	/*
-	 * Get the time the post with the given ID is update
-	 */
-	public function updateTime($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$updateTime = $this->model->getUpdateTime();
-		$rsp = new Response();
-
-		if($updateTime === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("UpdateTime", $updateTime);
-		}
-
-		$rsp->send();
-	}
 
 	/************************************/
 	/*************** LIKE ***************/
@@ -558,7 +557,7 @@ class PostController
 	public function like($postID)
 	{
 
-		// TODO ==> VERIFIER SI LE PROFIL EST PUBLIC / PRIVE F
+		// TODO ==> VERIFIER SI LE PROFIL EST PUBLIC / PRIVE 
 		//                                    FOLLOWED / PAS FOLLOWED
 		//        VOIR COMMENTCONTROLLER
 
@@ -583,17 +582,15 @@ class PostController
 			return;
 		}
 
-
+		//Si le post n'est pas encore like
 		if(!$this->likeModel->isLiked($postID, $profileID)){
+			//Si ce n'est pas son propre post
 			if($this->model->getProfileID() != $profileID){
-				if(!isAuthorized::isPrivateProfile($this->model->getProfileID())){
-					$this->likeModel->like($postID, $profileID);
-					$resp->setSuccess(200, "post liked")
-					     ->bindValue("postID", $postID)
-					     ->bindValue("profileID", $profileID);
-				}else{
-					$resp->setFailure(400, "profile is private");
-				}				
+				//TODO => FOLLOW OU PAS FOLLOW
+				$this->likeModel->like($postID, $profileID);
+				$resp->setSuccess(200, "post liked")
+				     ->bindValue("postID", $postID)
+				     ->bindValue("profileID", $profileID);			
 			}else{
 				$resp->setFailure(400, "You can not like your own post");
 			}			

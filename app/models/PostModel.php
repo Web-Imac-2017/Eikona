@@ -48,7 +48,7 @@ class PostModel extends DBInterface
         }
 
         //Post found
-        $stmt = $this->cnx->prepare("SELECT post_id, profile_id, post_type, post_extension, post_description, post_publish_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
+        $stmt = $this->cnx->prepare("SELECT post_id, profile_id, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $postID]);
 
         $this->postID = $postID;
@@ -122,6 +122,11 @@ class PostModel extends DBInterface
         $this->postDatas['post_geo_lng'] = $name;
     }
 
+    public function getFullPost()
+    {
+        return $this->postDatas;
+    }
+
     /*
      * Get the profileID of the post
      *
@@ -134,107 +139,6 @@ class PostModel extends DBInterface
         }
 
         return $this->postDatas['profile_id'];
-    }
-
-    /*
-     * Get the state of the post
-     *
-     */
-    public function getState()
-    {
-        if($this->postID == 0)
-        {
-            return 0;
-        }
-
-        return $this->postDatas['post_state'];
-    }
-
-    /*
-     * Get the Geo latitude, longitude and position of the post
-     *
-     */
-    public function getGeo()
-    {
-        if($this->postID == 0)
-        {
-            return false;
-        }
-
-        $tabGeo[0] = $this->postDatas['post_geo_lat'];
-        $tabGeo[1] = $this->postDatas['post_geo_lng'];
-        $tabGeo[2] = $this->postDatas['post_geo_name'];
-
-        return $tabGeo;
-    }
-
-    /*
-     * Get the description of the post
-     *
-     */
-    public function getDescription()
-    {
-        if($this->postID == 0)
-        {
-            return 0;
-        }
-
-        return $this->postDatas['post_description'];
-
-    }
-
-    /*
-     * Get the time when the post was published
-     *
-     */
-    public function getPublishTime()
-    {
-        if($this->postID == 0)
-        {
-            return 0;
-        }
-        return $this->postDatas['post_publish_time'];
-    }
-
-    /*
-     * Get the state of enableness of the comments
-     *
-     */
-    public function getAllowComments()
-    {
-        if($this->postID == 0)
-        {
-            return 0;
-        }
-        return $this->postDatas['post_allow_comments'];
-    }
-
-    /*
-     * Get the state of approvment of the post
-     *
-     */
-    public function getApproved()
-    {
-        if($this->postID == 0)
-        {
-            return 0;
-        }
-        return $this->postDatas['post_allow_comments'];
-    }
-
-    /*
-     * Get the time when the post was edited
-     *
-     */
-    public function getUpdateTime()
-    {
-        if($this->postID == 0)
-        {
-            return 0;
-        }
-
-        $stmt = $this->cnx->prepare("SELECT post_edit_time FROM posts WHERE post_id = :postID");
-        $stmt->execute([":postID" => $this->postID]);
     }
 
 
@@ -285,9 +189,6 @@ class PostModel extends DBInterface
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
     }
-
-
-
 
 
     /**
@@ -400,6 +301,18 @@ class PostModel extends DBInterface
         $this->postDatas['post_geo_name'] = $name;
 
 		return $name;
+    }
+
+    public function updateTime($postID)
+    {
+        $time = time();
+
+        $stmt = $this->cnx->prepare("
+            UPDATE posts SET post_edit_time = :time
+            WHERE :postID = post_id");
+        $stmt->execute([":time" => $time,
+                        ":postID" => $postID]);
+        return $time;
     }
 
     /*
