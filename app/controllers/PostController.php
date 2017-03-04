@@ -296,7 +296,10 @@ class PostController
 					} else {
 						$rsp->setSuccess(200)
 							->bindValue("postID", $postID)
-							->bindValue("postGeo", $this->model->getGeo());
+							->bindValue("postGeo", ["lat" => $lat,
+								                    "lng" => $lng,
+								                    "name" => $name
+								                   ]);
 					}
 				} else {
 					$rsp->setFailure(400, "Missing value. Edit aborted.");
@@ -311,7 +314,7 @@ class PostController
 				} else {
 					$rsp->setSuccess(200)
 						->bindValue("postID", $postID)
-						->bindValue("allowComments", $this->model->allowComments());
+						->bindValue("allowComments", $allowComments);
 				}
 			break;
 
@@ -323,7 +326,7 @@ class PostController
 				} else {
 					$rsp->setSuccess(200)
 						->bindValue("postID", $postID)
-						->bindValue("disableComments", $this->model->disableComments());
+						->bindValue("disableComments", $disableComments);
 				}
 			break;
 
@@ -335,7 +338,7 @@ class PostController
 				} else {
 					$rsp->setSuccess(200)
 						->bindValue("postID", $postID)
-						->bindValue("postApproved", $this->model->updatePostApproved());
+						->bindValue("postApproved", $postApproved);
 				}
 			break;
 
@@ -350,7 +353,7 @@ class PostController
 							}else{
 								$rsp->setSuccess(200)
 									->bindValue("postID", $postID)
-									->bindValue("state", $this->model->getState());
+									->bindValue("state", $newState);
 							}
 						}else{
 							$rsp->setFailure(400, "Wrong value for state");
