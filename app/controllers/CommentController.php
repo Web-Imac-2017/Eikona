@@ -13,8 +13,6 @@ class CommentController
 		$this->postModel = new PostModel();
 	}
 
-
-
 	private function setComment($commentID)
 	{
 		$result = $this->model->setComment($commentID);
@@ -57,12 +55,17 @@ class CommentController
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
+
+
 		$resp = new Response();
 
 		//Si c'est bien un post
 		if(isAuthorized::isPost($postID)){
 
 			$this->postModel->setPost($postID);
+			var_dump("profile actif = " .$profileID);
+			var_dump("profile post = ".$this->postModel->getProfileID());
+			die();
 
 			//Si les commentaires sont autorisés
 			if($this->postModel->getAllowComments()){

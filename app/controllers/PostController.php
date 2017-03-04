@@ -223,11 +223,18 @@ class PostController
 	public function display($postID)
 	{
 		if(!$this->setPost($postID))
-			return;
-
-		$data = $this->model->getFullPost();
+			return;	
 
 		$rsp = new Response();
+
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+			$rsp->setFailure(401, "You can not see this post")
+			    ->send();
+			return;
+		}		
+
+		$data = $this->model->getFullPost();
+		
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
 			->bindValue("profileID", $data['profile_id'])
@@ -388,179 +395,12 @@ class PostController
 	}
 
 
-	/*****************************************************************************/
-	/*
-		LES METHODES QUI SUIVENT SONT DES GETTER ET N'ONT PAS LEIU D'ETRE DANS LE 
-		CONTROLLER. POUR LES UTILISER DEPUIS UN AUTRE CONTROLLER, IL FAUT INCLURE 
-		LE MODELE POST.
-    */
-	/*****************************************************************************/
-
-	/*
-	 * Get the geo of the post with the given ID
-	 */
-	/*public function geo($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$geo = $this->model->getGeo();
-		$rsp = new Response();
-
-		if($geo === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("geo", $geo);
-		}
-
-		$rsp->send();
-	}*/
-
-	/*
-	 * Get the description of the post with the given ID
-	 */
-	/*public function description($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$desc = $this->model->getDescription();
-		$rsp = new Response();
-
-		if($desc === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("desc", $desc);
-		}
-
-		$rsp->send();
-	}*/
-
-	/*
-	 * Get the time the post was publish with the given ID
-	 */
-	/*public function publishTime($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$publishTime = $this->model->getPublishTime();
-		$rsp = new Response();
-
-		if($publishTime === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("publishTime", $publishTime);
-		}
-
-		$rsp->send();
-	}*/
-
-	/*
-	 * Get the state of the post with the given ID
-	 * 1 if publish, 2 is moderation, not visible
-	 */
-	/*public function state($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$state = $this->model->getState();
-		$rsp = new Response();
-
-		if($state === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("state", $state);
-		}
-
-		$rsp->send();
-	}
-*/
-	/*
-	 * Get if the comments are allowed of the post with the given ID
-	 * 1 is allowed, 0 isn't allowed
-	 */
-	/*public function allowComments($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$allowComments = $this->model->getAllowComments();
-		$rsp = new Response();
-
-		if($allowComments === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("allowComments", $allowComments);
-		}
-
-		$rsp->send();
-	}*/
-
-	/*
-	 * Get if the post with the given ID is approved
-	 * 1 is approved, 0 isn't approved yet
-	 */
-	/*public function approved($postID)
-	{
-		if(!$this->setPost($postID))
-		{
-			return;
-		}
-
-		$approved = $this->model->getApproved();
-		$rsp = new Response();
-
-		if($approved === false)
-		{
-			$rsp->setFailure(400);
-		} else {
-			$rsp->setSuccess(200)
-				->bindValue("postID", $postID)
-				->bindValue("Approved", $approved);
-		}
-
-		$rsp->send();
-	}*/
-
-
 	/************************************/
 	/*************** LIKE ***************/
 	/************************************/
 
 	public function like($postID)
 	{
-
-		// TODO ==> VERIFIER SI LE PROFIL EST PUBLIC / PRIVE 
-		//                                    FOLLOWED / PAS FOLLOWED
-		//        VOIR COMMENTCONTROLLER
-
 		if(!$this->setPost($postID))
 			return;
 
@@ -586,11 +426,14 @@ class PostController
 		if(!$this->likeModel->isLiked($postID, $profileID)){
 			//Si ce n'est pas son propre post
 			if($this->model->getProfileID() != $profileID){
-				//TODO => FOLLOW OU PAS FOLLOW
-				$this->likeModel->like($postID, $profileID);
-				$resp->setSuccess(200, "post liked")
-				     ->bindValue("postID", $postID)
-				     ->bindValue("profileID", $profileID);			
+				if(isAuthorized::seeFullProfile($this->model->getProfileID())){
+					$this->likeModel->like($postID, $profileID);
+					$resp->setSuccess(200, "post liked")
+				    	 ->bindValue("postID", $postID)
+				     	 ->bindValue("profileID", $profileID);	
+				}else{
+					$resp->setFailure(401, "You can not see this post");
+				}						
 			}else{
 				$resp->setFailure(400, "You can not like your own post");
 			}			
@@ -639,6 +482,12 @@ class PostController
 
 		$resp = new Response();
 
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+			$rsp->setFailure(401, "You can not see this post")
+			    ->send();
+			return;
+		}			
+
 		$likes = $this->likeModel->getAllLikes($postID);
 		
 		$resp->setSuccess(200, "likes returned")
@@ -658,6 +507,12 @@ class PostController
 			return;
 
 		$resp = new Response();
+
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+			$rsp->setFailure(401, "You can not see this post")
+			    ->send();
+			return;
+		}		
 
 		$coms = $this->commentModel->getComments($postID);
 
