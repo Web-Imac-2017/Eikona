@@ -919,8 +919,31 @@ class ProfileController
 
         $rsp = new Response();
         $rsp->setSuccess(200)
-            ->bindValue("isFollowing", $this->followModel->isFollowing($follower, $following))
-            ->bindValue("isSubscribed", $this->followModel->isSubscribed($follower, $following))
+            ->bindValue("isFollowing", $this->followModel->isFollowing($follower, $followed))
+            ->bindValue("isSubscribed", $this->followModel->isSubscribed($follower, $followed))
+            ->bindValue("isConfirmed", $this->followModel->isConfirmed($follower, $followed))
+            ->send();
+    }
+
+    /**
+     * Confirm the follow request
+     * @param integer $follower Follower ID
+     * @param integer $followed ID of profile followed
+     */
+    public function confirmFollow($follower, $followed = -1)
+    {
+        $follower = $follower == -1 ? Session::read("profileID") : $follower;
+        $rsp = new Response();
+
+        if($this->followModel->confirmFollow($follower, $followed))
+        {
+            $rsp->setSuccess(200)
+                ->send;
+
+            return;
+        }
+
+        $rsp->setFailure(400, "This following does not exist")
             ->send();
     }
 }
