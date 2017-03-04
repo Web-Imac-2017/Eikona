@@ -409,19 +409,12 @@ class PostModel extends DBInterface
 	 */
 	public function tag($tagName)
 	{
-		$stmt = $this->cnx->prepare("SELECT post_id FROM tags WHERE tag_name = :tagName ORDER BY use_time DESC");
+		$stmt = $this->cnx->prepare("
+            SELECT post_id FROM tags
+            WHERE tag_name = :tagName 
+            ORDER BY use_time DESC");
         $stmt->execute([":tagName" => $tagName]);
 
-// C'est la où ça merde
-//		$stmt->bindColumn(1, $post_id);
-//
-//		while ($row = $stmt->fetch(PDO::FETCH_BOUND)) {
-//			$data = $post_id;
-//			echo $data . "\n";
-//    	}
-//
-//		return $data;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
-
-
 }

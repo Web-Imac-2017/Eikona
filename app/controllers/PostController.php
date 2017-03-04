@@ -536,16 +536,25 @@ class PostController
 	public function tag($tagName)
 	{
 		//Get all the post where tag_name = $tagName;
-		$tags = $this->model->tag($tagName);
-
+		
 		$rsp = new Response;
+		
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+			$rsp->setFailure(401, "You can not see this post")
+			    ->send();
+			return;
+		}
+
+		$tags = $this->model->tag($tagName);
+		var_dump($tags);
 
 		if($tags == false){
 			$rsp->setFailure(404);
 		} else {
-			$rsp->setSuccess(200)
-				->bindValue("Tags", $tags)
-				->bindValue("Tag", $tagName);
+			$rsp->setSuccess(200, "tags returned")
+				->bindValue("tagName", $tagName)
+				->bindValue("nbOfTag", count($tags))
+				->bindValue("tags", $tags);
 		}
 
 		$rsp->send();
