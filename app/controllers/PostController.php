@@ -220,18 +220,20 @@ class PostController
 	/*
 	 * Display all the information of the post with the given ID
 	 */
-	public function display($postID)
+	public function display($postID, $silence = true)
 	{
 		if(!$this->setPost($postID))
 			return;	
 
 		$rsp = new Response();
 
-		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
-			$rsp->setFailure(401, "You can not see this post")
-			    ->send();
-			return;
-		}		
+		if($silence){
+			if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+				$rsp->setFailure(401, "You can not see this post")
+				    ->send();
+				return;
+			}	
+		}			
 
 		$data = $this->model->getFullPost();
 		
@@ -483,7 +485,7 @@ class PostController
 		$resp = new Response();
 
 		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
-			$rsp->setFailure(401, "You can not see this post")
+			$resp->setFailure(401, "You can not see this post")
 			    ->send();
 			return;
 		}			

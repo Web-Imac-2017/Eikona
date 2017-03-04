@@ -178,7 +178,7 @@ class isAuthorized
      */
     static public function isPost($postID)
     {
-        $data = Response::read("post", "display", $postID)['data'];
+        $data = Response::read("post", "display", $postID, false)['data'];
         if(!empty($data))
             return true;
 

@@ -45,17 +45,9 @@ class CommentController
 	public function create($postID)
 	{
 	
-		//TODO ==> VERIFIER SI LE POST PROVIENT D'UN PROFIL PRIVE OU PUBLIC
-		//         SI PROFIL PUBLIC -> COMMENTAIRES ALLOWED SAUF S'ILS SONT DESACTIVES
-		//         SI PROFIL PRIVE  -> IL FAUT LE FOLLOW POUR COMMENTER / LIKE 
-		//                             VERIFIER SI LES COMMENTAIRES SONT ACTIVES
-		//         
-		//         VERIFICATION COMMENTS ALLOWED EN PREMIER
 	
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
-
-
 
 		$resp = new Response();
 
@@ -63,9 +55,6 @@ class CommentController
 		if(isAuthorized::isPost($postID)){
 
 			$this->postModel->setPost($postID);
-			var_dump("profile actif = " .$profileID);
-			var_dump("profile post = ".$this->postModel->getProfileID());
-			die();
 
 			//Si les commentaires sont autorisés
 			if($this->postModel->getAllowComments()){
@@ -75,12 +64,16 @@ class CommentController
 					if(isAuthorized::isUser($userID)){
 						//Si l'utilisateur à un profil d'actif
 						if($profileID){
-							$this->model->create($profileID, $postID, $_POST['commentText']);
-							$resp->setSuccess(200, "Comment posted")
-							     ->bindValue("userID", $userID)
-							     ->bindValue("profileID", $profileID)
-							     ->bindValue("postID", $postID)
-							     ->bindValue("comment", $_POST['commentText']);					
+							if(isAuthorized::seeFullProfile($this->postModel->getProfileID())){
+								$this->model->create($profileID, $postID, $_POST['commentText']);
+								$resp->setSuccess(200, "Comment posted")
+								     ->bindValue("userID", $userID)
+								     ->bindValue("profileID", $profileID)
+								     ->bindValue("postID", $postID)
+								     ->bindValue("comment", $_POST['commentText']);
+							}else{
+								$resp->setFailure(401, "You can not comment this post");
+							}			
 						}else{
 							$resp->setFailure(401, "You don't have current profile selected");
 						}

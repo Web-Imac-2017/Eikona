@@ -141,6 +141,20 @@ class PostModel extends DBInterface
         return $this->postDatas['profile_id'];
     }
 
+     /*
+     * Get post_allow_comments of the post
+     *
+     */
+    public function getAllowComments()
+    {
+        if($this->postID == 0)
+        {
+            return 0;
+        }
+
+        return $this->postDatas['post_allow_comments'];
+    }
+
 
     public function nbrPosts($profileID)
     {
