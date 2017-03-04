@@ -122,14 +122,6 @@ class isAuthorized
     On vérifie si le post appartient bien au profil actif
      */
 
-    //TODO
-    //Confirm the current user can view fully the given profile
-    static public function seeFullProfile($profileID)
-    {
-        return true;
-    }
-
-
     /***** Posts verifications *****/
 
     static public function editPost($postID)

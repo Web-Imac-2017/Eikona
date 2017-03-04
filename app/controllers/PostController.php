@@ -337,9 +337,28 @@ class PostController
 			break;
 
 			case "state":
-				var_dump(isAuthorized::isAdmin($userID));
-				var_dump(isAuthorized::isModerator($userID));
-				die();
+				if(isAuthorized::isModerator($userID)['data']['isModerator'] == true ||
+				   isAuthorized::isAdmin($userID)['data']['isAdmin'] == true){
+					if(!empty($_POST['state'])){
+						if($_POST['state'] == 1 || $_POST['state'] == 2){
+							$newState = $this->model->updateState($_POST['state']);
+
+							if($newState === false){
+								$rsp->setFailure(400);
+							}else{
+								$rsp->setSuccess(200)
+									->bindValue("postID", $postID)
+									->bindValue("state", $this->model->getState());
+							}
+						}else{
+							$rsp->setFailure(400, "Wrong value for state");
+						}						
+					}else{
+						$rsp->setFailure(400, "Edit aborted. Missing value.");
+					}
+				}else{
+					$rsp->setFailure(401, "You are not authorized to do this action.");
+				}
 			break;
 
 			default;
