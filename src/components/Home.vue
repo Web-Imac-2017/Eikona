@@ -1,19 +1,18 @@
 <template lang="html">
   <div id="home">
-  	<connectionForm></connectionForm>
-  	<informationsProfil></informationsProfil>
+  	<informationsProfilAutre></informationsProfilAutre>
   </div>
 </template>
 
 <script>
 import connectionForm from './Connection.vue'
-import informationsProfil from './Informations-profil.vue'
+import informationsProfilAutre from './Informations-profil.vue'
 
 export default {
   name: 'home',
   components: {
     connectionForm,
-    informationsProfil
+    informationsProfilAutre
   }
 }
 </script>
