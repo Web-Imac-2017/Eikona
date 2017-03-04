@@ -222,10 +222,6 @@ Data:
 
   * **Code:** 400 FAILURE <br />
 
-
-
-
-
 ## Supprimer un post
 
 Supprime un post du profil courant ainsi que la photo du dossier medias/img/
@@ -251,10 +247,6 @@ Supprime un post du profil courant ainsi que la photo du dossier medias/img/
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le post spécifié n'existe pas
 
-
-
-
-
 ## Liker un post
 
 Like un post avec le profil courant
@@ -274,20 +266,23 @@ Like un post avec le profil courant
 ### Succès
 
   * **Code:** 200 OK
+Data:
+```json
+{ 
+    postID : ID du post, 
+    profileID: ID du profil qui vient de like le post
+}
+```
 
 ### Erreurs
 
   * **Code:** 401 NOT AUTHORIZED <br />
-    **Explication** Le post spécifié n'existe pas
+    **Explication** Le post spécifié n'existe pas OU l'user n'a pas de profil courant
 
   OU
 
   * **Code:** 400 NOT AUTHORIZED <br />
-    **Explication** Le post n'a pas pu être liké
-
-
-
-
+    **Explication** Le post est privé OU on ne peut pas aimer son propre post OU Le post a déjà été aimé par le profil courant
 
 ## dé-Liker un post
 
@@ -295,7 +290,7 @@ dé-Like un post avec le profil courant
 
 ### URL
 ```
-/post/like/<postID>/
+/post/unlike/<postID>/
 ```
 
 ### Méthode
@@ -312,11 +307,41 @@ dé-Like un post avec le profil courant
 ### Erreurs
 
   * **Code:** 401 NOT AUTHORIZED <br />
-    **Explication** Le post spécifié n'existe pas
+    **Explication** Le post spécifié n'existe pas 'user n'a pas de profil courant
 
   OU
 
-  * **Code:** 400 NOT AUTHORIZED <br />
-    **Explication** Le post n'a pas pu être dé-liké
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** Le post n'a pas été aimé
+
+## Récupérer tous les likes d'un post
+
+Récupère et liste les likes d'un post
+
+### URL
+```
+/post/likes/<postID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **postID** : ID du post à dé-liker
+
+### Succès
+
+  * **Code:** 200 OK
+
+### Erreurs
+
+  * **Code:** 401 NOT AUTHORIZED <br />
+    **Explication** Le post spécifié n'existe pas 'user n'a pas de profil courant
+
+  OU
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** Le post n'a pas été aimé
 	
 	
