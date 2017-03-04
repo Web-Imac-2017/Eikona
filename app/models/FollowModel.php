@@ -162,7 +162,7 @@ class FollowModel extends DBInterface
 
 
     /**
-     * Update subscription to stop receiving notifications
+     * Update subscription with given setting
      * @param  integer $profileID
      * @return boolean success or failure
      */

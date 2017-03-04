@@ -824,6 +824,13 @@ class ProfileController
             ->send();
     }
 
+
+
+    /**
+     * Update subscription with given setting
+     * @param  integer $profileID
+     * @return boolean success or failure
+     */
     public function subscribe($profileID)
     {
         $rsp = new Response();
@@ -859,6 +866,13 @@ class ProfileController
             ->send();
     }
 
+
+
+    /**
+     * Update subscription with given setting
+     * @param  integer $profileID
+     * @return boolean success or failure
+     */
     public function unsubscribe($profileID)
     {
         $rsp = new Response();
@@ -891,6 +905,19 @@ class ProfileController
         }
 
         $rsp->setSuccess(200)
+            ->send();
+    }
+
+    /**
+     * Tell if the follower is following the followed
+     * @param integer $follower Follower ID
+     * @param integer $followed ID of profile followed
+     */
+    public function isFollowing($follower, $followed)
+    {
+        $rsp = new Response();
+        $rsp->setSuccess(200)
+            ->bindValue("isFollowing", $this->followModel->isFollowing($follower, $following))
             ->send();
     }
 }
