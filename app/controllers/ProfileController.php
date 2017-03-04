@@ -676,7 +676,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -736,7 +735,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -847,7 +845,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -889,7 +886,6 @@ class ProfileController
 
         if(!$currentUser)
         {
-            echo "Hi mom!";
             $rsp->setFailure(401, "You must be connected to do this.")
                 ->send();
 
@@ -930,21 +926,56 @@ class ProfileController
      * @param integer $follower Follower ID
      * @param integer $followed ID of profile followed
      */
-    public function confirmFollow($follower, $followed = -1)
+    public function confirmFollow($follower)
     {
-        $follower = $follower == -1 ? Session::read("profileID") : $follower;
+        $followed = Session::read("profileID") : $follower;
         $rsp = new Response();
 
-        if($this->followModel->confirmFollow($follower, $followed))
+        if(!isAuthorized::editProfile($followed))
         {
-            $rsp->setSuccess(200)
-                ->send;
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
 
             return;
         }
 
-        $rsp->setFailure(400, "This following does not exist")
-            ->send();
+        if(!$followed)
+        {
+            $rsp->setFailure(401, "You must be connected to do this.")
+                ->send();
+
+            return;
+        }
+
+        if($followed === $follower)
+        {
+            $rsp->setFailure(401, "You cannot do this.")
+                ->send();
+
+            return;
+        }
+
+        $result = $this->followModel->confirmFollow($follower, $followed))
+
+        if($result === "notAProfile")
+        {
+            $rsp->setFailure(400, "The given parameter is not a valid profile ID.")
+                ->send();
+
+            return;
+        }
+
+        if($result === false)
+        {
+
+            $rsp->setFailure(400, "This following does not exist")
+                ->send();
+
+            return;
+        }
+
+        $rsp->setSuccess(200)
+            ->send;
     }
 }
 ?>

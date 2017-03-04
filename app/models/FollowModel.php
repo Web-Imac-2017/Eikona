@@ -252,6 +252,13 @@ class FollowModel extends DBInterface
         $follower = Sanitize::int($follower);
         $followed = Sanitize::int($followed);
 
+        $allow = $this->authorizeAction($followed, $follower);
+
+        if($allow !== "ok")
+        {
+            return $allow;
+        }
+
         if(!$this->isFollowing($follower, $followed))
         {
             return false;
