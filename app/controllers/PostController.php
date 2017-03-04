@@ -10,6 +10,7 @@ class PostController
 	public function __construct()
 	{
 		$this->model        = new PostModel();
+		$this->tagModel     = new TagModel();
 		$this->likeModel    = new LikeModel();
 		$this->commentModel = new CommentModel();
 	}
@@ -93,6 +94,8 @@ class PostController
 		{
 			
 			$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+			preg_match_all('/#([^# ]+)/', $desc, $tags);
+
 			$comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
 			$source = $_FILES['img']['tmp_name'];
 
@@ -109,13 +112,18 @@ class PostController
 
 			//Création des dossiers
 			$this->createFolder($userID, $profileID);
-			
 
 			//detect if extension is allowed
 			if(in_array($extension, $validFormat))
 			{
 				$type = "image";
+
 				$postID = $this->model->create($type, "jpg", $desc, $comments);
+
+				//Add the tags
+				while (list(, $tag) = each($tags[1])) {
+					$this->tagModel->addTag($postID, $tag);
+				}
 
 				$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
 				$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
@@ -664,4 +672,28 @@ class PostController
 	}
 
 
+	/************************************/
+	/*********** TAGS *******************/
+	/************************************/
+
+	/*
+	 * Research all the posts with this tagName
+	 */
+	public function tag($tagName)
+	{
+		//Get all the post where tag_name = $tagName;
+		$tags = $this->model->tag($tagName);
+
+		$rsp = new Response;
+
+		if($tags == false){
+			$rsp->setFailure(404);
+		} else {
+			$rsp->setSuccess(200)
+				->bindValue("Tags", $tags)
+				->bindValue("Tag", $tagName);
+		}
+
+		$rsp->send();
+	}
 }
