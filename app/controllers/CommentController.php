@@ -153,10 +153,14 @@ class CommentController
 				if(!$this->likeModel->isLiked($profileID, $commentID)){
 					//Si ce n'est pas son propre comment
 					if($this->model->getProfileID() != $profileID){
-						$this->likeModel->like($profileID, $commentID);
-						$resp->setSuccess(201, "comment liked")
-					    	 ->bindValue("commentID", $commentID)
-					     	 ->bindValue("profileID", $profileID);
+						if(isAuthorized::seeFullProfile($this->postModel->getProfileID())){
+							$this->likeModel->like($profileID, $commentID);
+							$resp->setSuccess(201, "comment liked")
+						    	 ->bindValue("commentID", $commentID)
+						     	 ->bindValue("profileID", $profileID);
+						}else{
+							$resp->setFailure(401, "You can not like this comment");
+						}	
 					}else{
 						$resp->setFailure(400, "You can not like your own comment");
 				   	}	
@@ -210,6 +214,12 @@ class CommentController
 			return;
 			
 		$resp = new Response();
+
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+			$rsp->setFailure(401, "You can not see likes on this comment");
+			    ->send();
+			return;
+		}
 
 		$likes = $this->likeModel->getLikes($commentID);
 
