@@ -977,4 +977,41 @@ Data:
 
   * **Code:** 400 BAD REQUEST <br />
     **Explication** Vous ne pouvez pas ne plus recevoir les notification si vous n'êtes pas abonné
+
+
+
+
+
+
+
+## Vérifie l'abonnement
+
+Vérifie si un profil est abonné à un autre
+
+### URL
+```
+/profile/isFollowing/<followedID>[/<followerID>]
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **followedID** : ID du profil suivie
+  
+  **Variable Optionnelle**
+  
+  * **followerID** : Profile suivant. le profile courant est utilisé par défaut.
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{
+    isFollowing : 1 si le followed est suivant par le profil follower, 0 sinon.
+    isSubscribed : 1 si le follower est abonné au profil followed, 0 sinon.
+}
+```
     
