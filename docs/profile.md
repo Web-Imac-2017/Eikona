@@ -1050,11 +1050,12 @@ Data:
 
 ### Erreurs
 
-  * **Code:** 401 UNAUTHORIZED <br />
-    **Explication** Vous n'êtes pas autorisé à modifier ce profil OU Vous n'êtes pas connecté
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** La variable GET **profileID** n'est pas un ID
     
     OU
 
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** Vous ne pouvez pas ne plus recevoir les notification si vous n'êtes pas abonné
-    confirmFollow
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Il n'y a pas de profile connecté OU Vous n'avez pas les droits sur ce profil OU Vous ne pouvez pas arrêter de vous suivre vous-même.
+    
+    
