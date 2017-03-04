@@ -920,6 +920,7 @@ class ProfileController
         $rsp = new Response();
         $rsp->setSuccess(200)
             ->bindValue("isFollowing", $this->followModel->isFollowing($follower, $following))
+            ->bindValue("isSubscribed", $this->followModel->isSubscribed($follower, $following))
             ->send();
     }
 }

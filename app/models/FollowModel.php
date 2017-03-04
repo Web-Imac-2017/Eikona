@@ -26,7 +26,7 @@ class FollowModel extends DBInterface
     }
 
     /**
-     * Tell is the current profile is already following the given profile
+     * Tell is the follower profile is already following the followed profile
      * @param  integer        $profileID profile followed
      * @param  integer        $profileID profile following
      * @return boolean string on failure, true on success
@@ -37,11 +37,30 @@ class FollowModel extends DBInterface
         $stmt->execute([":followed" => Sanitize::int($followed),
                         ":follower" => Sanitize::int($follower)]);
 
-        return $stmt->fetchColumn();
+        return intval($stmt->fetchColumn());
+    }
+    
+
+    /**
+     * Tell is the follower profile is subscribed to the followed profile
+     * @param  integer        $profileID profile followed
+     * @param  integer        $profileID profile following
+     * @return boolean string on failure, true on success
+     */
+    public function isSubscribed($follower, $followed)
+    {
+        if(!$this->isFollowing($follower, $followed))
+            return 0;
+            
+        $stmt = $this->cnx->prepare("SELECT follower_subscribed FROM followings WHERE followed_id = :followed AND follower_id = :follower");
+        $stmt->execute([":followed" => Sanitize::int($followed),
+                        ":follower" => Sanitize::int($follower)]);
+
+        return intval($stmt->fetchColumn());
     }
 
     /**
-     * Follow a profile
+     * Follow a profile 
      * @param  integer        $profileID Profile to follow
      * @param  boolean        $subscribe Does the user want to subscribe
      * @return string|boolean true on success, string otherwise
