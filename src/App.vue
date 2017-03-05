@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <topHeader></topHeader>
-    <inscription></inscription>
+    <Post></Post>
     <router-view></router-view>
     <mainFooter></mainFooter>
   </div>
@@ -11,13 +11,15 @@
 
 let topHeader = require('./components/Header.vue')
 let mainFooter = require('./components/mainFooter.vue')
+import Post from './components/Post.vue'
 
 
 export default {
   name: 'app',
   components: {
     topHeader,
-    mainFooter
+    mainFooter,
+    Post
    
   }
 
