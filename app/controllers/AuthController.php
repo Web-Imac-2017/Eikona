@@ -90,6 +90,27 @@ class AuthController{
 	}
 
 
+	public function forgottenPassword()
+	{
+		$resp = new Response();
+
+		//Si un mail a été entré
+		if(!empty($_POST['user_email'])){
+			//Si l'email existe bien
+			if($this->model->checkEmail($_POST['user_email'])){
+				$this->model->sendRecuperationMail($_POST['user_email'], time());
+				$resp->setSuccess(200, "good");
+			}else{
+				$resp->setFailure(400, "pas bon mail");
+			}
+		}else{
+			$resp->setFailure(400, "il manque un champ");
+		}
+
+		$resp->send();
+	}
+
+
 	/**
 	 * Connexion
 	 * @return Response JSON

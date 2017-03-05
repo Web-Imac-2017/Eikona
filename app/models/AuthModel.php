@@ -73,6 +73,27 @@ class AuthModel extends DBInterface{
        return (mail($email, $subject, $content, $headers)) ? true : false;
     }
 
+    public function sendRecuperationMail($email, $time)
+    {
+    	require_once 'Library/RecuperationMail.php';
+
+    	$subject = "RECUPEREZ VOTRE MOT DE PASSE";
+
+    	$headers = 'From: zobeleflorian@gmail.com' . "\r\n" .
+                   'MIME-Version: 1.0' . "\r\n" .
+                   'Content-type: text/html; charset=utf-8';
+
+        $this->updateLastActivityForPasswordRecuperation($email, $time);
+
+        return (mail($email, $subject, $content, $headers)) ? true : false;
+    }
+
+    private function updateLastActivityForPasswordRecuperation()
+    {
+    	$stmt = $this->cnx->prepare("
+    		UPDATE users SET ")
+    }
+
 	/**********************/
 	/***** ACTIVATION *****/
 	/**********************/
