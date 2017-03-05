@@ -44,7 +44,8 @@ class LikeModel extends DBInterface{
 	public function getAllLikes($postID)
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT profile_id, like_time FROM post_likes
+			SELECT post_likes.profile_id, profile_name, like_time FROM post_likes
+			JOIN profiles ON post_likes.profile_id = profiles.profile_id
 			WHERE :postID= post_id");
 		$stmt->execute([":postID" => $postID]);
 

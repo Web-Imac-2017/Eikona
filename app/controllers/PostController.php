@@ -3,6 +3,7 @@
 class PostController
 {
 	private $model;
+	private $tagModel;
 	private $likeModel;
 	private $commentModel;
 
@@ -545,8 +546,7 @@ class PostController
 			return;
 		}
 
-		$tags = $this->model->tag($tagName);
-		var_dump($tags);
+		$tags = $this->tagModel->tag($tagName);
 
 		if($tags == false){
 			$rsp->setFailure(404);

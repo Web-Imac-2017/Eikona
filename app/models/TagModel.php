@@ -67,17 +67,19 @@ class TagModel extends DBInterface
 		return "success";
 	}
 
+	
 	/*
-	 * Number of a tag with this tagName
-	 * @param $tagName name of the tag to find
+	 * Get all the post with the tagName given
+	 * Do we need a limit ?
 	 */
-	public function countTag($tagName)
+	public function tag($tagName)
 	{
-		$stmt = $this->cnx->prepare("SELECT COUNT(tag_name) FROM tags WHERE tag_name = :tagName");
-		$stmt->execute([":tagName" => $tagName]);
+		$stmt = $this->cnx->prepare("
+            SELECT post_id FROM tags
+            WHERE tag_name = :tagName 
+            ORDER BY use_time DESC");
+        $stmt->execute([":tagName" => $tagName]);
 
-		$nbTag = $stmt->fetchColumn();
-
-		return $nbTag;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 }

@@ -63,8 +63,9 @@ class CommentLikeModel extends DBInterface
 	public function getLikes($commentID)
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT profile_id, comment_id, like_time
+			SELECT comment_id, comment_likes.profile_id, profiles.profile_name, like_time
 			FROM comment_likes
+			JOIN profiles ON comment_likes.comment_id = profiles.profile_id
 			WHERE :commentID = comment_id");
 		$stmt->execute([":commentID" => $commentID]);
 

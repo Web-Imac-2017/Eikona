@@ -216,7 +216,7 @@ class CommentController
 		$resp = new Response();
 
 		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
-			$rsp->setFailure(401, "You can not see likes on this comment");
+			$rsp->setFailure(401, "You can not see likes on this comment")
 			    ->send();
 			return;
 		}
