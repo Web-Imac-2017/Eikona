@@ -2,7 +2,7 @@
 
 class AuthController{
 
-	private $model;	
+	private $model;
 
 	public function __construct()
 	{
@@ -98,18 +98,51 @@ class AuthController{
 		if(!empty($_POST['user_email'])){
 			//Si l'email existe bien
 			if($this->model->checkEmail($_POST['user_email'])){
-				$this->model->sendRecuperationMail($_POST['user_email'], time());
-				$resp->setSuccess(200, "good");
+				$code = $this->model->addCode($_POST['user_email']);
+				$this->model->sendRecuperationMail($_POST['user_email'], $code);
+				$resp->setSuccess(200, "email sent")
+					 ->bindValue("userEmail", $_POST['user_email']);
 			}else{
-				$resp->setFailure(400, "pas bon mail");
+				$resp->setFailure(404, "unknown user");
 			}
 		}else{
-			$resp->setFailure(400, "il manque un champ");
+			$resp->setFailure(400, "Tous les champs ne sont pas remplis");
 		}
 
 		$resp->send();
 	}
 
+	public function regenere()
+	{
+		$resp = new Response();
+
+		if(!empty($_POST['user_email']) &&
+		   !empty($_POST['user_passwd']) && 
+		   !empty($_POST['user_passwd_confirm']) &&
+		   !empty($_POST['code'])){
+
+			if($this->model->checkEmail($_POST['user_email'])){
+				if($this->model->checkCode($_POST['user_email'], $_POST['code'])){
+					if($_POST['user_passwd'] == $_POST['user_passwd_confirm']){
+						$this->model->updatePassword($_POST['user_email'], $_POST['user_passwd']);
+						$this->model->deleteCode($_POST['user_email']);
+						$resp->setSuccess(200, "password regenerated")
+						     ->bindValue("userEmail", $_POST['user_email']);
+					}else{
+						$resp->setFailure(409, "password and confirmation do not correspond");
+					}
+				}else{
+					$resp->setFailure(409, "invalid reset code");
+				}				
+			}else{
+				$resp->setFailure(404, "unknown user");
+			}
+		}else{
+			$resp->setFailure(400, "Tous les champs ne sont pas remplis");
+		}
+
+		$resp->send();
+	}
 
 	/**
 	 * Connexion
