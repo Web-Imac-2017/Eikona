@@ -166,6 +166,11 @@ Permet à l'utilisateur de se déconnecter de son compte.
 
 **POST**
 
+### Variables POST
+
+* **user_email** : Email de l'utilisateur
+* **user_passwd**: Mot de passe de l'utilisateur
+
 ### Succès
 
   * **Code:** 200 OK
@@ -180,5 +185,94 @@ Data:
 
 * **Code:** 400 BAD REQUEST <br />
   **Explication** L'utilisateur n'est connecté à aucun compte.
+
+## Récupération du mot de passe
+
+La récupération du mot de passe se passe en deux étapes. Dans un premier temps, l'utilisateur "dira" qu'il a oublié son mot de passe. Il recevra par mail un code qui lui permettra de redéfinir un nouveau mot de passe.
+Ici est détaillée la première étape.
+
+### URL
+```
+/auth/forgottenPassword/
+```
+
+### Méthode
+
+**POST**
+
+### Variables POST
+
+* **user_email** : Email de l'utilisateur
+
+### Succès
+
+  * **Code:** 200 OK
+Data: 
+```json
+{
+  userEmail: Email du user,
+}
+```
+
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Tous les champs ne sont pas remplis 
+
+  OU 
+
+* **Code:** 404 NOT FOUND <br />
+  **Explication** L'email ne correspond à aucun utilisateur
+
+## Regénération du mot de passe
+
+Une fois le code reçu, il pourra redéfinir un nouveau mot de passe.
+
+### URL
+```
+/auth/regenere/
+```
+
+### Méthode
+
+**POST**
+
+### Variables POST
+
+* **user_email** : Email de l'utilisateur
+* **user_passwd** : Nouveau mot de passe
+* **user_passwd_confirm** : Confirmation du nouveau mot de passe
+* **code** : Le code reçu par mail
+
+### Succès
+
+  * **Code:** 200 OK
+Data: 
+```json
+{
+  userEmail: Email du user,
+}
+```
+
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Tous les champs ne sont pas remplis 
+
+  OU 
+
+* **Code:** 404 NOT FOUND <br />
+  **Explication** L'email ne correspond à aucun utilisateur
+
+    OU 
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** Le code pour redéfinir un mot de passe est incorrect
+
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** Le mot de passe et celui de confirmation ne correspondent pas
+
 
 
