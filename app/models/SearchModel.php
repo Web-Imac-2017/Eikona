@@ -49,7 +49,13 @@ class SearchModel extends DBInterface
 
 	public function searchTag($query)
 	{
-		$stmt = $this->cnx->prepare("");
+		$stmt = $this->cnx->prepare("
+			SELECT tag_name, tags.post_id, use_time, posts.profile_id, profiles.profile_name, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved
+			FROM tags
+			JOIN posts ON posts.post_id = tags.post_id
+			JOIN profiles ON posts.profile_id = profiles.profile_id
+			WHERE tag_name LIKE :q
+			ORDER BY use_time DESC");
 		$stmt->execute([":q" => '%'.$query.'%']);
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -57,7 +63,10 @@ class SearchModel extends DBInterface
 
 	public function searchAll($query)
 	{
-		$stmt = $this->cnx->prepare();
+		$stmt = $this->cnx->prepare("");
+		$stmt->execute([":q" => '%'.$query.'%']);
+
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 }

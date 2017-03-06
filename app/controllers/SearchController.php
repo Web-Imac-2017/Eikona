@@ -39,8 +39,6 @@ class SearchController
 
 				case "comment":
 					$res = $this->model->searchComment($query);
-					var_dump($res);
-					die();
 					break;
 
 				case "tag":
@@ -49,6 +47,8 @@ class SearchController
 
 				default:
 					$res = $this->model->searchAll($query);
+					var_dump($res);
+					die();
 					break;
 			}
 			$resp->setSuccess(200, "request done");
