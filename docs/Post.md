@@ -59,18 +59,25 @@ Créer un post pour l'utilisateur courant.
 ### Succès
 
   * **Code:** 200 OK <br />
-    **Data:** `{ 
-	
-	postId: Id du post,
-	profileID: ID du profil du post en question
-	desc: Description du post
-	publishTime: Moment où le post a été publié
-	allowComments: Si le post autorise les commentaires
-	approved: Si le post est approuvé
-	updateTime: Moment où le post a été mis à jour
-	state: Etat du post
-	geo: Nom, latitude et longitude du post
-	}`
+Data: 
+```json
+{
+  postID : ID du post,
+  profileID : ID du profil,
+  desc : Description du post,
+  publishTime : Date de publication,
+  updateTime : Date de la modification,
+  allowComments : 1 = comments enabled, 0 = comments disabled,
+  approved : Le post a été approuvé,
+  state : Etat de modération du post,
+  geo : {
+    lat : latitude,
+    lng : longitude, 
+    name : Nom du lieu
+  }
+}
+```
+
  
 ### Erreurs
  
@@ -79,54 +86,8 @@ Créer un post pour l'utilisateur courant.
 
   OU
 
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le post spécifié n'existe pas
-
-
-
-
-
-## Récupère une info d'un post
-
-Récupère une information passée en paramètre d'un post
-
-### URL
-```
-/post/<field>/<postID>
-```
-
-### Méthode
-**GET**
-
-### Variable GET
-
-  * **profileID** : ID du profil à utiliser
-    **field** : Nom du champ à récupérer `DESCRIPTION|GEO|PUBLISHTIME|STATE|ALLOWCOMMENTS|APPROVED|UPDATETIME`
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    profileID : ID du profil, 
-    <field> : Informations du field
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** La variable GET **profileID** n'est pas un ID
-
-  OU
-
-  * **Code:** 404 NOT FOUND <br />
-    **Explication** Le profil spécifié n'existe pas
-
-
-
-
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Le profil est privé est le user ne le suit pas
 
 
 ## Mise à jour d'un post
@@ -143,7 +104,7 @@ Met à jour le champ indiqué du post
 
 ### Variable GET
 
-  * **field** : Nom du champ à modifier `DESCRIPTION|GEO|ALLOWCOMMENTS|DISABLECOMMENTS|POSTAPPROVED`
+  * **field** : Nom du champ à modifier `DESCRIPTION|GEO|ALLOWCOMMENTS|DISABLECOMMENTS|POSTAPPROVED|STATE`
     **postID** : ID du post à utiliser
 
 ### Variable POST
@@ -154,9 +115,10 @@ Met à jour le champ indiqué du post
     **post_geo_lat** : Nouvelle latitude du post
     **post_geo_lng** : Nouvelle longitude du post
     **post_geo_name** : Nouveau name de la géo du post
-	**allowComments** : Permet d'accepter les commentaires
-	**disableComments** : Permet d'empêcher les commentaires
-	**postApproved** : Permet de passer un post à Approved
+	  **allowComments** : Permet d'accepter les commentaires
+  	**disableComments** : Permet d'empêcher les commentaires
+	  **postApproved** : Permet de passer un post à Approved
+    **state** : Le nouveau state du post
 
 ### Succès
 
@@ -165,7 +127,7 @@ Data:
 ```json
 { 
     profileID : ID du profil, 
-    profileName OU profileDesc OU profileIsPrivate : Valeur mise à jour
+    profileName OU profileDesc OU profileIsPrivate OU state : Valeur mise à jour
 }
 ```
  
@@ -183,44 +145,12 @@ Data:
 
   * **Code:** 400 MISSING VALUE <br />
     **Explication** Il manque la nouvelle valeur du field.
+
+     OU
+
+  * **Code:** 400 MISSING VALUE <br />
+    **Explication** Mauvaise valeur pour le state
   
-  
-  
-  
-## Mise à jour du state d'un post
-
-Met à jour l'état d'un post
-
-### URL
-```
-/post/updateState/<postID>
-```
-
-### Méthode
-**POST**
-
-### Variable GET
-
-  * **postID** : ID du post à utiliser
-  
-### Variable POST
-  
-  * **state** : Nouvel état du post
-
-### Succès
-
-  * **Code:** 200 OK
-Data:
-```json
-{ 
-    postID : ID du post, 
-    state: Etat mis à jour
-}
-```
- 
-### Erreurs
-
-  * **Code:** 400 FAILURE <br />
 
 ## Supprimer un post
 
@@ -277,12 +207,12 @@ Data:
 ### Erreurs
 
   * **Code:** 401 NOT AUTHORIZED <br />
-    **Explication** Le post spécifié n'existe pas OU l'user n'a pas de profil courant
+    **Explication** Le post spécifié n'existe pas OU l'user n'a pas de profil courant OU vous ne suivez pas la personne
 
   OU
 
   * **Code:** 400 NOT AUTHORIZED <br />
-    **Explication** Le post est privé OU on ne peut pas aimer son propre post OU Le post a déjà été aimé par le profil courant
+    **Explication** On ne peut pas aimer son propre post OU Le post a déjà été aimé par le profil courant
 
 ## dé-Liker un post
 
@@ -303,6 +233,13 @@ dé-Like un post avec le profil courant
 ### Succès
 
   * **Code:** 200 OK
+Data:
+```json
+{ 
+    postID : ID du post, 
+    profileID: ID du profil qui vient de dé-like le post
+}
+```
 
 ### Erreurs
 
@@ -333,15 +270,70 @@ Récupère et liste les likes d'un post
 ### Succès
 
   * **Code:** 200 OK
+Data:
+```json
+{ 
+    postID : ID du post, 
+    nbOfLikes: nombres de likes du post (si 0, pas de likes),
+    like:{
+      profile_id : ID du profil qui a like le post,
+      profile_name : Le nom du profil,
+      like_time : Date du like
+    }
+}
+```
 
 ### Erreurs
 
   * **Code:** 401 NOT AUTHORIZED <br />
-    **Explication** Le post spécifié n'existe pas 'user n'a pas de profil courant
+    **Explication** Le post spécifié n'existe pas 'user n'a pas de profil courant OU vous ne suivez pas le profil
 
   OU
 
   * **Code:** 400 BAD REQUEST <br />
     **Explication** Le post n'a pas été aimé
 	
-	
+## Récupérer les commentaires d'un post
+
+Récupère tous les commentaires d'nu post
+
+### URL
+```
+/post/comments/<postID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **postID** : ID du post dont il faut récupérer les commentaires
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ 
+    postID : ID du post, 
+    nbOfComments: nombre de commentaires,
+    comments : {
+      comment_id : ID du commentaire,
+      profile_id : ID du profil qui a commenté,
+      profile_name : Nom du profil qui a commenté,
+      comment_texte : Le corps du commentaire,
+      comment_time : Date du commentaire
+    }
+}
+```
+
+### Erreurs
+
+  * **Code:** 401 NOT AUTHORIZED <br />
+    **Explication** Le post spécifié n'existe pas OU l'user n'a pas de profil courant OU vous ne suivez pas la personne
+
+  OU
+
+  * **Code:** 400 NOT AUTHORIZED <br />
+    **Explication** On ne peut pas aimer son propre post OU Le post a déjà été aimé par le profil courant
+
