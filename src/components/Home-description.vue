@@ -1,6 +1,6 @@
 <template lang="html">
   <div>
-    <h1>Eikona</h1>
+    <h1>Bienvenue sur Eikona, votre nouvelle source d'inspiration</h1>
     <p>Pourquoi s’inscrire sur Eikona ? Pour pouvoir suivre vos artistes préférés, s’inspirer et inspirer, et gérer plusieurs profils avec un seul et même compte ! N’hésitez plus, rejoignez-nous !</p>
   </div>
 </template>
@@ -12,4 +12,6 @@ export default {
 </script>
 
 <style lang="css">
+
+
 </style>
