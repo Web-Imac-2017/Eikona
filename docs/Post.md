@@ -21,9 +21,9 @@ Créer un post pour l'utilisateur courant.
 ### Variables POST
 
   * **img** : Image du post
-  
+
   **Variables optionnelles**
-  
+
   * **postDescription** : Description du post
   * **postType** : A définir pour le moment jusqu'à ce que ça soit mis en place
 
@@ -31,7 +31,7 @@ Créer un post pour l'utilisateur courant.
 
   * **Code:** 201 CREATED <br />
     **Data:** `{ profileID : ID du profil créé }`
- 
+
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
@@ -59,8 +59,8 @@ Créer un post pour l'utilisateur courant.
 ### Succès
 
   * **Code:** 200 OK <br />
-    **Data:** `{ 
-	
+    **Data:** `{
+
 	postId: Id du post,
 	profileID: ID du profil du post en question
 	desc: Description du post
@@ -71,9 +71,9 @@ Créer un post pour l'utilisateur courant.
 	state: Etat du post
 	geo: Nom, latitude et longitude du post
 	}`
- 
+
 ### Erreurs
- 
+
   * **Code:** 400 BAD REQUEST <br />
     **Explication** La variable GET **postID** n'est pas un ID
 
@@ -108,12 +108,12 @@ Récupère une information passée en paramètre d'un post
   * **Code:** 200 OK
 Data:
 ```json
-{ 
-    profileID : ID du profil, 
+{
+    profileID : ID du profil,
     <field> : Informations du field
 }
 ```
- 
+
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
@@ -149,7 +149,7 @@ Met à jour le champ indiqué du post
 ### Variable POST
 
   **Variable Optionnel**
-  
+
   * **desc** : Nouvelle description du post
     **post_geo_lat** : Nouvelle latitude du post
     **post_geo_lng** : Nouvelle longitude du post
@@ -163,12 +163,12 @@ Met à jour le champ indiqué du post
   * **Code:** 200 OK
 Data:
 ```json
-{ 
-    profileID : ID du profil, 
+{
+    profileID : ID du profil,
     profileName OU profileDesc OU profileIsPrivate : Valeur mise à jour
 }
 ```
- 
+
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
@@ -178,15 +178,15 @@ Data:
 
   * **Code:** 405 METHOD NOT ALLOWED <br />
     **Explication** Le field spécifié n'est pas supporté.
-	
+
   OU
 
   * **Code:** 400 MISSING VALUE <br />
     **Explication** Il manque la nouvelle valeur du field.
-  
-  
-  
-  
+
+
+
+
 ## Mise à jour du state d'un post
 
 Met à jour l'état d'un post
@@ -202,9 +202,9 @@ Met à jour l'état d'un post
 ### Variable GET
 
   * **postID** : ID du post à utiliser
-  
+
 ### Variable POST
-  
+
   * **state** : Nouvel état du post
 
 ### Succès
@@ -212,12 +212,12 @@ Met à jour l'état d'un post
   * **Code:** 200 OK
 Data:
 ```json
-{ 
-    postID : ID du post, 
+{
+    postID : ID du post,
     state: Etat mis à jour
 }
 ```
- 
+
 ### Erreurs
 
   * **Code:** 400 FAILURE <br />
@@ -268,8 +268,8 @@ Like un post avec le profil courant
   * **Code:** 200 OK
 Data:
 ```json
-{ 
-    postID : ID du post, 
+{
+    postID : ID du post,
     profileID: ID du profil qui vient de like le post
 }
 ```
@@ -284,9 +284,14 @@ Data:
   * **Code:** 400 NOT AUTHORIZED <br />
     **Explication** Le post est privé OU on ne peut pas aimer son propre post OU Le post a déjà été aimé par le profil courant
 
-## dé-Liker un post
+  OU
 
-dé-Like un post avec le profil courant
+  * **Code:** 406 NOT ACCEPTABLE <br />
+    **Explication** Le profil courant a liké plus de 200 post durant les 60 dernières minutes. (Securité Anti-Bot)
+
+## Dé-Liker un post
+
+Dé-Like un post avec le profil courant
 
 ### URL
 ```
@@ -343,5 +348,3 @@ Récupère et liste les likes d'un post
 
   * **Code:** 400 BAD REQUEST <br />
     **Explication** Le post n'a pas été aimé
-	
-	
