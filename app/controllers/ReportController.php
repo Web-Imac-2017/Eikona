@@ -73,7 +73,7 @@ class ReportController
 						->bindValue("ReportID", $reportID)
 						->send();
 				} else {
-					$rsp->setFailure(304, "Report already handle.")
+					$rsp->setFailure(200, "Report already handle.")
 						->send();
 				}
 			} else {
