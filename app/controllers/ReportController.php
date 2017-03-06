@@ -81,7 +81,7 @@ class ReportController
 					->send();
 			}
 		} else {
-			$rsp->setFailure("404", "Report does not exist.")
+			$rsp->setFailure(404, "Report does not exist.")
 			    ->send();
 		}
 	}
@@ -136,7 +136,7 @@ class ReportController
 
 		if($this->model->exist($reportID) == 0)
 		{
-			$rsp->setFailure("404", "Report doesn't exist");
+			$rsp->setFailure(404, "Report doesn't exist");
 		}
 
 		if(isAuthorized::isModerator() || isAuthorized::isAdmin())

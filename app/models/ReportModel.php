@@ -55,7 +55,7 @@ class ReportModel extends DBInterface
 
 	public function getReports()
 	{
-		$stmt = $this->cnx->prepare("SELECT report_id FROM reports WHERE report_status = 0 ORDER BY ASC");
+		$stmt = $this->cnx->prepare("SELECT report_id FROM reports WHERE report_status = 0");
 		$stmt->execute();
 
 		return $stmt->fetchAll(PDO::FETCH_COLUMN, "report_id");
