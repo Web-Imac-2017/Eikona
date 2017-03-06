@@ -21,9 +21,9 @@ Créer un post pour l'utilisateur courant.
 ### Variables POST
 
   * **img** : Image du post
-  
+
   **Variables optionnelles**
-  
+
   * **postDescription** : Description du post
   * **postType** : A définir pour le moment jusqu'à ce que ça soit mis en place
 
@@ -31,7 +31,7 @@ Créer un post pour l'utilisateur courant.
 
   * **Code:** 201 CREATED <br />
     **Data:** `{ profileID : ID du profil créé }`
- 
+
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
@@ -78,7 +78,6 @@ Data:
 }
 ```
 
- 
 ### Erreurs
  
   * **Code:** 400 BAD REQUEST <br />
@@ -87,7 +86,7 @@ Data:
   OU
 
   * **Code:** 401 UNAUTHORIZED <br />
-    **Explication** Le profil est privé est le user ne le suit pas
+    **Explication** Le profil est privé et le user ne le suit pas
 
 
 ## Mise à jour d'un post
@@ -100,6 +99,7 @@ Met à jour le champ indiqué du post
 ```
 
 ### Méthode
+
 **POST**
 
 ### Variable GET
@@ -110,7 +110,7 @@ Met à jour le champ indiqué du post
 ### Variable POST
 
   **Variable Optionnel**
-  
+
   * **desc** : Nouvelle description du post
     **post_geo_lat** : Nouvelle latitude du post
     **post_geo_lng** : Nouvelle longitude du post
@@ -130,7 +130,7 @@ Data:
     profileName OU profileDesc OU profileIsPrivate OU state : Valeur mise à jour
 }
 ```
- 
+
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
@@ -140,17 +140,11 @@ Data:
 
   * **Code:** 405 METHOD NOT ALLOWED <br />
     **Explication** Le field spécifié n'est pas supporté.
-	
+
   OU
 
   * **Code:** 400 MISSING VALUE <br />
     **Explication** Il manque la nouvelle valeur du field.
-
-     OU
-
-  * **Code:** 400 MISSING VALUE <br />
-    **Explication** Mauvaise valeur pour le state
-  
 
 ## Supprimer un post
 
@@ -198,8 +192,8 @@ Like un post avec le profil courant
   * **Code:** 200 OK
 Data:
 ```json
-{ 
-    postID : ID du post, 
+{
+    postID : ID du post,
     profileID: ID du profil qui vient de like le post
 }
 ```
@@ -214,9 +208,14 @@ Data:
   * **Code:** 400 NOT AUTHORIZED <br />
     **Explication** On ne peut pas aimer son propre post OU Le post a déjà été aimé par le profil courant
 
-## dé-Liker un post
+  OU
 
-dé-Like un post avec le profil courant
+  * **Code:** 406 NOT ACCEPTABLE <br />
+    **Explication** Le profil courant a liké plus de 200 post durant les 60 dernières minutes. (Securité Anti-Bot)
+
+## Dé-Liker un post
+
+Dé-Like un post avec le profil courant
 
 ### URL
 ```
