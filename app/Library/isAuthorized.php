@@ -21,7 +21,7 @@ class isAuthorized
             $checkWith = Sanitize::int($userID);
         }
 
-        return Response::read("user", "exists", $checkWith);
+        return Response::read("user", "exists", $checkWith)["data"]["exists"];
     }
     
     //Tell if the current user, or the given one, is a moderator
@@ -38,7 +38,7 @@ class isAuthorized
             $checkWith = Sanitize::int($userID);
         }
 
-        return Response::read("user", "isModerator", $checkWith);
+        return Response::read("user", "isModerator", $checkWith)["data"]["isModerator"];
     }
 
     //Tell if the current user, or the given one, is an admin
@@ -55,7 +55,7 @@ class isAuthorized
             $checkWith = Sanitize::int($userID);
         }
 
-        return Response::read("user", "isAdmin", $checkWith);
+        return Response::read("user", "isAdmin", $checkWith)["data"]["isAdmin"];
     }
 
     //Confirm the given profile is a real profile, or tell if we have a current profile if the parameter is ommited
