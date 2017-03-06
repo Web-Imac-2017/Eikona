@@ -151,7 +151,7 @@ class PostController
 		$rsp->send();
 	}
 
-	private function setPost($postID)
+	public function setPost($postID)
 	{
 		$result = $this->model->setPost($postID);
 
@@ -538,7 +538,7 @@ class PostController
 	{
 		//Get all the post where tag_name = $tagName;
 		
-		$rsp = new Response;
+		$rsp = new Response();
 		
 		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
 			$rsp->setFailure(401, "You can not see this post")
