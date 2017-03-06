@@ -201,12 +201,12 @@ Data:
 {
     commentID : ID du commentaire,
     nbOfLikes : nombre de likes,
-    likes : {
+    likes : [{
         comment_id : ID du commentaires,
         profile_id : ID du profil qui a like,
         profile_name : Nom du profil qui a aimé,
         like_time : Date du like
-    }
+    }]
 }
 ```
 

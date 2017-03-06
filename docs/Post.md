@@ -274,11 +274,11 @@ Data:
 { 
     postID : ID du post, 
     nbOfLikes: nombres de likes du post (si 0, pas de likes),
-    like:{
+    like:[{
       profile_id : ID du profil qui a like le post,
       profile_name : Le nom du profil,
       like_time : Date du like
-    }
+    }]
 }
 ```
 
@@ -316,13 +316,13 @@ Data:
 { 
     postID : ID du post, 
     nbOfComments: nombre de commentaires,
-    comments : {
+    comments : [{
       comment_id : ID du commentaire,
       profile_id : ID du profil qui a commenté,
       profile_name : Nom du profil qui a commenté,
       comment_texte : Le corps du commentaire,
       comment_time : Date du commentaire
-    }
+    }]
 }
 ```
 
