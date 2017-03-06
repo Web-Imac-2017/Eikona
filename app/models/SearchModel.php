@@ -41,7 +41,7 @@ class SearchModel extends DBInterface
 			JOIN posts ON posts.post_id = comments.post_id
 			JOIN profiles ON comments.profile_id = profiles.profile_id
 			WHERE comment_text LIKE :q
-			ORDER BY comment_time DESC");
+			ORDER BY comment_time DESC"); 	
 		$stmt->execute([":q" => '%'.$query.'%']);
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -63,10 +63,7 @@ class SearchModel extends DBInterface
 
 	public function searchAll($query)
 	{
-		$stmt = $this->cnx->prepare("");
-		$stmt->execute([":q" => '%'.$query.'%']);
 
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 }

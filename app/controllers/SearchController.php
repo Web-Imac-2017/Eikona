@@ -47,11 +47,14 @@ class SearchController
 
 				default:
 					$res = $this->model->searchAll($query);
-					var_dump($res);
-					die();
 					break;
 			}
-			$resp->setSuccess(200, "request done");
+			if(count($res) != 0){
+				$resp->setSuccess("result(s) found")
+					 ->bindValue("result", $res);
+			}else{
+				$resp->setFailure(404, "no result found");
+			}
 		}else{
 			$resp->setFailure(400, "Missing value. Request aborted");
 		}
