@@ -47,7 +47,37 @@ class SearchController
 
 				default:
 					$res = $this->model->searchAll($query);
-					break;
+					$profiles = $res[0]['count'];
+					$posts = $res[1]['count'];
+					$comments = $res[2]['count'];
+					$tags = $res[3]['count'];
+					
+					$tab = [
+						"profiles" => null,
+						"posts"    => null,
+						"comments" => null,
+						"tags"     => null
+					];
+
+					if($profiles != 0){
+						$tab['profiles'] = $this->model->searchProfile($query);
+					}
+					if($posts != 0){
+						$tab['posts'] = $this->model->searchDescription($query);
+					}
+					if($comments != 0){
+						$tab['comments'] = $this->model->searchComment($query);
+					}
+					if($tags != 0){
+						$tab['tags'] = $this->model->searchTag($query);
+					}
+					$resp->setSuccess(200, "results found")
+					     ->bindValue("profiles", $tab['profiles'])
+					     ->bindValue("posts", $tab['posts'])
+					     ->bindValue("comments", $tab['comments'])
+					     ->bindValue("tags", $tab['tags'])
+					     ->send();
+					return;
 			}
 			if(count($res) != 0){
 				$resp->setSuccess("result(s) found")

@@ -63,7 +63,18 @@ class SearchModel extends DBInterface
 
 	public function searchAll($query)
 	{
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(profile_name) as count FROM profiles WHERE profile_name LIKE :q
+			UNION ALL
+			SELECT COUNT(post_id) as count FROM posts WHERE post_description LIKE :q
+			UNION ALL
+			SELECT COUNT(comment_id) as count FROM comments WHERE comment_text LIKE :q
+			UNION ALL
+			SELECT COUNT(tag_name) as count FROM tags WHERE tag_name LIKE :q
+			");
+		$stmt->execute([":q" => '%'.$query.'%']);
 
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 }
