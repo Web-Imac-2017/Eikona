@@ -19,7 +19,7 @@ class PostController
 	public function create()
 	{
 
-		$rsp = new Response(); 
+		$rsp = new Response();
 
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
@@ -80,7 +80,7 @@ class PostController
 
 			/* Call to the postModel and creation of the JSON response */
 			$postID = $this->model->create($type, $extension, $desc);
-			
+
 
 			//Si img enregistrée dans bdd et uploadée
 			if($postID)
@@ -526,7 +526,13 @@ class PostController
 
 		if(!$profileID){
 			$rsp->setFailure(401, "You don't have current profile selected")
-			    ->send();	
+			    ->send();
+			return;
+		}
+
+		if ($this->likeModel->countLikeFromLastHour($profileID) > 200) {
+			$rsp->setFailure(406, "You have already liked 200 posts during the last 60 minutes, Calm down Billy Boy !")
+			    ->send();
 			return;
 		}
 
@@ -540,15 +546,15 @@ class PostController
 					     ->bindValue("profileID", $profileID);
 				}else{
 					$resp->setFailure(400, "profile is private");
-				}				
+				}
 			}else{
 				$resp->setFailure(400, "You can not like your own post");
-			}			
+			}
 		}else{
 			$resp->setFailure(400, "post already liked");
 		}
 
-		
+
 		$resp->send();
 
 	}
@@ -590,7 +596,7 @@ class PostController
 		$resp = new Response();
 
 		$count = $this->likeModel->countLike($postID);
-		
+
 		$resp->setSuccess(200, "likes returned")
 		     ->bindValue("postID", $postID)
 		     ->bindValue("likeCount", $count)

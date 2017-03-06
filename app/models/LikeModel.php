@@ -51,4 +51,16 @@ class LikeModel extends DBInterface{
 		return $stmt->fetchColumn();
 	}
 
+	public function countLikeFromLastHour($profileID)
+	{
+		$time = time();
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM post_likes
+			WHERE :profileID = profile_id
+			AND :time - like_time < 3600");
+		$stmt->execute([":profileID" => $profileID,
+						":time" => $time]);
+
+		return $stmt->fetchColumn();
+	}
 }
