@@ -531,7 +531,7 @@ class PostController
 	/************************************/
 
 	/*
-	 * Research all the posts with this tagName
+	 * Get tagname of a post
 	 */
 	public function tag($tagName)
 	{
