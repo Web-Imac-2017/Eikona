@@ -14,6 +14,7 @@ class PostController
 		$this->tagModel     = new TagModel();
 		$this->likeModel    = new LikeModel();
 		$this->commentModel = new CommentModel();
+		$this->postViewModel = new PostViewModel();
 	}
 
 	private function createFolder($userID, $profileID)
@@ -151,7 +152,7 @@ class PostController
 		$rsp->send();
 	}
 
-	private function setPost($postID)
+	public function setPost($postID)
 	{
 		$result = $this->model->setPost($postID);
 
@@ -538,7 +539,7 @@ class PostController
 	{
 		//Get all the post where tag_name = $tagName;
 		
-		$rsp = new Response;
+		$rsp = new Response();
 		
 		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
 			$rsp->setFailure(401, "You can not see this post")
@@ -559,4 +560,44 @@ class PostController
 
 		$rsp->send();
 	}
+
+
+
+	/************************************/
+	/*********** VIEW *******************/
+	/************************************/
+
+	public function view($postID)
+	{
+		if(!$this->setPost($postID))
+		{
+			return;
+		}
+
+		$resp = new Response();
+
+		$profileID = Session::read("profileID");
+
+		if($this->postViewModel->view($profileID, $postID))
+		{
+			$resp->setSuccess(200, "post viewed");
+		}
+		else
+		{
+			$rest->setFailure(400, "post not set as viewed");
+		}
+		$resp->send();
+	}
+
+	public function nbView()
+	{
+		$resp = new Response();
+		$rslt = $this->postViewModel->mostViewedPosts(10);
+		$resp->setSuccess(200, "post viewed")
+			 ->bindValue("rslt", $rslt);
+
+		$resp->send();
+	}
+
+
 }

@@ -195,7 +195,7 @@ class PostModel extends DBInterface
 
         $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
+        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ". $limit ." OFFSET ".Sanitize::int($offset);
 
         //Execute the query
         $stmt = $this->cnx->prepare($sql);
