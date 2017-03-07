@@ -313,19 +313,20 @@ Data:
 {
   userID: ID du user,
   nbOfProfiles: nombre de profils que possède le user,
-  profile1:{
-    profile_id: id du profil,
-    user_id: id du user (== userID),
-    profile_name: nom du profil,
-    profile_desc: description du profil,
-    profile_create_time: date de création du profil,
-    profile_views: nombre de vues du profil,
-    profile_private: si le profil est privé ou non
-  },
-  profile2:{
-    même champs que profile1
-  },
-  ...
+  profiles: [
+    { 
+      profile_id: id du profil,
+      user_id: id du user (== userID),
+      profile_name: nom du profil,
+      profile_desc: description du profil,
+      profile_create_time: date de création du profil,
+      profile_views: nombre de vues du profil,
+      profile_private: si le profil est privé ou non
+    },
+    {
+      même champs pour un autre profil.
+    }
+  ]
 }
 ```
 
