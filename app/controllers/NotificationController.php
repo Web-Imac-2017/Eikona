@@ -22,8 +22,21 @@ class NotificationController
 
 	public function create($code, $profileTarget)
 	{
+		$resp = new Response();
+
+		if($this->allowedCodes[$code] == null){
+			$resp->setFailure(400, "wrong code")
+			     ->send();
+			return;
+		}
+
 		$notif = $this->allowedCodes[$code];
-		$this->model->add($notif, $profileTarget);
+		//$this->model->add($notif, $profileTarget);
+
+		$resp->setSuccess(200, "notif returned")
+			 ->bindValue("type", $code)
+			 ->bindValue("code", $notif)
+		     ->send();
 	}
 
 	public function delete()

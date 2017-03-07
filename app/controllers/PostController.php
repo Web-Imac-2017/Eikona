@@ -431,8 +431,9 @@ class PostController
 			//Si ce n'est pas son propre post
 			if($this->model->getProfileID() != $profileID){
 				if(isAuthorized::seeFullProfile($this->model->getProfileID())){
-					$this->likeModel->like($postID, $profileID);
-					Response::read("notification", "create", "newLike", $this->model->getProfileID());
+					//$this->likeModel->like($postID, $profileID);
+					$notif = Response::read("notification", "create", "newLike", $this->model->getProfileID());
+					var_dump($notif);
 					$resp->setSuccess(200, "post liked")
 				    	 ->bindValue("postID", $postID)
 				     	 ->bindValue("profileID", $profileID);

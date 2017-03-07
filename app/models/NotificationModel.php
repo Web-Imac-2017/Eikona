@@ -41,4 +41,15 @@ class NotificationModel extends DBInterface
 		$stmt->execute([":id" => $id]);
 	}
 
+	public function getProfileNotifications($profileID)
+	{
+		$stmt = $this->cnx->prepare("
+			SELECT notif_id, notif_type, notif_target, notif_time, notif_seen
+			FROM notifications
+			WHERE profile_id = :id");
+		$stmt->execute([":id" => $profileID]);
+
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
 }
