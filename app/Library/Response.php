@@ -65,7 +65,7 @@ class Response
     public function setSuccess($code = 200, $msg = "")
     {
         $this->status = "success";
-        $this->message = Sanitize::string($msg, true);
+        $this->message = Sanitize::string($msg, true, false);
         $this->setCode($code);
 
         return $this;
@@ -79,7 +79,7 @@ class Response
     public function setFailure($code = 404, $msg = "An error occured. Please try again.")
     {
         $this->status = "error";
-        $this->message = Sanitize::string($msg, true);
+        $this->message = Sanitize::string($msg, true, false);
         $this->setCode($code);
 
         return $this;

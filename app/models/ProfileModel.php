@@ -363,7 +363,7 @@ class ProfileModel extends DBInterface
     {
         $profileID = Sanitize::int($profileID);
 
-        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, profile_picture followings.follower_subscribed, followings.follow_confirmed FROM profiles JOIN followings ON followings.follower_id = profiles.profile_id WHERE followings.followed_id = :profileID ORDER BY profiles.profile_name");
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, profile_picture, followings.follower_subscribed, followings.follow_confirmed FROM profiles JOIN followings ON followings.follower_id = profiles.profile_id WHERE followings.followed_id = :profileID ORDER BY profiles.profile_name");
         $stmt->execute([":profileID" => $profileID]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
