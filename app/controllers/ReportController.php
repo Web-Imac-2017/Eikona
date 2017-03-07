@@ -5,10 +5,12 @@ class ReportController
 
 	private $model;
 	private $postController;
+	private $postModel;
 
 	public function __construct()
 	{
-		$this->model     = new ReportModel();
+		$this->model          = new ReportModel();
+		$this->postModel      = new PostModel();
 		$this->postController = new PostController();
 	}
 
@@ -25,7 +27,7 @@ class ReportController
 		if(!$this->postController->setPost($postID))
 			return;
 
-		$reportComment = Sanitize::string($_POST['report_comment']);
+		$reportComment = !empty($_POST['report_comment']) ? Sanitize::string($_POST['report_comment']) : "";
 		$userID = Session::read("userID");
 		$reportStatus = 0;
 
@@ -60,21 +62,31 @@ class ReportController
 			//Is the user a moderator or an admin ?
 			if(isAuthorized::isModerator() || isAuthorized::isAdmin())
 			{
-				if($this->model->status($reportID) != 1)
-				{
-					$reportStatus = 1;
+				switch($this->model->status($reportID)){
+					case "1":
+						$rsp->setFailure(200, "Report has already an handler.")
+							->send();
+						break;
+					case "2":
+						$rsp->setFailure(200 ,"Report already reported.")
+							->send();
+						break;
+					case "3":
+						$rsp->setFailure(200 ,"Report already finished.")
+							->send();
+						break;
+					case "0":
+						$reportStatus = 1;
 
-					$this->model->addModerator($reportID, $reportHandler, $reportStatus);
+						$this->model->addModerator($reportID, $reportHandler, $reportStatus);
 
-					$rsp = new Response();
-					$rsp->setSuccess(200, "Report taken")
-						->bindValue("ReportHandlerID", $reportHandler)
-						->bindValue("Status", $reportStatus)
-						->bindValue("ReportID", $reportID)
-						->send();
-				} else {
-					$rsp->setFailure(200, "Report already handle.")
-						->send();
+						$rsp = new Response();
+						$rsp->setSuccess(200, "Report taken")
+							->bindValue("ReportHandlerID", $reportHandler)
+							->bindValue("Status", $reportStatus)
+							->bindValue("ReportID", $reportID)
+							->send();
+					break;
 				}
 			} else {
 				$rsp->setFailure(401,"You are not a moderator or an admin.")
@@ -82,6 +94,7 @@ class ReportController
 			}
 		} else {
 			$rsp->setFailure(404, "Report does not exist.")
+				->bindValue("ReportID", $reportID)
 			    ->send();
 		}
 	}
@@ -94,6 +107,8 @@ class ReportController
 	{
 		$rsp = new Response();
 
+		//Vérifier que l'userID est bien l'handlerID//
+
 		//Does the post exist ?
 		if($this->model->exist($reportID))
 		{
@@ -102,26 +117,38 @@ class ReportController
 			//Is the user a moderator or an admin ?
 			if(isAuthorized::isModerator() || isAuthorized::isAdmin())
 			{
-				//Is the status of the report already cancelled
-				if($this->model->status($reportID) == 3)
-				{
-					$rsp->setFailure(304 ,"Report already cancelled.");
-				} else {
-					$reportStatus = 3;
+				switch($this->model->status($reportID)){
+					//The post is handle or has been reported. It can be cancelled
+					case "1":
+					case "2":
+						$reportStatus = 3;
 
-					$reportResult = Sanitize::string($_POST['report_result']);
+						$reportResult = !empty($_POST['report_result']) ? Sanitize::string($_POST['report_result']) : "";
 
-					$this->model->moderate($reportID, $reportStatus, $reportResult);
+						$this->model->moderate($reportID, $reportStatus, $reportResult);
 
-					$rsp->setSuccess(200, "Report is now finish.");
+						$rsp->setSuccess(200, "Report is now finish.")
+							->bindValue("ReportID", $reportID)
+							->send();
+						break;
+					case "3":
+						$rsp->setFailure(200 ,"Report already finished.")
+							->send();
+						break;
+					case "0":
+						$rsp->setFailure(200, "Report has not an handler yet.")
+							->send();
+					break;
 				}
 			} else {
-				$rsp->setFailure(401, "You are not a moderator or an admin.");
+				$rsp->setFailure(401, "You are not a moderator or an admin.")
+					->send();
 			}
 		} else {
-			$rsp->setFailure("404", "Report doesn't exist");
+			$rsp->setFailure("404", "Report doesn't exist")
+				->bindValue("ReportID", $reportID)
+				->send();
 		}
-		$rsp->send();
 	}
 
 
@@ -134,6 +161,9 @@ class ReportController
 	{
 		$rsp = new Response();
 
+		//Vérifier que l'userID est bien l'handlerID
+		//Vérifier que le report est pas déjà fini
+
 		if($this->model->exist($reportID) == 0)
 		{
 			$rsp->setFailure(404, "Report doesn't exist");
@@ -141,24 +171,46 @@ class ReportController
 
 		if(isAuthorized::isModerator() || isAuthorized::isAdmin())
 		{
-			$reportResult = $_POST['report_result'];
-			$reportResult = Sanitize::string($reportResult);
-			$reportStatus = 2;
+			switch($this->model->status($reportID)){
+				case "0":
+					$rsp->setFailure(200, "Report has not an handler yet.");
+					break;
+				case "2":
+					$rsp->setFailure(200 ,"Report already reported.");
+					break;
+				case "3":
+					$rsp->setFailure(200 ,"Report already finished.");
+					break;
+				case "1":
+					$reportResult = !empty($_POST['report_result']) ? Sanitize::string($_POST['report_result']) : "";
+					$reportResult = Sanitize::string($reportResult);
+					$reportStatus = 2;
 
+					//Changer le state du post qui est report maintenant, ça marche pas for now
+					$postID = $this->model->postID($reportID);
 
-			//Changer le state du post qui est report maintenant, ça marche pas for now
-			$postID = $this->model->postID($reportID);
+					if(!$this->postController->setPost($postID))
+						return;
 
-			if(!$this->postModel->setPost($postID))
-				return;
+					$result = $this->postModel->setPost($postID);
 
-			$this->postModel->updateState(2);
+					if($result == "success")
+					{
+						$state = $this->postModel->updateState(2);
 
-			/* Envoyer une notif ici avec le reportResult de la part de la session de l'userID */
+						/* Envoyer une notif ici avec le reportResult de la part de la session de l'userID */
 
-			$this->model->moderate($reportID, $reportStatus, $reportResult);
+						$this->model->moderate($reportID, $reportStatus, $reportResult);
 
-			$rsp->setSuccess(200, "Post is now hidden.");
+						$rsp->setSuccess(200, "Post is now hidden. Notif send.")
+							->bindValue("ReportID", $reportID)
+							->bindValue("PostID", $postID)
+							->bindValue("PostState", $state);
+					} else {
+						$rsp->setFailure(400, "There is a problem with the postID.");
+					}
+					break;
+			}
 		} else {
 			$rsp->setFailure(404, "The report has not worked.");
 		}
