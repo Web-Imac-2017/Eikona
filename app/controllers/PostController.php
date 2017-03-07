@@ -432,9 +432,11 @@ class PostController
 			if($this->model->getProfileID() != $profileID){
 				if(isAuthorized::seeFullProfile($this->model->getProfileID())){
 					$this->likeModel->like($postID, $profileID);
+					Response::read("notification", "create", "newLike", $this->model->getProfileID());
 					$resp->setSuccess(200, "post liked")
 				    	 ->bindValue("postID", $postID)
-				     	 ->bindValue("profileID", $profileID);	
+				     	 ->bindValue("profileID", $profileID);
+
 				}else{
 					$resp->setFailure(401, "You can not see this post");
 				}						
