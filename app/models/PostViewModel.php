@@ -3,7 +3,6 @@
 class PostViewModel extends DBInterface
 {
 	private $postViewID = 0;
-	private $postViewDatas = null;
 
 	public function __construct($postViewID = 0)
 	{

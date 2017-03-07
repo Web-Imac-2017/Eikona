@@ -22,15 +22,16 @@ class NotificationModel extends DBInterface
 		parent::__construct();
 	}
 
-	public function add($code, $profileTarget)
+	public function add($code, $profileTarget, $targetID)
 	{
 		$stmt = $this->cnx->prepare("
-			INSERT INTO notifications (profile_id, notif_type, notif_time, notif_seen)
-			VALUES (:target, :code, :time, :seen)");
-		$stmt->execute([":target" => $profileTarget,
-			            ":code" => $code,
-			            ":time" => time(),
-			            ":seen" => 0]);
+			INSERT INTO notifications (profile_id, notif_type, notif_target, notif_time, notif_seen)
+			VALUES (:target, :code, :targetID, :time, :seen)");
+		$stmt->execute([":target"   => $profileTarget,
+						":code"     => $code,
+						":targetID" => $targetID,
+						":time"     => time(),
+						":seen"     => 0]);
 	}
 
 	public function delete($id)

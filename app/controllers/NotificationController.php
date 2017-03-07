@@ -20,22 +20,24 @@ class NotificationController
 		$this->model = new NotificationModel();
 	}
 
-	public function create($code, $profileTarget)
+	public function create($code, $profileTarget, $target)
 	{
 		$resp = new Response();
 
-		if($this->allowedCodes[$code] == null){
+		if(!array_key_exists($code, $this->allowedCodes)){
 			$resp->setFailure(400, "wrong code")
 			     ->send();
 			return;
 		}
 
 		$notif = $this->allowedCodes[$code];
-		//$this->model->add($notif, $profileTarget);
+		$this->model->add($notif, $profileTarget, $target);
 
 		$resp->setSuccess(200, "notif returned")
 			 ->bindValue("type", $code)
 			 ->bindValue("code", $notif)
+			 ->bindValue("profileTargetID", $profileTarget)
+			 ->bindValue("targetID", $target)
 		     ->send();
 	}
 

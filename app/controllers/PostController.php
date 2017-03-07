@@ -6,14 +6,15 @@ class PostController
 	private $tagModel;
 	private $likeModel;
 	private $commentModel;
+	private $postViewModel;
 
 
 	public function __construct()
 	{
-		$this->model        = new PostModel();
-		$this->tagModel     = new TagModel();
-		$this->likeModel    = new LikeModel();
-		$this->commentModel = new CommentModel();
+		$this->model         = new PostModel();
+		$this->tagModel      = new TagModel();
+		$this->likeModel     = new LikeModel();
+		$this->commentModel  = new CommentModel();
 		$this->postViewModel = new PostViewModel();
 	}
 
@@ -431,13 +432,17 @@ class PostController
 			//Si ce n'est pas son propre post
 			if($this->model->getProfileID() != $profileID){
 				if(isAuthorized::seeFullProfile($this->model->getProfileID())){
-					//$this->likeModel->like($postID, $profileID);
-					$notif = Response::read("notification", "create", "newLike", $this->model->getProfileID());
-					var_dump($notif);
-					$resp->setSuccess(200, "post liked")
-				    	 ->bindValue("postID", $postID)
-				     	 ->bindValue("profileID", $profileID);
-
+					$this->likeModel->like($postID, $profileID);
+					$notif = Response::read("notification", "create", "newLike", $this->model->getProfileID(), $postID);
+					if($notif['status'] == 'success'){
+						$resp->setSuccess(200, "post liked and notification sent")
+				    	     ->bindValue("postID", $postID)
+				     	 	 ->bindValue("profileID", $profileID)
+				     	 	 ->bindValue("notif", $notif['data']);
+					}
+					else{
+						$resp->setFailure(409, "post not liked and notification not sent");
+					}					
 				}else{
 					$resp->setFailure(401, "You can not see this post");
 				}						
