@@ -5,12 +5,14 @@ class UserController{
 	private $model;
 	private $profileModel;
 	private $authModel;
+	private $notifModel;
 
 	public function __construct()
 	{
-		$this->model = new UserModel();
+		$this->model        = new UserModel();
 		$this->profileModel = new ProfileModel();
-		$this->authModel = new AuthModel();
+		$this->authModel    = new AuthModel();
+		$this->notifModel   = new NotificationModel();
 	}
 
 	/**
@@ -370,6 +372,31 @@ class UserController{
 			}
 		}else{
 			$resp->setFailure(401, "You are not authorized to do this action.");
+		}
+
+		$resp->send();
+	}
+
+	public function notifications()
+	{
+		$resp = new Response();
+
+		$userID = Session::read("userID");
+
+		if(!$this->setUser($userID))
+			return;
+
+		$tab = [];
+
+		if($userID){
+			if($this->profileModel->hasProfiles($userID)){
+				$notif = $this->notifModel->getUserNotifications($userID);
+				foreach($notif as $n){
+					$tab[$n['profile_id']][] = $n;
+				}
+				$resp->setSuccess(200, "notif returned")
+					 ->bindValue("notif", $tab);
+			}
 		}
 
 		$resp->send();

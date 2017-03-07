@@ -3,20 +3,6 @@
 class NotificationModel extends DBInterface
 {
 
-	/*
-	
-	Nouvel abonnement : 1. L'utilisateur est notifié que quelqu'un veut s'abonner à son compte. SEULEMENT POUR LES PROFILS PRIVES.
-	Abonnement accepté : 2. L'utilisateur a accepté votre demande d'abonnement.
-	Nouvel abonné : 3. L'utilisateur a un nouvel abonné.
-	Nouveau like : 4. Tel post a reçu un like.
-	Nouveau commentaire : 5. Tel post à un nouveau commentaire
-	Nouveau like sur un commentaire : 6. Tel commentaire sur tel post à un nouveau like
-	Vous êtes admin : 7.
-	Vous êtes modérateur : 8.
-	Vous avez perdu vos droits : 9.
-
-	 */	
-
 	public function __construct()
 	{
 		parent::__construct();
@@ -49,6 +35,23 @@ class NotificationModel extends DBInterface
 			FROM notifications
 			WHERE profile_id = :id");
 		$stmt->execute([":id" => $profileID]);
+
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	public function getUserNotifications($userID)
+	{
+		$stmt = $this->cnx->prepare("
+			SELECT notif_id, profile_id, notif_type, notif_target, notif_time, notif_seen
+			FROM notifications
+			WHERE profile_id IN
+			(
+				SELECT profile_id FROM profiles
+				WHERE user_id = :id
+			)
+			AND notif_seen = 0
+			ORDER BY profile_id");
+		$stmt->execute([":id" => $userID]);
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}

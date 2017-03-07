@@ -422,7 +422,7 @@ class PostController
 		}
 
 		if(!$profileID){
-			$rsp->setFailure(401, "You don't have current profile selected")
+			$resp->setFailure(401, "You don't have current profile selected")
 			    ->send();	
 			return;
 		}

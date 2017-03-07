@@ -158,6 +158,21 @@ class ProfileModel extends DBInterface
     }
 
     /**
+     * Return if an user have profile(s)
+     * @param  int  $id user_id
+     * @return boolean     true / false
+     */
+    public function hasProfiles($id)
+    {
+        $stmt = $this->cnx->prepare("
+            SELECT COUNT(profile_id) FROM profiles
+            WHERE user_id = :id");
+        $stmt->execute([":id" => $id]);
+
+        return $stmt->fetchColumn() != 0 ? true : false;
+    }
+
+    /**
      * Return the name of the profile
      */
     public function getName()
