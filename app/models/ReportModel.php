@@ -53,10 +53,16 @@ class ReportModel extends DBInterface
 		]);
 	}
 
-	public function getReports()
+	public function getReports($userID = 0)
 	{
-		$stmt = $this->cnx->prepare("SELECT report_id FROM reports WHERE report_status = 0");
-		$stmt->execute();
+		if($userID != 0)
+		{
+			$stmt = $this->cnx->prepare("SELECT report_id FROM reports WHERE report_handler = :userID AND (report_status = 1 OR report_status = 2)");
+			$stmt->execute([ ":userID" => $userID]);
+		} else {
+			$stmt = $this->cnx->prepare("SELECT report_id FROM reports WHERE report_status = 0");
+			$stmt->execute();
+		}
 
 		return $stmt->fetchAll(PDO::FETCH_COLUMN, "report_id");
 	}
@@ -72,6 +78,14 @@ class ReportModel extends DBInterface
 	public function status($reportID)
 	{
 		$stmt = $this->cnx->prepare("SELECT report_status FROM reports WHERE report_id = :reportID");
+		$stmt->execute([":reportID" => $reportID]);
+
+		return $stmt->fetchColumn();
+	}
+
+	public function handlerID($reportID)
+	{
+		$stmt = $this->cnx->prepare("SELECT report_handler FROM reports WHERE report_id = :reportID");
 		$stmt->execute([":reportID" => $reportID]);
 
 		return $stmt->fetchColumn();
