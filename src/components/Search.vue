@@ -1,5 +1,5 @@
 <template lang="html">
-  <div>
+  <md-layout>
     <form novalidate @submit.stop.prevent="search">
       <md-input-container id="search-bar" md-inline>
         <md-icon md-primary>search</md-icon>
@@ -7,7 +7,7 @@
         <md-input type="search" v-model="keywords"></md-input>
       </md-input-container>
     </form>
-  </div>
+  </md-layout>
 </template>
 
 <script>

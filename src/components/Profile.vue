@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     activeProfile () {
-      return (this.$store.state.currentProfile == this.i)
+      return (this.$store.state.currentProfile === this.i)
     }
   },
   methods: {

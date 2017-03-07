@@ -21,31 +21,37 @@
         </md-layout>
       </md-layout>
     </md-whiteframe>
-  </div>
+    <profileCreation v-if="creationForm"></profileCreation>
+  </md-layout>
 </template>
 
 <script>
 import store from './connectionStore.js'
 import profile from './Profile.vue'
+import profileCreation from './Profile-creation.vue'
 
 export default {
   name: 'profile-selection',
   store: store,
   components: {
-    profile
+    profile,
+    profileCreation
   },
-  computed: {
+  data () {
+    return {
+      creationForm: false
+    }
+  },
+  methods: {
     user () {
       return this.$store.state.user
     },
     profiles () {
       return this.$store.state.profiles
-    }
-  },
-  methods: {
+    },
     add_profile () {
       console.log('add_profile')
-      // redirection vers la page de création de profil
+      this.creationForm = true
     }
   }
 }

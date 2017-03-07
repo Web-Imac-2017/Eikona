@@ -1,11 +1,11 @@
 <template lang="html">
-  <header>
+  <md-layout tag="header" id="header">
     <search class="header-item"></search>
-    <div class="header-item">
-      <a id="logo" title="Accueil" href="/"><md-icon alt="Eiko" class="md-size-2x" md-src="./assets/Eiko.png"/></a>
-    </div>
+    <md-layout class="header-item">
+      <md-button id="logo" title="Accueil" href="/Eikona/" class="md-icon-button"><md-icon alt="Eiko" md-src="assets/Eiko.png"/></md-button>
+    </md-layout>
     <connexion id="connexion" class="header-item"></connexion>
-  </header>
+  </md-layout>
 </template>
 
 <script>
@@ -22,15 +22,11 @@ export default {
 </script>
 
 <style lang="css" scoped>
-header {
+#header {
   width:100%;
   background-color: lightgray;
-  display: flex;
 }
 .header-item {
-  flex: 1;
-  text-align: center;
   margin: auto 0;
 }
-
 </style>

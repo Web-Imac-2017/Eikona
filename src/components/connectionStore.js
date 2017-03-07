@@ -6,44 +6,24 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     user: {
-      id: 'jean99',
-      email: 'jean.michel@gmail.com',
-      connected: true
+      id: 0,
+      email: '',
+      connected: false
     },
-    // profiles de tests, reel à recupérer en fonction de l'utilisateur co
-    profiles: [{
-      id: 'Jean Jean',
-      avatarPath: './assets/Eiko.png',
-      posts: 4,
-      followers: 6,
-      followings: 10
-    },
-    {
-      id: 'Jean Michel',
-      avatarPath: './assets/Eiko.png',
-      posts: 5,
-      followers: 6,
-      followings: 0
-    },
-    {
-      id: 'Jean Jean',
-      avatarPath: './assets/Eiko.png',
-      posts: 0,
-      followers: 2,
-      followings: 10
-    }],
-    currentProfile: 0
+    profiles: [],
+    currentProfile: -1
   },
   mutations: {
     SET_USER: (state, id, email, isConnected) => {
       state.user.id = id
       state.user.email = email
       state.user.connected = isConnected
+      console.log('Ajout au store de user')
     },
     SET_LIST_PROFILES: (state) => {
-      this.$http.post('/Eikona/do/user/profiles/', {}).then((response) => {
-        for (profile in response.data) {
-          state.profiles.push(profile);
+      Vue.http.post('/Eikona/do/user/profiles/', {}).then((response) => {
+        for (var profile in response.data) {
+          state.profiles.push(profile)
         }
       }, (response) => {
         console.log('ERR: récupération des profils', response)

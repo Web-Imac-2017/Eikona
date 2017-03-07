@@ -1,6 +1,6 @@
 <template lang="html">
   <md-layout>
-    <div v-if="user.connected">
+    <div v-if="isConnected">
       <md-button @click.native="settings" class="md-icon-button"><md-icon>settings</md-icon></md-button>
       <md-button @click.native="deconnect" class="md-icon-button"><md-icon>power_settings_new</md-icon></md-button>
     </div>
@@ -13,13 +13,19 @@
 
 <script>
 import store from './connectionStore.js'
+import Vuex from 'vuex'
 
 export default {
   name: 'header-connection',
   store: store,
-  computed: {
-    user () {
-      return this.$store.state.user
+  data () {
+    return {
+      isConnected: false
+    }
+  },
+  watch: {
+    isConnected () {
+      return this.$store.state.user.connected
     }
   },
   methods: {
@@ -33,12 +39,12 @@ export default {
     },
     deconnect () {
       console.log('deconnect')
-      this.$http.post('/Eikona/do/auth/signOut/', {}).then((response) => {
+      this.$http.post('auth/signOut/', {}).then((response) => {
         console.log('Disconnected', response)
         store.commit('SET_USER', 0, 0, false)
       }, (response) => {
         console.log('ERR: disconnect', response)
-        switch(response.code){
+        switch (response.code) {
           case 400:
             console.log('Bad request')
             this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
@@ -50,7 +56,7 @@ export default {
           case 404:
             console.log('Not found')
             this.error_mail = true
-            document.getElementById('connection-id').className += " md-input-invalid"
+            document.getElementById('connection-id').classLisr.add('md-input-invalid')
             break
           case 409:
             console.log('Conflict')
