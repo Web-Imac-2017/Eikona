@@ -33,7 +33,8 @@ class NotificationModel extends DBInterface
 		$stmt = $this->cnx->prepare("
 			SELECT notif_id, notif_type, notif_target, notif_time, notif_seen
 			FROM notifications
-			WHERE profile_id = :id");
+			WHERE profile_id = :id
+			ORDER BY notif_time");
 		$stmt->execute([":id" => $profileID]);
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -50,7 +51,7 @@ class NotificationModel extends DBInterface
 				WHERE user_id = :id
 			)
 			AND notif_seen = 0
-			ORDER BY profile_id");
+			ORDER BY profile_id, notif_time DESC");
 		$stmt->execute([":id" => $userID]);
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);

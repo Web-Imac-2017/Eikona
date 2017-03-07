@@ -5,6 +5,7 @@ class ProfileController
     private $model;
     private $postModel;
     private $followModel;
+    private $notifModel;
 
     /**
      * Init the constructor and link the model
@@ -12,9 +13,10 @@ class ProfileController
      */
     public function __construct()
     {
-        $this->model = new ProfileModel();
-        $this->postModel = new PostModel();
+        $this->model       = new ProfileModel();
+        $this->postModel   = new PostModel();
         $this->followModel = new FollowModel();
+        $this->notifModel  = new NotificationModel();
     }
 
     /**
@@ -987,5 +989,32 @@ class ProfileController
         $rsp->setSuccess(200)
             ->send;
     }
+
+    public function notifications()
+    {
+        $profileID = Session::read("profileID");
+
+        $resp = new Response();
+
+        if(!$profileID){
+            $rsp->setFailure(401, "You must have profile to do this.")
+                ->send();
+            return;
+        }
+
+        $notif = $this->notifModel->getProfileNotifications($profileID);
+        
+        if($notif == null){
+            $resp->setFailure(404, "You do not have notifications.")
+                 ->send();
+            return;
+        }
+
+        $resp->setSuccess(200, "notifications returned")
+             ->bindValue("profileID", $profileID)
+             ->bindValue("notif", $notif)
+             ->send();
+   }
+
 }
 ?>
