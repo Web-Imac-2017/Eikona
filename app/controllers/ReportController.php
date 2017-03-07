@@ -220,6 +220,11 @@ class ReportController
 	}
 
 	/*
+	 * Fonction qui permet aux modérateur de changer le statut d'un post qui était en 2.
+	 * Récupère les posts avec status = 2 et change depuis le moment où ils ont été changés
+	*/
+
+	/*
 	 * Modifier la fonction qui suit pour qu'elle récupère tous les reports:
 	 * Soit ils ont le statut 0, par du tout modérer
 	 * Soit ils ont le statut 2, ils ont été modérés mais pas modifié encore
@@ -249,4 +254,11 @@ class ReportController
 		$rsp->send();
 	}
 
+	/*
+	 * Get all post from a given Admin
+	 */
+	public function myReports()
+	{
+
+	}
 }
