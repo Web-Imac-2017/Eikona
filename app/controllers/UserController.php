@@ -386,8 +386,6 @@ class UserController{
 		if(!$this->setUser($userID))
 			return;
 
-		$tab = [];
-
 		if($userID){
 			if($this->profileModel->hasProfiles($userID)){
 				$notif = $this->notifModel->getUserNotifications($userID);
@@ -396,7 +394,11 @@ class UserController{
 				}
 				$resp->setSuccess(200, "notif returned")
 					 ->bindValue("notif", $tab);
+			}else{
+				$resp->setFailure(401, "You don't have profiles");
 			}
+		}else{
+			$resp->setFailure(401, "you are not connected");
 		}
 
 		$resp->send();

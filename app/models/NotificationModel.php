@@ -55,5 +55,4 @@ class NotificationModel extends DBInterface
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
-
 }
