@@ -52,7 +52,7 @@ class BannedWordsModel extends DBInterface
         $stmt = $this->cnx->prepare("SELECT word FROM banned_words ORDER BY word");
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     /**
