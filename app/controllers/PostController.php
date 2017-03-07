@@ -79,7 +79,7 @@ class PostController
 			    ->send();
 			return;
 		}		
-
+        
 		if(empty($_FILES['img'])){
 			$rsp->setFailure(400, "no file selected")
 			    ->send();
@@ -577,6 +577,8 @@ class PostController
 		$resp = new Response();
 
 		$profileID = Session::read("profileID");
+        
+        echo $profileID;
 
 		if($this->postViewModel->view($profileID, $postID))
 		{
@@ -584,7 +586,7 @@ class PostController
 		}
 		else
 		{
-			$rest->setFailure(400, "post not set as viewed");
+			$resp->setFailure(400, "post not set as viewed");
 		}
 		$resp->send();
 	}

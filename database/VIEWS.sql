@@ -1,16 +1,23 @@
+# ((-x+24*3600)/log(x))/64
 CREATE VIEW `posts_bonus` AS
 SELECT
 	post_id,
-    LOG(ABS(UNIX_TIMESTAMP() - post_publish_time)) as post_bonus
+    IF (UNIX_TIMESTAMP() - post_publish_time < 24*3600, 
+        TRUNCATE((24*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        , 0)
+		 AS post_bonus
 FROM
 	posts
 ;
 
+# ((-x+96*3600)/log(x))/64
 CREATE VIEW `comments_score` AS
 SELECT
 	comments.post_id AS post_id,
     comments.comment_id AS comment_id,
-	IF (UNIX_TIMESTAMP() - comment_time < 96*3600, (9600*3600 / (UNIX_TIMESTAMP() - comment_time)), 0)
+	IF (UNIX_TIMESTAMP() - comment_time < 96*3600, 
+        TRUNCATE((96*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        , 0)
 		 AS comment_score
 FROM
 	comments
@@ -18,10 +25,13 @@ JOIN posts ON
 	posts.post_id = comments.post_id
 ;
 
+#((-x+72*3600)/log(x))/64
 CREATE VIEW `likes_score` AS
 SELECT
 	post_likes.post_id AS post_id,
-	IF (UNIX_TIMESTAMP() - like_time < 72*3600, (7200*3600 / (UNIX_TIMESTAMP() - like_time)), 0)
+	IF (UNIX_TIMESTAMP() - like_time < 72*3600, 
+        TRUNCATE((72*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        , 0)
 		 AS like_score
 FROM
 	post_likes
@@ -29,10 +39,13 @@ JOIN posts ON
 	posts.post_id = post_likes.post_id
 ;
 
+#((-x+48*3600)/log(x))/64
 CREATE VIEW `views_score` AS
 SELECT
 	post_views.post_id AS post_id,
-	IF (UNIX_TIMESTAMP() - view_time < 48*3600, (4800*3600 / (UNIX_TIMESTAMP() - view_time)), 0)
+	IF (UNIX_TIMESTAMP() - view_time < 48*3600, 
+        TRUNCATE((48*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        , 0)
 		 AS view_score
 FROM
 	post_views

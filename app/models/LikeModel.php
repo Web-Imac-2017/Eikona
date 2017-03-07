@@ -22,12 +22,15 @@ class LikeModel extends DBInterface{
 
 	public function like($postID, $profileID)
 	{
-		$stmt = $this->cnx->prepare("
-			INSERT INTO post_likes (profile_id, post_id, like_time)
-			VALUES (:profileID, :postID, :likeTime)");
-		$stmt->execute([":profileID" => $profileID,
-			            ":postID"    => $postID,
-			            ":likeTime"  => time()]);
+        if(!$this->isLiked($postID, $profileID))
+        {
+            $stmt = $this->cnx->prepare("
+                INSERT INTO post_likes (profile_id, post_id, like_time)
+                VALUES (:profileID, :postID, :likeTime)");
+            $stmt->execute([":profileID" => $profileID,
+                            ":postID"    => $postID,
+                            ":likeTime"  => time()]);
+        }
 	}
 
 
