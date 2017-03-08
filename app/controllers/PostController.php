@@ -62,7 +62,7 @@ class PostController
 	public function create()
 	{
 
-		$rsp = new Response(); 
+		$rsp = new Response();
 
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
@@ -78,7 +78,7 @@ class PostController
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
 			return;
-		}		
+        }		
         
 		if(empty($_FILES['img'])){
 			$rsp->setFailure(400, "no file selected")
@@ -94,7 +94,7 @@ class PostController
 		 */
 		if(is_uploaded_file($_FILES['img']['tmp_name']))
 		{
-			
+
 			$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
 			preg_match_all('/#([^# ]+)/', $desc, $tags);
 
@@ -110,7 +110,7 @@ class PostController
 				return;
 			}
 
-			$extension = explode("/", $format['mime'])[1];			
+			$extension = explode("/", $format['mime'])[1];
 
 			//Création des dossiers
 			$this->createFolder($userID, $profileID);
@@ -134,14 +134,14 @@ class PostController
 					$rsp->setFailure(400, "echec lors de l'upload")
 					    ->send();
 					return;
-				}				
+				}
 
-				$this->uploadImg($extension, $source, $savePath);				
+				$this->uploadImg($extension, $source, $savePath);
 
 				$rsp->setSuccess(201, "post created")
 					->bindValue("userID", $userID)
 					->bindValue("profileID", $profileID)
-					->bindValue("postID", $postID);		
+					->bindValue("postID", $postID);
 			}else{
 				$rsp->setFailure(400, "File do not have good extension");
 			}
@@ -225,7 +225,7 @@ class PostController
 	public function display($postID, $silence = true)
 	{
 		if(!$this->setPost($postID))
-			return;	
+			return;
 
 		$rsp = new Response();
 
@@ -234,11 +234,11 @@ class PostController
 				$rsp->setFailure(401, "You can not see this post")
 				    ->send();
 				return;
-			}	
-		}			
+			}
+		}
 
 		$data = $this->model->getFullPost();
-		
+
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
 			->bindValue("profileID", $data['profile_id'])
@@ -376,11 +376,11 @@ class PostController
 							}
 						}else{
 							$rsp->setFailure(400, "Wrong value for state");
-						}						
+						}
 					}else{
 						$rsp->setFailure(400, "Edit aborted. Missing value.");
 					}
-				}else{  
+				}else{
 					$rsp->setFailure(401, "You are not authorized to do this action.");
 				}
 			break;
@@ -405,6 +405,7 @@ class PostController
 
 	public function like($postID)
 	{
+		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
@@ -422,7 +423,13 @@ class PostController
 
 		if(!$profileID){
 			$rsp->setFailure(401, "You don't have current profile selected")
-			    ->send();	
+			    ->send();
+			return;
+		}
+
+		if ($this->likeModel->countLikeFromLastHour($profileID) > 200) {
+			$rsp->setFailure(406, "You have already liked 200 posts during the last 60 minutes, Calm down Billy Boy !")
+			    ->send();
 			return;
 		}
 
@@ -434,24 +441,25 @@ class PostController
 					$this->likeModel->like($postID, $profileID);
 					$resp->setSuccess(200, "post liked")
 				    	 ->bindValue("postID", $postID)
-				     	 ->bindValue("profileID", $profileID);	
+				     	 ->bindValue("profileID", $profileID);
 				}else{
 					$resp->setFailure(401, "You can not see this post");
 				}						
 			}else{
 				$resp->setFailure(400, "You can not like your own post");
-			}			
+			}
 		}else{
 			$resp->setFailure(400, "post already liked");
 		}
 
-		
+
 		$resp->send();
 
 	}
 
 	public function unlike($postID)
 	{
+		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
@@ -481,6 +489,7 @@ class PostController
 
 	public function likes($postID)
 	{
+		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
@@ -490,10 +499,10 @@ class PostController
 			$resp->setFailure(401, "You can not see this post")
 			    ->send();
 			return;
-		}			
+		}
 
 		$likes = $this->likeModel->getAllLikes($postID);
-		
+
 		$resp->setSuccess(200, "likes returned")
 		     ->bindValue("postID", $postID)
 		     ->bindValue("nbOfLikes", count($likes))
@@ -516,7 +525,7 @@ class PostController
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
 			return;
-		}		
+		}
 
 		$coms = $this->commentModel->getComments($postID);
 
