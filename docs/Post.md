@@ -8,7 +8,7 @@ Celui-ci permet d'accéder à toutes les informations relatives à ces derniers.
 
 ## Création d'un post
 
-Créer un post pour l'utilisateur courant.
+Créer un post pour l'utilisateur courant et le marque comme brouillon.
 
 ### URL
 ```
@@ -30,11 +30,27 @@ Créer un post pour l'utilisateur courant.
 ### Succès
 
   * **Code:** 201 CREATED <br />
-    **Data:** `{ profileID : ID du profil créé }`
-
+    **Data:** 
+    ```
+    { 
+    	profileID : ID du profil créé 
+    }
+    ```
+    
 ### Erreurs
 
   * **Code:** 400 BAD REQUEST <br />
+    **Explication** Une erreur est survenue avec le fichier: fichier manquant/erreur à l'upload...
+    
+    OU
+    
+  * **Code:** 401 NOT AUTHORIZED<br />
+    **Explication** L'utilisateur n'est pas connecté
+    
+    OU
+    
+  * **Code:** 415 UNSUPPORTED MEDIA TYPE<br />
+    **Explication** Le fichier n'est pas une image png/jpeg/bmp
 
 
 
@@ -75,6 +91,9 @@ Data:
     lng : longitude, 
     name : Nom du lieu
   }
+  originalPicture: Image original du post OU Image définitive si post publié
+  editedPicture: Image avec le filtre courant / null si pas de filtre ou post publié
+  contactPicture: Planche contact avec tous les filtres / null si post publié
 }
 ```
 
@@ -146,6 +165,88 @@ Data:
   * **Code:** 400 MISSING VALUE <br />
     **Explication** Il manque la nouvelle valeur du field.
 
+
+
+## Changer le filtre
+Change le filtre du post donné
+### URL
+```
+/profile/setfilter/<postID>/<filter>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du post à modifier
+  * **filter** : Nom du filtre à appliquer. `amaro, brannan, clarendon, earlybird, hefe, hudson, inkwell, kelvin, lark, lofi, mayfair, moon, nashville, reyes, rise, sierra, sutro, toaster, valencia, walden, willow, xproii`
+  
+### Succès
+
+  * **Code:** 200 OK
+  * **Data:**
+  ```
+  {
+  	postID: Post mis à jour
+	currentFilter: filtre actuel du post
+	editedPicture: Lien vers l'image modifié
+  }
+  ```
+  
+### Erreurs
+
+  * **Code:** 401 NOT AUTHORIZED <br />
+    **Explication** L'utilisateur n'est pas connecté/ne possède pas ce post/ne peut pas le modifier
+    
+  OU
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** Impossible de publier le post
+
+
+
+
+## Publier un post
+
+Marque un post comme publié, le rendant public et empecher de nouvelles modifications sur l'image
+### URL
+```
+/profile/publish/<postID>/
+```
+
+### Méthode
+**GET**
+
+### Variable GET
+
+  * **profileID** : ID du post à publier
+
+### Succès
+
+  * **Code:** 200 OK
+  * **Data:**
+  ```
+  {
+  	postID: Post publié
+	state: Nouvel état du post (1)
+  }
+  ```
+  
+### Erreurs
+
+  * **Code:** 401 NOT AUTHORIZED <br />
+    **Explication** L'utilisateur n'est pas connecté/ne possède pas ce post/ne peut pas le modifier
+    
+  OU
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Explication** Impossible de publier le post
+    
+    
+
+
+
 ## Supprimer un post
 
 Supprime un post du profil courant ainsi que la photo du dossier medias/img/
@@ -170,6 +271,9 @@ Supprime un post du profil courant ainsi que la photo du dossier medias/img/
 
   * **Code:** 404 NOT FOUND <br />
     **Explication** Le post spécifié n'existe pas
+
+
+
 
 ## Liker un post
 
@@ -197,6 +301,10 @@ Data:
     profileID: ID du profil qui vient de like le post
 }
 ```
+
+
+
+
 
 ### Erreurs
 
