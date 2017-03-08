@@ -52,6 +52,15 @@ const router = new VueRouter({
   }]
 })
 
+// configuration couleur vue Material
+Vue.material.registerTheme('default', {
+  primary: {
+    color: 'cyan',
+    hue: 800
+  }
+}) 
+
+
 new Vue({ // eslint-disable-line no-new
   el: '#app',
   router,
