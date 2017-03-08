@@ -5,7 +5,7 @@
 				<md-avatar class="md-large avatar">
 					<img src="../../assets/Eiko.png"/>
 				</md-avatar>
-				<md-layout md-gutter md-flex="50" md-column>
+				<md-layout md-gutter md-flex="50" md-list>
 					<p class="profile-name">{{ user.profileName }}</p>
 					<md-button class="md-primary md-raised" @click.native="modifier">Modifier</md-button>
 				</md-layout>
@@ -13,25 +13,29 @@
 
 			<md-layout md-column class="cls_2">
 				<p class="infoNumber"><span>{{ user.nmb_posts }}</span> posts <span>{{ user.nmb_abonnements }}</span> abonnnements <span>{{ user.nmb_abonnés }}</span> abonnés</p>
-				<p class="description">Description<br>{{ user.profileDesc }}</p>
+				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
 			</md-layout>
 		</md-whiteframe>	
 		
-		<md-whiteframe class="edition" md-elevation="8" v-else @submit.stop.prevent="submit">
+		<md-whiteframe type="form" class="edition" md-elevation="8" v-else @submit.stop.prevent="submit">
+			<md-layout>
+				<md-radio v-model="radio0" class="md-primary" md-value="1">Privé</md-radio>
+				<md-radio v-model="radio0" class="md-warn" md-value="2">Public</md-radio>
+			</md-layout>
+			<md-input-container>
+		    	<label>Nom du profil</label>
+		    	<md-input v-model="user.profileName"></md-input> <!-- mettre un moyen de vérifier la validite du champs -->
+			</md-input-container>
 			<md-layout class="profile_pic">
 				<md-avatar class="md-large">
 					<img src="../../assets/Eiko.png"/>
 				</md-avatar>
+				
 				<md-input-container class="cls_file">
 					<label>Photo du profil</label>
 					<md-file v-model="onlyImages" accept="image/*"></md-file>
 				</md-input-container>
 			</md-layout>
-
-			<md-input-container>
-		    	<label>Nom du profil</label>
-		    	<md-input v-model="user.profileName"></md-input>
-			</md-input-container>
 
 			<md-input-container>
 				<label>Description</label>
@@ -54,7 +58,8 @@ export default{
 			nameProfile: '',
 			descProfile: '',
 			statusProfile:'',
-			avatarProfile:''
+			avatarProfile:'',
+			radio0: 1
 		}
 	},
 	computed :{
@@ -71,14 +76,17 @@ export default{
 	methods: {
 		submit () {
 			console.log('submit');
+			
 		},
 		save () {
 			console.log('save');
 			this.modification = !this.modification;
+
 		},
 		modifier () {
 			this.modification = !this.modification;	
 		}
+
 	}
 }
 	
@@ -110,14 +118,22 @@ p, span{
 	padding: 15px;
 }
 
-span{
-	font-weight: 500;
-}
-
 .infoNumber{
 	padding: 5px;
 	margin-bottom: 10px;
 	text-align: center;
+}
+
+p.infoNumber span{
+	font-weight: 500;
+}
+
+p.description{
+	font-weight: 500;
+}
+
+p.description span{
+	font-weight: 300;
 }
 
 .edition{
