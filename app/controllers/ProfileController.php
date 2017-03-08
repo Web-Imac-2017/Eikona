@@ -721,7 +721,29 @@ class ProfileController
             return;
         }
 
-        $rsp->setSuccess(200)
+        //Si demande à un profil privé
+        if($result === 0)
+        {
+            $code = "newFollowAsk";
+        }
+
+        //Si abonnement à un profil privé
+        if($result === 1){
+            $code = "newFollowing";
+        }
+
+        $notif = Response::read("notification", "create", $code, $currentUser, $profileID, $profileID);
+
+        if($notif['code'] != 200){
+        $rsp->setFailure(400, "error during following")
+            ->send();
+            return;
+        }
+
+        $rsp->setSuccess(200, "follow and notification sent")
+            ->bindValue("userProfile", $currentUser)
+            ->bindValue("profileFollowed", $profileID)
+            ->bindValue("notif", $notif['data'])
             ->send();
     }
 

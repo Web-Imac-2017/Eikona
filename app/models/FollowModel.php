@@ -114,7 +114,7 @@ class FollowModel extends DBInterface
                         ":subscribe" => $subscribe,
                         ":confirmed" => $confirmed]);
 
-        return true;
+        return $confirmed;
     }
 
 
