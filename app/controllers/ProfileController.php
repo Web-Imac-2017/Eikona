@@ -36,6 +36,7 @@ class ProfileController
             $rsp->send();
             return;
         }
+
         $name = $_POST['profileName'];
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
@@ -48,24 +49,29 @@ class ProfileController
 
         if($result == "badUserID")
         {
-            $rsp->setFailure(400, "Given user ID is not valid.");
-        }
-        else if($result == "userNameAlreadyExists")
-        {
-            $rsp->setFailure(409, "The profile name is already taken.");
-        }
-        else
-        {
-            $rsp->setSuccess(201, "profile created")
-                ->bindValue("profileID", $result);
+            $rsp->setFailure(400, "Given user ID is not valid.")
+                ->send();
+
+            return;
         }
 
-        /**
-         * Handle profile picture
-         */
+        if($result == "userNameAlreadyExists")
+        {
+            $rsp->setFailure(409, "The profile name is already taken.")
+                ->send();
 
-        //Send JSON response
-        $rsp->send();
+            return;
+        }
+
+        $rsp->setSuccess(201, "profile created")
+            ->bindValue("profileID", $result)
+            ->send();
+
+        //Create profile folder
+        $profileKey = $this->model->getKey();
+
+        $root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+        mkdir($root."/".$profileKey);
     }
 
     /**
