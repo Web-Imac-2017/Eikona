@@ -1,14 +1,16 @@
 <?php
 
 class UserController{
-	
+
 	private $model;
 	private $profileModel;
+	private $authModel;
 
 	public function __construct()
 	{
 		$this->model = new UserModel();
 		$this->profileModel = new ProfileModel();
+		$this->authModel = new AuthModel();
 	}
 
 	/**
@@ -37,6 +39,55 @@ class UserController{
 		return true;
 	}
 
+
+    /*********************/
+    /**** Confirm user methods */
+    /*********************/
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($userID)
+    {
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("exists", $this->model->exists($userID))
+            ->send();
+    }
+
+
+
+    /**
+     * Tell if the specified user is a moderator
+     * @param integer $userID User ID to verify
+     */
+    public function isModerator($userID)
+    {
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("isModerator", $this->model->isModerator($userID))
+            ->send();
+    }
+
+
+
+    /**
+     * Tell if the specified user is an administrator
+     * @param integer $userID User ID to verify
+     */
+    public function isAdmin($userID)
+    {
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("isAdmin", $this->model->isAdmin($userID))
+            ->send();
+    }
+
 	/**
 	 * Return all elements of an user
 	 * @return Response JSON
@@ -55,7 +106,7 @@ class UserController{
 		$resp = new Response();
 		$resp->setSuccess(200, "all elements returned")
 		     ->bindValue("userID", $userID)
-		     ->bindValue("userName", $userInfos['user_name'])	
+		     ->bindValue("userName", $userInfos['user_name'])
 		     ->bindValue("userEmail", $userInfos['user_email'])
 		     ->bindValue("userRegisterTime", $userInfos['user_register_time'])
 		     ->bindValue("userLastActivity", $userInfos['user_last_activity'])
@@ -83,7 +134,7 @@ class UserController{
 
 		if($profiles){
 			$resp->setSuccess(200, "user profiles returned")
-			     ->bindValue("userID", $profiles[0]['user_id'])
+			     ->bindValue("userID", $userID)
 			     ->bindValue("nbOfProfiles", count($profiles))
 			     ->bindValue("profiles", $profiles);
 		}else{
@@ -106,7 +157,7 @@ class UserController{
 		//get userID
 		$userID = Session::read("userID");
 
-		// If userID is wrong	
+		// If userID is wrong
 		if(!$this->setUser($userID)){
 			return;
 		}
@@ -143,15 +194,20 @@ class UserController{
 				if(!empty($_POST['email'])){
 					if($this->model->isUnique($_POST['email'])){
 						if($this->model->updateEmail($_POST['email'])){
-							$resp->setSuccess(200, "email changed")
-						         ->bindValue("userID", $userID)
-							     ->bindValue("userEmail", $this->model->getEmail());
-							Session::renewKey();
+							$ban = new BanController;
+							if (!$ban->model->isEmailBan($_POST['user_email'])){
+								$resp->setSuccess(200, "email changed")
+								->bindValue("userID", $userID)
+								->bindValue("userEmail", $this->model->getEmail());
+								Session::renewKey();
+							}else{
+								$resp->setFailure(406, "Email banned");
+							}
 						}else{
-							$resp->setFailure(409, "incorrect email");
-						}					
-					}else{						
-						$resp->setFailure(403, "user already exists");
+							$resp->setFailure(409, "Incorrect email");
+						}
+					}else{
+						$resp->setFailure(403, "User already exists");
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
@@ -193,7 +249,7 @@ class UserController{
 		//get userID
 		$userID = Session::read("userID");
 
-		// If userID is wrong	
+		// If userID is wrong
 		if(!$this->setUser($userID)){
 			return;
 		}
@@ -213,16 +269,16 @@ class UserController{
 
 				if(!empty($_POST['id'])){
 					if($this->model->userExists($_POST['id'])){
-						if($this->model->setModerator($_POST['id'])){	
+						if($this->model->setModerator($_POST['id'])){
 							$resp->setSuccess(200, "user is now moderator")
 							 	 ->bindValue("userModeratorID", $_POST['id'])
 							 	 ->bindValue("userModerator", 1);
 							Session::renewKey();
 						}else{
 							$resp->setFailure(409, "incorrect id");
-						}						
+						}
 					}else{
-						$resp->setFailure(404, "Given user ID does not exist");	
+						$resp->setFailure(404, "Given user ID does not exist");
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted.");
@@ -244,7 +300,7 @@ class UserController{
 							$resp->setFailure(409, "incorrect ID");
 						}
 					}else{
-						$resp->setFailure(404, "Given user admin ID does not exist");	
+						$resp->setFailure(404, "Given user admin ID does not exist");
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted");
@@ -266,7 +322,7 @@ class UserController{
 							$resp->setFailure(409, "incorrect ID");
 						}
 					}else{
-						$resp->setFailure(404, "Given user admin ID does not exist");	
+						$resp->setFailure(404, "Given user admin ID does not exist");
 					}
 				}else{
 					$resp->setFailure(400, "Missing value. Edit aborted");
@@ -281,9 +337,42 @@ class UserController{
 		     ->send();
 	}
 
+	/**
+	 * Supprime le compt ede l'user
+	 * @return [type] [description]
+	 */
+
+	/* TODO : SUPPRIMER LES PROFILS LORS DE LA SUPPRESSION DU COMPTE */
+	public function delete()
+	{
+		$resp = new Response();
+
+		$userID = Session::read("userID");
+
+
+		if($userID){
+			if(!empty($_POST['user_passwd'])){
+				if($this->authModel->checkDelete($userID, $_POST['user_passwd'])){
+					if($this->authModel->delete($userID)){
+						$resp->setSuccess(200, "account deleted")
+						     ->bindValue("userID", $userID)
+						     ->send();
+						Response::read("auth", "signOut", true);
+						return;
+					}else{
+						$resp->setFailure(403, "fail to delete");
+					}
+				}else{
+					$resp->setFailure(409, "incorrect password");
+				}
+			}else{
+				$resp->setFailure(400, "tous les champs ne sont pas remplis");
+			}
+		}else{
+			$resp->setFailure(401, "You are not authorized to do this action.");
+		}
+
+		$resp->send();
+	}
+
 }
-
-
-
-
-

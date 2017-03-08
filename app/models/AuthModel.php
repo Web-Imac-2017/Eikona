@@ -73,6 +73,82 @@ class AuthModel extends DBInterface{
        return (mail($email, $subject, $content, $headers)) ? true : false;
     }
 
+
+    /************************/
+	/***** RECUPERATION *****/
+	/************************/
+
+    private function randomString()
+    {
+    	$res = "";
+    	$length = 6;
+    	$chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    	$array = str_split($chars);
+
+    	for($i=0; $i<$length; $i++){
+    		$res .= $array[array_rand($array)];
+    	}
+
+    	return $res;
+    }
+
+    public function addCode($email)
+    {
+    	$code = $this->randomString();
+
+    	$stmt = $this->cnx->prepare("
+    		UPDATE users SET user_code = :code
+    		WHERE user_email = :email");
+    	$stmt->execute([":code" => $code,
+    		            ":email" => $email]);
+
+    	return $code;
+    }
+
+    public function checkCode($email, $code)
+    {
+    	$stmt = $this->cnx->prepare("
+    		SELECT COUNT(*) FROM users
+    		WHERE :code = user_code
+    		AND :email = user_email");
+    	$stmt->execute([":code" => $code,
+    		            ":email" => $email]);
+
+    	return ($stmt->fetchColumn() == 1) ? true : false;
+    }
+
+    public function sendRecuperationMail($email, $code)
+    {
+    	require_once 'Library/RecuperationMail.php';
+
+    	$subject = "RECUPEREZ VOTRE MOT DE PASSE";
+
+    	$headers = 'From: zobeleflorian@gmail.com' . "\r\n" .
+                   'MIME-Version: 1.0' . "\r\n" .
+                   'Content-type: text/html; charset=utf-8';
+
+        return (mail($email, $subject, $content, $headers)) ? true : false;
+    }
+
+    public function updatePassword($email, $passwd)
+    {
+    	$pwd = hash("sha256", $passwd);
+
+    	$stmt = $this->cnx->prepare("
+    		UPDATE users SET user_passwd = :pwd
+    		WHERE user_email = :email");
+    	$stmt->execute([":pwd" => $pwd,
+    		            ":email" => $email]);
+    }
+
+    public function deleteCode($email)
+    {
+    	$stmt = $this->cnx->prepare("
+    		UPDATE users SET user_code = NULL
+    		WHERE user_email = :email");
+    	$stmt->execute([":email" => $email]);
+    }
+
 	/**********************/
 	/***** ACTIVATION *****/
 	/**********************/

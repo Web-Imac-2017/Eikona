@@ -13,12 +13,12 @@ class BlockModel extends DBInterface{
 	 * @param  int $blocked_id blocked_id
 	 * @param  time $time time()
 	 */
-	public function blockUser($blocker_id, $blocked_id, $time)
+	public function blockUser($blocker_id, $blocked_id)
 	{
-		$stmt = $this->cnx->prepare("INSERT INTO blocked (blocked_id, blocker_id, block_time) VALUES (:blocker_id, :blocked_id, :time)");
+			$stmt = $this->cnx->prepare("INSERT INTO blocked (blocker_id, blocked_id, block_time) VALUES (:blocker_id, :blocked_id, :time)");
 		$stmt->execute([":blocker_id" => $blocker_id,
                         ":blocked_id" => $blocked_id,
-                        ":time" => $time]);
+                        ":time" => time()]);
 	}
 
 	/**
@@ -28,7 +28,7 @@ class BlockModel extends DBInterface{
 	 */
 	public function unblockUser($blocker_id, $blocked_id)
 	{
-		$stmt = $this->cnx->prepare("DELETE FROM blocked WHERE blocker_id = :blocker_id AND blocker_id = :blocked_id");
+		$stmt = $this->cnx->prepare("DELETE FROM blocked WHERE blocker_id = :blocker_id AND blocked_id = :blocked_id");
 		$stmt->execute([":blocker_id" => $blocker_id,
                         ":blocked_id" => $blocked_id]);
 	}
@@ -41,7 +41,7 @@ class BlockModel extends DBInterface{
 	 */
 	public function isBlocked($blocker_id, $blocked_id)
 	{
-		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM blocked WHERE blocker_id = :blocker_id AND blocker_id = :blocked_id");
+		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM blocked WHERE blocker_id = :blocker_id AND blocked_id = :blocked_id");
 		$stmt->execute([":blocker_id" => $blocker_id,
                         ":blocked_id" => $blocked_id]);
 
