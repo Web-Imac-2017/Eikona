@@ -50,15 +50,19 @@ export default {
       confirm: '',
       code: '',
       alert: {
-        content: '',
+        content: 'Reinitialisation du mot de passe',
         ok: 'Ok'
       }
     }
  },
  mixins: [formVerifications],
  methods: {
-   verif_code () {
-     // A completer
+   verif_code (value, inputContainerId) {
+     var regex = /[a-zA-Z0-9]{6}$/
+     if(!regex.test(value)){
+       document.getElementById(inputContainerId).classList.add('md-input-invalid')
+       return false
+     } else document.getElementById(inputContainerId).classList.remove('md-input-invalid')
      return true
    },
    onClose () {

@@ -1,6 +1,6 @@
 <template lang="html">
   <md-layout>
-    <form id="connectionForm" @submit.stop.prevent="send">
+    <form v-show="!forgetPassword" id="connectionForm" @submit.stop.prevent="send">
       <h2>Connectez vous</h2>
       <div v-if="error_message != ''" class="md-warn">{{ error_message }}</div>
       <md-input-container id="connection-id">
@@ -16,12 +16,13 @@
       <p>Les champs marqués d'un * sont obligatoires.</p>
       <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
     </form>
-    <md-button class="md-dense md-accent" @click.native="forgetPassword = !forgetPassword">Mot de passe oublié ?</md-button>
+    <md-button v-show="!forgetPassword" class="md-dense md-accent" @click.native="forgetPassword = !forgetPassword">Mot de passe oublié ?</md-button>
     <resetPassword v-show="forgetPassword" @close="forgetPassword = false"></resetPassword>
   </md-layout>
 </template>
 
 <script>
+import Vuex from 'vuex'
 import store from './connectionStore.js'
 import formVerifications from './../formVerifications.js'
 import resetPassword from './resetPassword.vue'
@@ -42,18 +43,26 @@ export default {
   },
   mixins: [formVerifications],
   methods: {
+    ...Vuex.mapActions({
+      initUserStore: 'initUser',
+      initProfilesStore: 'initProfiles',
+      clearUserStore: 'clearUser'
+    }),
     send () {
       if (!(this.verif_mail(this.email, 'connection-id') && this.verif_password(this.password, 'connection-password'))) return
       this.$http.post('/Eikona/do/auth/signIn', {
         user_email: this.email,
         user_passwd: this.password
       }).then((response) => {
-        store.commit('SET_USER', response.userID, response.userEmail, true)
-        store.commit('SET_LIST_PROFILES')
+        this.initUserStore()
+        this.initProfilesStore()
         this.$router.push('/Eikona/user/profile')
       }, (response) => {
-        store.commit('SET_USER', '', '', false)
+        this.clearUserStore()
         switch (response.status) {
+          case 200:
+            console.log('User connected')
+            break
           case 400:
             this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
             break
@@ -67,7 +76,7 @@ export default {
             document.getElementById('connection-password').classList.add('md-input-invalid')
             break
           default:
-            console.log('Unknown error', response)
+            console.log('Unknown error')
         }
       })
     }

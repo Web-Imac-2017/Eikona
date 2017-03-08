@@ -75,8 +75,7 @@ export default {
 			(response) => {
         console.log('Sign up success', response)
 				this.$refs['mailConfirmation'].open()
-      },
-			(response) => {
+      }, (response) => {
         console.log('Sign up error', response)
         switch (response.status) {
           case 400:

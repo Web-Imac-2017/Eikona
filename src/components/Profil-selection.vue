@@ -1,31 +1,24 @@
 <template lang="html">
   <md-layout md-flex="50" md-flex-small="100" md-align="center">
-    <md-whiteframe md-elevation="8">
-      <h1>Bonjour {{ user.id }} !</h1>
+    <md-whiteframe md-elevation="8" id="profile-selection">
+      <h1>Bonjour {{ getUser.userName }} !</h1>
       <p>Veuillez sélecionner un profil :</p>
-      <md-layout md-column md-align="center">
-        <profile v-for="(profile, i) in profiles" :profile="profile" :i="i"></profile>
-        <md-layout>
-          <md-button type="button" @click.native="add_profile">
-            <md-layout md-flex="100">
-              <md-layout md-flex="25">
-                <md-avatar class="md-avatar-icon">
-                  <md-icon>add</md-icon>
-                </md-avatar>
-              </md-layout>
-              <md-layout md-flex="75">
-                <h3>Ajouter un profil</h3>
-              </md-layout>
-            </md-layout>
+      <md-list class="md-double-line">
+        <profile v-for="(profile, i) in profiles" :profile="profile" :i="i" @select="select(selectProfile)"></profile>
+        <md-list-item class="md-inset">
+          <span>Ajouter un profil</span>
+          <md-button @click.native="createProfile" class="md-icon-button md-list-action">
+            <md-icon class="md-accent">add_circle</md-icon>
           </md-button>
-        </md-layout>
-      </md-layout>
+        </md-list-item>
+      </md-list>
     </md-whiteframe>
     <profileCreation v-if="creationForm"></profileCreation>
   </md-layout>
 </template>
 
 <script>
+import Vuex from 'vuex'
 import store from './connectionStore.js'
 import profile from './Profile.vue'
 import profileCreation from './Profile-creation.vue'
@@ -42,20 +35,36 @@ export default {
       creationForm: false
     }
   },
+  computed: {
+    ...Vuex.mapGetters([
+      'getUser',
+      'profiles'
+    ])
+  },
   methods: {
-    user () {
-      return this.$store.state.user
-    },
-    profiles () {
-      return this.$store.state.profiles
-    },
-    add_profile () {
-      console.log('add_profile')
+    createProfile () {
       this.creationForm = true
+    },
+    select (profile) {
+      console.log('select profile')
+
+      // redirection vers page correspondante
+      this.$store.commit('SET_CURRENT_PROFILE', this.i)
+
+      // selection profile ajax
+      this.$http.get('/Eikona/do/profile/setCurrent/' + this.$store.state.profiles[this.i]).then((response) => {
+        console.log('Changement de profile :' + this.$store.state.profiles[this.i], response)
+        // redirect vers la page du profile correspondant
+        }, (response) => {
+          console.log('ERR profile selection: ', response)
+      })
     }
   }
 }
 </script>
 
 <style lang="css">
+#profile-selection {
+  padding : 50px;
+}
 </style>

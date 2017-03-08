@@ -32,6 +32,14 @@ export default {
 				return false
 			} else document.getElementById(inputContainerId).classList.remove('md-input-invalid')
 			return true
-		}
+		},
+    verif_text(value, inputContainerId){
+      var regex = /[\ta-zA-Z0-9 -._//:();^/@?!]+/
+			if(!regex.test(value)){
+				document.getElementById(inputContainerId).classList.add('md-input-invalid')
+				return false
+			} else document.getElementById(inputContainerId).classList.remove('md-input-invalid')
+			return true
+    }
   }
 }
