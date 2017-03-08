@@ -32,7 +32,7 @@ class NotificationModel extends DBInterface
 	public function getProfileNotifications($profileID)
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT notif_id, profile_id, profile_target_id, notif_type, notif_target, notif_time, notif_seen
+			SELECT DISTINCT notif_id, profile_id, profile_target_id, notif_type, notif_target, notif_time, notif_seen
 			FROM notifications
 			WHERE profile_target_id = :id
 			AND notif_seen = 0
@@ -45,7 +45,7 @@ class NotificationModel extends DBInterface
 	public function getUserNotifications($userID)
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT notif_id, profile_id, notif_type, notif_target, notif_time, notif_seen
+			SELECT DISTINCT notif_id, profile_id, notif_type, notif_target, notif_time, notif_seen
 			FROM notifications
 			WHERE profile_id IN
 			(

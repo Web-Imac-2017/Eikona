@@ -10,9 +10,6 @@ class NotificationController
 		"newLike"        => 4, //DONE
 		"newComment"     => 5, //DONE
 		"newCommentLike" => 6, //DONE
-		"admin"          => 7,
-		"moderator"      => 8,
-		"user"           => 9
 	];
 
 	public function __construct()
