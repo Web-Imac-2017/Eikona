@@ -149,12 +149,12 @@ class ProfileModel extends DBInterface
         if($id == 0) return false;
 
         $stmt = $this->cnx->prepare("
-            SELECT profile_id, user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private
+            SELECT profile_id
             FROM profiles
             WHERE :id = user_id");
         $stmt->execute([":id" => $id]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     /**
