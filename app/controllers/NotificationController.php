@@ -7,7 +7,7 @@ class NotificationController
 		"newFollowAsk"   => 1,
 		"followAccepted" => 2,
 		"newFollower"    => 3,
-		"newLike"        => 4,
+		"newLike"        => 4, //DONE
 		"newComment"     => 5,
 		"newCommentLike" => 6,
 		"admin"          => 7,
@@ -42,11 +42,6 @@ class NotificationController
 	}
 
 	public function delete()
-	{
-
-	}
-
-	public function read()
 	{
 
 	}

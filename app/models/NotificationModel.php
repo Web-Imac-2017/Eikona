@@ -56,4 +56,12 @@ class NotificationModel extends DBInterface
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
+
+	public function setNotificationSeen($notifID)
+	{
+		$stmt = $this->cnx->prepare("
+			UPDATE notifications SET notif_seen = 0
+			WHERE notif_id = :id");
+		$stmt->execute([":id" => $notifID]);
+	}
 }
