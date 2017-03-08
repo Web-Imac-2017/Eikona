@@ -13,15 +13,15 @@
 class FiltR
 {
     public static $formatsAllowed = ["jpg", "jpeg", "png", "bmp", "bmp2", "bmp3", "tiff"];
-    public static $availableFilters = ["amaro", "brannan", "clarendon", "earlybird", "hefe", "hudson", "inkwell", "kelvin", "lark", "lofi", "mayfair", "moon", "nashville", "reyes", "rise", "sierra", "sutro", "toaster",  "valencia", "walden", "willow", "XProII"];
+    public static $availableFilters = ["amaro", "brannan", "clarendon", "earlybird", "hefe", "hudson", "inkwell", "kelvin", "lark", "lofi", "mayfair", "moon", "nashville", "reyes", "rise", "sierra", "sutro", "toaster",  "valencia", "walden", "willow", "xproii"];
 
 
 
     private static $BlackVignetteOverlay = null;
-    private static $BlackVignetteOverlayPath = "FiltR/BlackVignetteOverlay.png";
+    private static $BlackVignetteOverlayPath = "/Eikona/app/Library/FiltR/BlackVignetteOverlay.png";
 
     private static $WhiteSpot = null;
-    private static $WhiteSpotPath = "FiltR/CenterWhite.png";
+    private static $WhiteSpotPath = "/Eikona/app/Library/FiltR/CenterWhite.png";
 
 
 
@@ -137,12 +137,12 @@ class FiltR
         if($destWidth >= 1024 || $destHeight >= 1024)
         {
             //echo "CLUT16";
-            $clut = self::getImage("FiltR/halds/".$filter."-16.png");
+            $clut = self::getImage($_SERVER['DOCUMENT_ROOT']."/Eikona/app/Library/FiltR/halds/".$filter."-16.png");
         }
         else
         {
             //echo "CLUT8";
-            $clut = self::getImage("FiltR/halds/".$filter.".png");
+            $clut = self::getImage( $_SERVER['DOCUMENT_ROOT']."/Eikona/app/Library/FiltR/halds/".$filter.".png");
         }
 
         return $clut;
@@ -154,12 +154,17 @@ class FiltR
      * Print a proof of all the filter applied to the picture
      * @param [[Type]] [$sampleWidth = 150] [[Description]]
      */
-    public static function proof($srcIMG, $sampleSize = 150)
+    public static function proof($srcIMG, $destIMG)
     {
         $img = self::getImage($srcIMG);
 
         if(!$img)
             return false;
+
+
+
+        $sampleSize = 150;
+
 
 
         $img->setImageCompressionQuality(40);
@@ -185,9 +190,7 @@ class FiltR
 
         $montage = $stack->montageImage(new ImagickDraw(), '3', $geo['width']."x".$geo['height'], 0, '0');
 
-        $montage->setImageFormat("jpeg");
-        header("Content-Type: image/jpeg");
-        echo $montage;
+        return $montage->writeImage($destIMG);
     }
 
 
@@ -197,7 +200,7 @@ class FiltR
     private static function getBlackVignette($sizeX, $sizeY, $factor = 1)
     {
         if(is_null(self::$BlackVignetteOverlay))
-            self::$BlackVignetteOverlay = self::getImage(self::$BlackVignetteOverlayPath);
+            self::$BlackVignetteOverlay = self::getImage($_SERVER['DOCUMENT_ROOT'].self::$BlackVignetteOverlayPath);
 
         $vignette = self::$BlackVignetteOverlay->getImage();
 
@@ -216,7 +219,7 @@ class FiltR
     private static function getWhiteSpot($sizeX, $sizeY, $factor = 1)
     {
         if(is_null(self::$WhiteSpot))
-            self::$WhiteSpot = self::getImage(self::$WhiteSpotPath);
+            self::$WhiteSpot = self::getImage($_SERVER['DOCUMENT_ROOT'].self::$WhiteSpotPath);
 
         $vignette = self::$WhiteSpot->getImage();
 
@@ -259,6 +262,8 @@ class FiltR
         $srcIMG = $args[0];
         $destIMG = $args[1];
 
+
+
         $img = self::getImage($srcIMG);
 
         if(!$img)
@@ -267,7 +272,7 @@ class FiltR
 
 
         ////////////// Speed up testing
-        self::resize($img, 2048, 2048);
+        //self::resize($img, 2048, 2048);
         //////////////
 
 
@@ -303,8 +308,8 @@ class FiltR
         $img->haldClutImage($clut);
 
         //Apply Vignette
-        $img->setImageBackgroundColor('black');
-        $img->vignetteImage($geo['width'] * 0.2, 65000, $geo['width'] * -0.07, $geo['height'] * -0.07);
+        $vignette = self::getBlackVignette($geo['width']*2, $geo['height']*2, 1.5);
+        $img->compositeImage($vignette, imagick::COMPOSITE_OVERLAY,  $geo['width']*-0.5, $geo['height']*-0.5);
 
         //Apply center white dot
         $overlay = self::getWhiteSpot($geo['width'], $geo['height'], 1);
@@ -396,7 +401,7 @@ class FiltR
         $img->haldClutImage($clut);
 
         //Apply Vignette
-        $vignette = self::getImage("FiltR/BlackSquareVignette.png");
+        $vignette = self::getImage($_SERVER['DOCUMENT_ROOT']."/Eikona/app/Library/FiltR/BlackSquareVignette.png");
         $vignette->resizeImage($geo['width'] * 1.05, $geo['height'] * 1.05, imagick::FILTER_TRIANGLE, 1);
 
         $img->compositeImage($vignette, imagick::COMPOSITE_OVERLAY , $geo['width'] * -0.025, $geo['height'] * -0.025);
@@ -524,11 +529,11 @@ class FiltR
         $img->haldClutImage($clut);
 
         //Apply Vignette
-        $img->setImageBackgroundColor('black');
-        $img->vignetteImage($geo['width']*0.5, 65000, 0, -$geo['height']);
+        $vignette = self::getBlackVignette($geo['width']*2, $geo['height']*2, 1.5);
+        $img->compositeImage($vignette, imagick::COMPOSITE_OVERLAY,  $geo['width']*-0.5, $geo['height']*-0.5);
 
         //Apply whites flares
-        $overlayPath = "FiltR/ThreeDots.png";
+        $overlayPath = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/Library/FiltR/ThreeDots.png";
         $overlay = self::getImage($overlayPath);
 
         $overlay->resizeImage($geo['width'], $geo['height'], imagick::FILTER_TRIANGLE, 1);
@@ -752,11 +757,11 @@ class FiltR
         $img->haldClutImage($clut);
 
         //Apply vignette
-        $img->setImageBackgroundColor('black');
-        $img->vignetteImage($geo['width']*0.2, 65000, $geo['width']*-0.1, $geo['height']*-0.1);
+        $vignette = self::getBlackVignette($geo['width']*2, $geo['height']*2, 1.5);
+        $img->compositeImage($vignette, imagick::COMPOSITE_OVERLAY,  $geo['width']*-0.5, $geo['height']*-0.5);
 
         //Apply whites flares
-        $overlayPath = "FiltR/ThreeDots.png";
+        $overlayPath = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/Library/FiltR/ThreeDots.png";
         $overlay = self::getImage($overlayPath);
 
         $overlay->resizeImage($geo['width'], $geo['height'], imagick::FILTER_TRIANGLE, 1);
@@ -782,7 +787,8 @@ class FiltR
 
         $img->haldClutImage($clut);
 
-        $img->vignetteImage($geo['width']*0.2, 65000, $geo['width']*-0.7, $geo['height']*-0.7);
+        $vignette = self::getBlackVignette($geo['width']*2, $geo['height']*2, 1.5);
+        $img->compositeImage($vignette, imagick::COMPOSITE_OVERLAY,  $geo['width']*-0.5, $geo['height']*-0.5);
 
         return $img;
     }
