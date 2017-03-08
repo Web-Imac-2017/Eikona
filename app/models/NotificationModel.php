@@ -8,12 +8,13 @@ class NotificationModel extends DBInterface
 		parent::__construct();
 	}
 
-	public function add($code, $profileTarget, $targetID)
+	public function add($code, $profileID, $profileTargetID, $targetID)
 	{
 		$stmt = $this->cnx->prepare("
-			INSERT INTO notifications (profile_id, notif_type, notif_target, notif_time, notif_seen)
-			VALUES (:target, :code, :targetID, :time, :seen)");
-		$stmt->execute([":target"   => $profileTarget,
+			INSERT INTO notifications (profile_id, profile_target_id, notif_type, notif_target, notif_time, notif_seen)
+			VALUES (:profile, :target, :code, :targetID, :time, :seen)");
+		$stmt->execute([":profile"  => $profileID,
+						":target"   => $profileTargetID,
 						":code"     => $code,
 						":targetID" => $targetID,
 						":time"     => time(),
@@ -31,9 +32,10 @@ class NotificationModel extends DBInterface
 	public function getProfileNotifications($profileID)
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT notif_id, notif_type, notif_target, notif_time, notif_seen
+			SELECT notif_id, profile_id, profile_target_id, notif_type, notif_target, notif_time, notif_seen
 			FROM notifications
-			WHERE profile_id = :id
+			WHERE profile_target_id = :id
+			AND notif_seen = 0
 			ORDER BY notif_time");
 		$stmt->execute([":id" => $profileID]);
 

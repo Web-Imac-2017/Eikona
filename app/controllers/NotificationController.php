@@ -20,7 +20,7 @@ class NotificationController
 		$this->model = new NotificationModel();
 	}
 
-	public function create($code, $profileTarget, $target)
+	public function create($code, $profileID, $profileTarget, $target)
 	{
 		$resp = new Response();
 
@@ -31,11 +31,12 @@ class NotificationController
 		}
 
 		$notif = $this->allowedCodes[$code];
-		$this->model->add($notif, $profileTarget, $target);
+		$this->model->add($notif, $profileID, $profileTarget, $target);
 
 		$resp->setSuccess(200, "notif returned")
 			 ->bindValue("type", $code)
 			 ->bindValue("code", $notif)
+			 ->bindValue("profileID", $profileID)
 			 ->bindValue("profileTargetID", $profileTarget)
 			 ->bindValue("targetID", $target)
 		     ->send();

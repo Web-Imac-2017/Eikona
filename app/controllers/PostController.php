@@ -433,7 +433,7 @@ class PostController
 			if($this->model->getProfileID() != $profileID){
 				if(isAuthorized::seeFullProfile($this->model->getProfileID())){
 					$this->likeModel->like($postID, $profileID);
-					$notif = Response::read("notification", "create", "newLike", $this->model->getProfileID(), $postID);
+					$notif = Response::read("notification", "create", "newLike", $profileID, $this->model->getProfileID(), $postID);
 					if($notif['code'] == 200){
 						$resp->setSuccess(200, "post liked and notification sent")
 				    	     ->bindValue("postID", $postID)
