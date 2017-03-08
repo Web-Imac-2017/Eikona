@@ -1,2 +1,4 @@
 node_modules
 app/medias
+/app/controllers/botRessources/botLogs.csv
+/app/controllers/botRessources/src2.jpg
