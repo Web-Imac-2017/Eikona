@@ -17,9 +17,7 @@ class BotController extends DBInterface
         $actions = ["addUser", "addProfile", "addPost", "addComment", "addLike", "viewPost"];
         
         $rand = mt_rand(0, 100);
-        
-        //echo $rand;
-        
+
         if($rand < 3)
             $this->addUser();
         else if($rand < 10)
@@ -259,13 +257,14 @@ class BotController extends DBInterface
         $stmt->execute([":uID" => $uID]);
         
         $profileID = $stmt->fetchColumn();
-        
-        
+
         if($profileID === false)
         {
-            return $this->addProfile();
+            $profileID = $this->addProfile();
         }
         
+        Session::write("profileID", $profileID);
+
         return $profileID;
     }
 }
