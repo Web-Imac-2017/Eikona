@@ -1,23 +1,40 @@
 <template>
-	<md-layout id="infosProfil">
-		<md-layout class="cls_1">
-			<md-avatar class="md-large">
-				<img src="../../assets/portrait_final.jpg"/>
-			</md-avatar>
-			<md-layout>
-				<p class="profile-name">{{ user.profileName }}</p>
-				<md-button v-if="!abonne" class="md-raised md-primary" @click.native="sabonner">S'abonner</md-button>
-				<md-button v-else class="md-raised" @click.native="sabonner">Abonné(e)</md-button>
-			</md-layout>
-		</md-layout>
+	<md-layout md-column md-flex="20" md-flex-offset="10">
+		<md-whiteframe class="infos" md-elevation="8">
+			<md-layout md-gutter class="cls_1">
+				<md-avatar class="md-large avatar">
+					<img src="../../assets/Eiko.png"/>
+				</md-avatar>
 
-		<md-layout class="cls_2">
-			<p class="infoNumber">{{ user.nmb_posts }} posts</p> 
-			<p class="infoNumber">{{ user.nmb_abonnements }} abonnnements</p>
-			<p class="infoNumber">{{ user.nmb_abonnés }} abonnés</p>
-		</md-layout>
-		<p class="description">{{ user.profileDesc }}</p>
-	</md-layout>
+				<md-layout md-flex="50" md-column>
+					<p class="profile-name">{{ user.profileName }}</p>
+
+					<md-layout v-if="!abonne" md-gutter>
+						<md-button  class="md-raised md-primary" @click.native="sabonner">S'abonner</md-button>
+						<md-button class="md-fab md-raised md-mini" disabled>
+							<md-icon>notifications_none</md-icon>
+						</md-button>
+					</md-layout>
+
+					<md-layout v-else md-gutter>
+						<md-button  class="md-raised" @click.native="desabonner">Abonné(e)</md-button>
+						<md-button v-if="!notif" class="md-fab md-raised md-mini md-clean" @click.native="notifier">
+							<md-icon>notifications_none</md-icon>
+						</md-button>
+						<md-button v-else class="md-fab md-raised md-mini md-primary" @click.native="notifier">
+							<md-icon>notifications</md-icon>
+						</md-button>
+					</md-layout>
+				</md-layout>
+
+			</md-layout>
+
+			<md-layout md-column class="cls_2">
+				<p class="infoNumber"><span>{{ user.nmb_posts }}</span> posts <span>{{ user.nmb_abonnements }}</span> abonnnements <span>{{ user.nmb_abonnés }}</span> abonnés</p>
+				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
+			</md-layout>
+		</md-whiteframe>
+	</md-layout> 
 </template>
 
 <script>
@@ -25,10 +42,12 @@ import connection from './Connection.vue'
 
 export default {
 	name: 'informationsProfilAutre',
+
 	data () {
 		return {
 			connected: true,
-			abonne: false
+			abonne: false,
+			notif: false
 		}
 	},
 	computed :{
@@ -45,12 +64,27 @@ export default {
 	methods: {
 		sabonner () {
 			if(!this.connected){
-				console.log("!connected");
+				console.log("Abonnement");
+				/*this.$http.get('/Eikona/do/<profileID>[/<subscribe>]').then((response) => {
+      				// gérer le succes, toutes les infos renvoyer sont dans response.data 
+
+    			}, (response) => {
+      				// gérer les erreurs
+      			}
+    		})*/
 			}
 			else{
 				console.log("changement");
 				this.abonne=!this.abonne;
-			}	
+				this.notif=true;
+			}
+		},
+		desabonner () {
+			this.abonne=!this.abonne;
+			this.notif=false;
+		},
+		notifier () {
+			this.notif=!this.notif;
 		}
 	}
 }
@@ -59,35 +93,44 @@ export default {
 
 <style scoped>
 
-#infosProfil{
-	width: 30%;
-	padding: 30px;
-	background-color: white;
-	display: block;
-	margin: 50px;
-	border: 1px solid black;
-}
-
-p{
+p, span{
 	font-family: 'Roboto';
+	font-size: 0.8vw;
 	font-weight: 300;
 }
 
-.profile-name{
-	font-weight: 500;
+.cls_1{
+	padding: 15px;
+	margin-bottom: 15px;
+	border-bottom: 1px solid lightgrey;
+	position: relative;
 }
 
-.cls_1{
-	width: 100%;
-	display: flex;
+.profile-name{
+	font-size: 1.2vw;
+	margin: 8px;
 }
 
 .cls_2{
-	width: 100%;
+	padding: 15px;
 }
 
-p.infoNumber{
-	display: inline;
+.infoNumber{
+	padding: 5px;
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+p.infoNumber span{
+	font-weight: 500;
+}
+
+p.description{
+	font-weight: 500;
+}
+
+p.description span{
+	font-weight: 300;
 }
 
 </style>
