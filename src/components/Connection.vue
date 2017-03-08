@@ -1,9 +1,9 @@
 <template lang="html">
   <form id="connectionForm" @submit.stop.prevent="send">
-    <h2>Connectez vous</h2>
+    <h3>Vous avez déjà un compte ?</h3>
     <div v-if="error_message != ''" class="error-msg">{{ error_message }}</div>
     <md-input-container>
-      <label>E-mail</label>
+      <label>Email</label>
       <md-input id="connection-id" required type="email" v-model="user_email"></md-input>
       <span v-if="error_mail" class="md-error">Adresse mail inconnue ou incorrecte</span>
     </md-input-container>
@@ -13,7 +13,7 @@
       <span v-if="error_password" class="md-error">Mot de passe incorrect</span>
     </md-input-container>
     <p>Les champs marqués d'un * sont obligatoires.</p>
-    <md-button  class="md-raised" type="submit">SE CONNECTER</md-button>
+    <md-button  class="md-primary md-raised" type="submit">SE CONNECTER</md-button>
   </form>
 </template>
 
@@ -77,8 +77,11 @@ export default {
   color: red;
   font-weight: bold;
 }
+
 #connectionForm p {
   font-size: x-small;
   color: darkgray;
+  text-align: center;
 }
+
 </style>

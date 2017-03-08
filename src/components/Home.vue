@@ -2,15 +2,21 @@
   <div id="home">
     <div class="angled_container angled_container--open-right">
       <md-layout :md-gutter="8" md-align="center">
-      <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
-        <description id="description" class="home-top-element"></description>
+        <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
+          <md-whiteframe md-elevation="5" id="connect"><connection></connection></md-whiteframe>
+        </md-layout>
+        <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
+          <description id="description" class="home-top-element"></description>
+        </md-layout>
       </md-layout>
-      <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
-        <connection id="connect" class="home-top-element"></connection>
-      </md-layout>
-      </md-layout>
+      <div id="firstInscription" onclick="scrollWin(0, 100)">
+        <h2>Pas encore inscrit(e) ?</h2>
+        <a href="#formulaire"><md-icon>keyboard_arrow_down</md-icon></a>
+      </div>
     </div>
-    <md-whiteframe md-elevation="8" id="register"><inscription></inscription></md-whiteframe>
+    <section id="formulaire">
+      <md-whiteframe md-elevation="5" id="register"><inscription></inscription></md-whiteframe>
+    </section>
   </div>
 </template>
 
@@ -27,6 +33,7 @@ export default {
     description
   }
 }
+
 </script>
 
 <style lang="css">
@@ -34,26 +41,59 @@ export default {
 #home {
   text-align: center;
 }
-#description {
-  text-align: left;
-  color: white;
-  
-}
-#connect {
-  text-align: right;
-}
-.home-top-element {
-  display: inline-block;
-  vertical-align: top;
-  z-index: 1;
-}
+
+
 #register {
  max-width: 40%;
  padding: 50px 100px;
  text-align: center;
  margin: 50px auto;
+ background-color: white;
 }
 
+#description {
+  width: 590px;
+  position: relative;
+  left: 15%;
+  top: 80%;
+  text-align: left;
+  color: white;
+}
+
+#connect {
+  position: relative;
+  left: 25%;
+  top: 20%;
+  background-color: white;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+#firstInscription {
+  position: relative;
+  top: 25%;
+}
+
+/*********************** ANIMATION CSS ********************/
+
+#formulaire {
+  z-index:0; 
+  -webkit-transform: translateZ( 0 );
+  transform: translateZ( 0 );
+  -webkit-transition: -webkit-transform 0.6s ease-in-out;
+  transition: transform 0.6s ease-in-out;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /*background-image: url('../../assets/bg_test.png');
+  background-repeat:no-repeat;
+  -webkit-background-size: cover; 
+  background-size: cover;*/
+}
+
+a[ id= "formulaire" ]:target ~ #formulaire {
+    -webkit-transform: translateY( 500px);
+    transform: translateY( 500px );
+}
 
 /*********************** BACKGROUND CSS ********************/
 
@@ -72,18 +112,20 @@ export default {
   position: absolute;
   bottom: 0; right: 0;
 }
+
 .angled_container:before {
   background-color: #078b9c ;
   transform: skewY(30deg);
   transform-origin: right bottom;
-
+  box-shadow: 0 16px 10px -13px rgba(0, 0, 0, 0.5);
 }
 
 .angled_container:after {
   background-color: #226986;
+
   transform: skewY(-30deg);
   transform-origin: left bottom;
-
+  box-shadow: 1px 1px 10px 0.5px rgba(0, 0, 0, 0.3);
 }
 
 </style>
