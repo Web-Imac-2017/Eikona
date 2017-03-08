@@ -54,7 +54,10 @@ class FiltR
 
 
 
-
+    /**
+     * Make sure the image is displayed with the right orientation
+     * @param Imagick $image Image to sanitize
+     */
     private static function autoRotateImage($image)
     {
         $orientation = $image->getImageOrientation();
@@ -131,7 +134,13 @@ class FiltR
 
 
 
-
+    /**
+     * Get the clut for the desired filter
+     * @param  string  $filter     Name of the filter
+     * @param  integer $destWidth  Width of the image the clut will be used on
+     * @param  integer $destHeight Height of the image the clut will be used on
+     * @return Imagick The clut to use
+     */
     private static function getClut($filter, $destWidth, $destHeight)
     {
         if($destWidth >= 1024 || $destHeight >= 1024)
@@ -151,8 +160,10 @@ class FiltR
 
 
     /**
-     * Print a proof of all the filter applied to the picture
-     * @param [[Type]] [$sampleWidth = 150] [[Description]]
+     * Print a proof/contact sheet of all the filter applied to the picture
+     * @param  string  $srcIMG  Source path
+     * @param  string  $destIMG Save path
+     * @return boolean true on success, false otherwise
      */
     public static function proof($srcIMG, $destIMG)
     {
@@ -196,7 +207,13 @@ class FiltR
 
 
 
-
+    /**
+     * Get the image for the black vignette and make sure it doesn't get loaded two times
+     * @param  integer $sizeX        Width needed
+     * @param  integer $sizeY        Height needed
+     * @param  integer [$factor      = 1] If the image need to be strenghten or lighten
+     * @return Imagick The black vignette
+     */
     private static function getBlackVignette($sizeX, $sizeY, $factor = 1)
     {
         if(is_null(self::$BlackVignetteOverlay))
@@ -215,7 +232,13 @@ class FiltR
 
 
 
-
+/**
+     * Get the image for the white spot and make sure it doesn't get loaded two times
+     * @param  integer $sizeX        Width needed
+     * @param  integer $sizeY        Height needed
+     * @param  integer [$factor      = 1] If the image need to be strenghten or lighten
+     * @return Imagick The white spot
+     */
     private static function getWhiteSpot($sizeX, $sizeY, $factor = 1)
     {
         if(is_null(self::$WhiteSpot))
@@ -272,7 +295,7 @@ class FiltR
 
 
         ////////////// Speed up testing
-        //self::resize($img, 2048, 2048);
+        //self::resize($img, 1024, 1024);
         //////////////
 
 

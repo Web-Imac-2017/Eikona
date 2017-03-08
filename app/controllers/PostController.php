@@ -249,6 +249,12 @@ class PostController
 			->send();
 	}
 
+
+    /**
+     * Return links to the images of the post
+     * @param  integer $postID Post to use
+     * @return array   URLs to the images
+     */
     private function getImages($postID)
     {
 		if(!$this->setPost($postID))
@@ -434,6 +440,10 @@ class PostController
 		$rsp->send();
 	}
 
+    /**
+     * Publish the given post
+     * @param integer $postID POst to publish;
+     */
     public function publish($postID)
     {
         $rsp = new Response();
@@ -474,6 +484,12 @@ class PostController
 
     }
 
+
+    /**
+     * Apply the desired filter to the given post
+     * @param integer $postID Post to update
+     * @param string  $filter Name of the filter to apply
+     */
     public function setFilter($postID, $filter)
     {
         $rsp = new Response();

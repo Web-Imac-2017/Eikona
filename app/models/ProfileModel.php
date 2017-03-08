@@ -222,7 +222,7 @@ class ProfileModel extends DBInterface
     }
 
     /**
-     * Return the ID of the owner of the profile
+     * Return the key of the profile
      */
     public function getKey()
     {
