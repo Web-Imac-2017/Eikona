@@ -509,6 +509,7 @@ class PostController
 
 	public function like($postID)
 	{
+		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
@@ -561,6 +562,7 @@ class PostController
 
 	public function unlike($postID)
 	{
+		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
@@ -590,6 +592,7 @@ class PostController
 
 	public function likes($postID)
 	{
+		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
