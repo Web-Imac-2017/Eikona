@@ -9,7 +9,7 @@ class NotificationController
 		"newFollower"    => 3, 
 		"newLike"        => 4, //DONE
 		"newComment"     => 5, //DONE
-		"newCommentLike" => 6,
+		"newCommentLike" => 6, //DONE
 		"admin"          => 7,
 		"moderator"      => 8,
 		"user"           => 9
