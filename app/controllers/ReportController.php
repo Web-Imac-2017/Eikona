@@ -15,7 +15,7 @@ class ReportController
 	}
 
 	/*
-	 * Add a report for the given postID with the report Comment
+	 * Add a report for the given postID with the report comment
 	 * @param $postID of the post concern
 	 * @param $_POST[$reportComment] Comment of the user who reported
 	 */
@@ -228,7 +228,6 @@ class ReportController
 					if($result == "success")
 					{
 						$state = $this->postModel->updateState(2);
-
 						/* NOTIF !!!! reportResult from UserID */
 
 						$this->model->moderate($reportID, $reportStatus, $reportResult);
@@ -281,8 +280,16 @@ class ReportController
 	}
 
 	/*
+	 * Get all the post which are hidden and have been modify since
+     */
+	public function waiting()
+	{
+		$reports = $this->model->getPostModified();
+	}
+
+	/*
 	 * Get all the reports which are not taken or get all reports from a moderator
-	 * $_POST['my_reports'] = if you want your report
+	 * $_POST['my_reports'] = if you want your reports to moderate
 	 * Else get all reports not handle yet
 	 */
 	public function reports()

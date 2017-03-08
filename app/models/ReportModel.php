@@ -46,10 +46,11 @@ class ReportModel extends DBInterface
 
 	public function moderate($reportID, $reportStatus, $reportResult = "")
 	{
-		$stmt = $this->cnx->prepare("UPDATE reports SET report_status = :reportStatus, report_result = :reportResult WHERE report_id = :reportID");
+		$stmt = $this->cnx->prepare("UPDATE reports SET report_status = :reportStatus, report_result = :reportResult, time_state_change = :timeStateChange WHERE report_id = :reportID");
 		$stmt->execute([ ":reportStatus" => $reportStatus,
 						 ":reportID"     => $reportID,
-						 ":reportResult" => $reportResult
+						 ":reportResult" => $reportResult,
+						 ":timeStateChange" = time()
 		]);
 	}
 
@@ -65,6 +66,20 @@ class ReportModel extends DBInterface
 		}
 
 		return $stmt->fetchAll(PDO::FETCH_COLUMN, "report_id");
+	}
+
+	public function postModified()
+	{
+		$queryReports = $this->cnx->prepare("SELECT time_state_change, report_id FROM reports WHERE report_status = 2");
+		$queryPosts = $this->cnx->prepare("SELECT time_state_change, report_id FROM reports WHERE report_status = 2");
+
+		//Pour i de 0 à query
+		//Si time_state_change - post_edit_time > 0
+		//Je sauvegarde ses reports et je les renvoie
+		$lastChange =
+
+		$stmt = $this->cnx->prepare("SELECT report_id FROM reports WHERE report_id = :reportID");
+		$stmt->execute([ ":reportID" => $reportID]);
 	}
 
 	public function postID($reportID)
