@@ -15,13 +15,14 @@ const mutations = {
   SET_USER: (state, newUser) => state.user = newUser,
   ADD_PROFILE: (state, profile) => state.profiles.push(profile),
   DELETE_PROFILE: (state, profile) => state.profiles.filter(i => i !== profile),
-  SET_CURRENT_PROFILE: (state, index) => state.currentProfile = index
+  SET_CURRENT_PROFILE: (state, id) => state.profiles.filter(el => el.id === id)
 }
 
 const getters = {
   getUser: state => state.user,
   profiles: state => state.profiles,
   currentProfile: state => state.profiles[state.currentProfile],
+  currentProfileIndex: state => state.currentProfile,
   getProfile: (state, index) => state.profiles[index]
 }
 
@@ -65,11 +66,17 @@ const actions = {
       }
     })
   },
+  selectProfile: (store, id) => {
+    Vue.http.get('/Eikona/do/profile/setCurrent/' + id).then((response) => {
+      store.commit('SET_CURRENT_PROFILE', id)
+    }, (response) => {
+      console.error('ERR: selection profile', response)
+    })
+  },
   initProfiles: (store) => {
     Vue.http.post('/Eikona/do/user/profiles/', {}).then((response) => {
-      for (var profile in response.data.data.profiles) {
-        state.profiles.push(profile)
-      }
+      console.log(response.data.data.profiles)
+      response.data.data.profiles.forEach(profile => store.commit('ADD_PROFILE', profile))
     }, (response) => {
       console.log('ERR: récupération des profils', response)
     })

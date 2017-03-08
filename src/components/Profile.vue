@@ -19,31 +19,35 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 import store from './connectionStore.js'
 
 export default {
   name: 'profile',
   store: store,
-  props: ['profile', 'i'],
-  data () {
-    return {
-      extended: true
-    }
-  },
+  props: [
+    'profile',
+    'index',
+    'extended'
+  ],
   computed: {
+    ...Vuex.mapGetters([
+      'currentProfileIndex'
+    ]),
     activeProfile () {
-      return (this.$store.state.currentProfile === this.i)
+      return this.index === this.currentProfileIndex
     }
   },
   methods: {
     select () {
+      console.log('Profile select : ', this.profile)
       this.$emit('select', this.profile)
     }
   }
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 .profile-subtitles {
   font-size: 1vw;
 }

@@ -4,7 +4,7 @@
       <h1>Bonjour {{ getUser.userName }} !</h1>
       <p>Veuillez sélecionner un profil :</p>
       <md-list class="md-double-line">
-        <profile v-for="(profile, i) in profiles" :profile="profile" :i="i" @select="select(selectProfile)"></profile>
+        <profile v-for="(item, index) in profiles" :profile="item" :index="index" :extended="true" @select="select(id)"></profile>
         <md-list-item class="md-inset">
           <span>Ajouter un profil</span>
           <md-button @click.native="createProfile" class="md-icon-button md-list-action">
@@ -42,22 +42,15 @@ export default {
     ])
   },
   methods: {
+    ...Vuex.mapActions([
+      'selectProfile'
+    ]),
     createProfile () {
       this.creationForm = true
     },
-    select (profile) {
-      console.log('select profile')
-
+    select (id) {
+      this.selectProfile(id)
       // redirection vers page correspondante
-      this.$store.commit('SET_CURRENT_PROFILE', this.i)
-
-      // selection profile ajax
-      this.$http.get('/Eikona/do/profile/setCurrent/' + this.$store.state.profiles[this.i]).then((response) => {
-        console.log('Changement de profile :' + this.$store.state.profiles[this.i], response)
-        // redirect vers la page du profile correspondant
-        }, (response) => {
-          console.log('ERR profile selection: ', response)
-      })
     }
   }
 }
