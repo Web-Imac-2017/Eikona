@@ -5,7 +5,7 @@ class NotificationController
 	private $model;
 	private $allowedCodes = [
 		"newFollowAsk"   => 1, //DONE
-		"followAccepted" => 2,
+		"followAccepted" => 2, //DONE
 		"newFollowing"   => 3, //DONE
 		"newLike"        => 4, //DONE
 		"newComment"     => 5, //DONE

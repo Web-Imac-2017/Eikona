@@ -1008,8 +1008,19 @@ class ProfileController
             return;
         }
 
-        $rsp->setSuccess(200)
-            ->send;
+        $notif = Response::read("notification", "create", "followAccepted", $followed, $follower, $followed);
+
+        if($notif['code'] != 200){
+            $rsp->setFailure(400, "followed not confirmed")
+                ->send();
+            return;
+        }
+
+        $rsp->setSuccess(200, "follower confirmed")
+            ->bindValue("follower", $follower)
+            ->bindValue("followed", $followed)
+            ->bindValue("notif", $notif['data'])
+            ->send();
     }
 
     public function notifications()
