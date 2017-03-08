@@ -6,9 +6,9 @@ class NotificationController
 	private $allowedCodes = [
 		"newFollowAsk"   => 1,
 		"followAccepted" => 2,
-		"newFollower"    => 3,
+		"newFollower"    => 3, 
 		"newLike"        => 4, //DONE
-		"newComment"     => 5,
+		"newComment"     => 5, //DONE
 		"newCommentLike" => 6,
 		"admin"          => 7,
 		"moderator"      => 8,

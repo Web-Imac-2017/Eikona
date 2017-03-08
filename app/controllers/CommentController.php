@@ -66,11 +66,17 @@ class CommentController
 						if($profileID){
 							if(isAuthorized::seeFullProfile($this->postModel->getProfileID())){
 								$this->model->create($profileID, $postID, $_POST['commentText']);
-								$resp->setSuccess(200, "Comment posted")
+								$notif = Response::read("notification", "create", "newComment", $this->postModel->getProfileID(), $postID);
+								if($notif['code'] == 200){
+									$resp->setSuccess(200, "Comment posted and notification sent")
 								     ->bindValue("userID", $userID)
 								     ->bindValue("profileID", $profileID)
 								     ->bindValue("postID", $postID)
-								     ->bindValue("comment", $_POST['commentText']);
+								     ->bindValue("comment", $_POST['commentText'])
+								     ->bindValue("notif", $notif['data']);
+								}else{
+									$resp->setFailure(409, "post not commented and notification not sent");
+								}									
 							}else{
 								$resp->setFailure(401, "You can not comment this post");
 							}			
