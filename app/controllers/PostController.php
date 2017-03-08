@@ -86,68 +86,75 @@ class PostController
 			return;
 		}
 
-		$validFormat = array("jpg", "jpeg", "png");
-
 		/*
 		 * Management of the picture
 		 * Management of the video is missing
 		 */
-		if(is_uploaded_file($_FILES['img']['tmp_name']))
+		if(!is_uploaded_file($_FILES['img']['tmp_name']))
 		{
+			$rsp->setFailure(400, "file not uploaded")
+                ->send();
+
+            return;
+        }
 			
-			$desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
-			preg_match_all('/#([^# ]+)/', $desc, $tags);
+        $desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
+        preg_match_all('/#([^# ]+)/', $desc, $tags);
+        $comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
+        $source = $_FILES['img']['tmp_name'];
 
-			$comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
-			$source = $_FILES['img']['tmp_name'];
+        $format = getimagesize($source);
 
-			$format = getimagesize($source);
+        //prevent format is wrong
+        if(!$format)
+        {
+            $rsp->setFailure(400, "File do not have good extension")
+                ->send();
 
-			//prevent format is wrong
-			if(!$format){
-				$rsp->setFailure(400, "File do not have good extension")
-					->send();
-				return;
-			}
+            return;
+        }
 
-			$extension = explode("/", $format['mime'])[1];			
+        $type = "image";
+        $postID = $this->model->create($type, "jpg", $desc, $comments);
 
-			//Création des dossiers
-			$this->createFolder($userID, $profileID);
+        if(!$postID)
+        {
+            $rsp->setFailure(400, "echec lors de l'upload")
+                ->send();
 
-			//detect if extension is allowed
-			if(in_array($extension, $validFormat))
-			{
-				$type = "image";
+            Response::read("Post", "delete", $postID);
 
-				$postID = $this->model->create($type, "jpg", $desc, $comments);
+            return;
+        }
 
-				//Add the tags
-				while (list(, $tag) = each($tags[1])) {
-					$this->tagModel->addTag($postID, $tag);
-				}
+        //Add the tags
+        while (list(, $tag) = each($tags[1])) {
+            $this->tagModel->addTag($postID, $tag);
+        }
 
-				$root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
-				$savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
+        //Création des dossiers
+        $this->createFolder($userID, $profileID);
 
-				if(!$postID){
-					$rsp->setFailure(400, "echec lors de l'upload")
-					    ->send();
-					return;
-				}				
+        //Prepare destination folder
+        $root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+        $savePath = $root.$userID."/".$profileID."/".$postID.".jpg";
 
-				$this->uploadImg($extension, $source, $savePath);				
 
-				$rsp->setSuccess(201, "post created")
-					->bindValue("userID", $userID)
-					->bindValue("profileID", $profileID)
-					->bindValue("postID", $postID);		
-			}else{
-				$rsp->setFailure(400, "File do not have good extension");
-			}
-		}else{
-			$rsp->setFailure(400, "file not uploaded");
-		}
+        //Save picture
+        if(!FiltR::saveTo($source, $savePath))
+        {
+            $rsp->setFailure(415, "An error occured with the image. Please try again")
+                ->send();
+
+            Response::read("Post", "delete", $postID);
+
+            return;
+        }
+
+        $rsp->setSuccess(201, "post created")
+            ->bindValue("userID", $userID)
+            ->bindValue("profileID", $profileID)
+            ->bindValue("postID", $postID);
 
 		$rsp->send();
 	}
