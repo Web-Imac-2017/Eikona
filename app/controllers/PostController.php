@@ -99,7 +99,6 @@ class PostController
         }
 			
         $desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
-        preg_match_all('/#([^# ]+)/', $desc, $tags);
         $comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
         $source = $_FILES['img']['tmp_name'];
 
@@ -131,7 +130,6 @@ class PostController
         while (list(, $tag) = each($tags[1])) {
             $this->tagModel->addTag($postID, $tag);
         }
-
         //Création des dossiers
         $this->createFolder($userID, $profileID);
 
