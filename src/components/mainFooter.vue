@@ -13,14 +13,14 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css?family=Lato');
+
 #footer{
 	text-align: center;
 	width: 100%;
 }
 
 #footer a{
-	font-family : 'Lato', sans-serif;
+	font-family : 'Roboto', sans-serif;
 	display: inline-block;
 	color : #028090;
 	text-decoration: none;

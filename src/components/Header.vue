@@ -9,8 +9,8 @@
 </template>
 
 <script>
-let search = require('./Search.vue')
-let connexion = require('./Header-connection.vue')
+import search from './Search.vue'
+import connexion from './Header-connection.vue'
 
 export default {
   name: 'top-header',

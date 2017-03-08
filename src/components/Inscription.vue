@@ -9,7 +9,6 @@
 
 <script>
 import inscriptionForm from './InscriptionForm.vue'
-
 export default {
 	name: 'inscription',
 	components: {
