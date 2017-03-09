@@ -263,6 +263,18 @@ class PostModel extends DBInterface
     }
 
 
+
+    public function getDraftsID($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE post_state = 1 AND profile_id = :profile");
+        $stmt->execute([":profile" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
+    }
+
+
     /**
      * Update the description of the post
      *
