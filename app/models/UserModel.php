@@ -57,6 +57,69 @@ class UserModel extends DBInterface{
 		return "success";
 	}
 
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($userID)
+    {
+        $userID = Sanitize::int($userID);
+
+        if($userID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(user_id) FROM users
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
+    /**
+     * Tell if the specified user is a moderator
+     * @param integer $userID User ID to verify
+     */
+    public function isModerator($userID)
+    {
+        $userID = Sanitize::int($userID);
+
+        if($userID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT user_moderator FROM users
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
+    /**
+     * Tell if the specified user is an administrator
+     * @param integer $userID User ID to verify
+     */
+    public function isAdmin($userID)
+    {
+        $userID = Sanitize::int($userID);
+
+        if($userID < 1)
+            return false;
+
+		$stmt = $this->cnx->prepare("
+			SELECT user_admin FROM users
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
+
+
 	/*****************/
 	/***** GETTER *****/
 	/*****************/

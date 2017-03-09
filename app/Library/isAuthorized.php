@@ -6,26 +6,83 @@
 class isAuthorized
 {
     /***** Global verifications *****/
-    static public function isUser($userID)
+
+    //Confirm the given user is a real user, or tell if we are currently connected if the parameter is ommited
+    static public function isUser($userID = null)
     {
-        return (Session::read("userID") === $userID && $userID != null) ? true : false;
+        $checkUser = 0;
+
+        if($userID === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($userID);
+        }
+
+        return Response::read("user", "exists", $checkWith)["data"]["exists"];
     }
     
-    static public function isModerator($userModerator)
-    {   
-        return ($userModerator == true) ? true : false;
+    //Tell if the current user, or the given one, is a moderator
+    static public function isModerator($userID = null)
+    {
+        $checkUser = 0;
+
+        if($userID === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($userID);
+        }
+
+        return Response::read("user", "isModerator", $checkWith)["data"]["isModerator"];
     }
 
-    static public function isAdmin($userAdmin)
+    //Tell if the current user, or the given one, is an admin
+    static public function isAdmin($userID = null)
     {
-        return ($userAdmin == true) ? true : false;
+        $checkUser = 0;
+
+        if($userID === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($userID);
+        }
+
+        return Response::read("user", "isAdmin", $checkWith)["data"]["isAdmin"];
+    }
+
+    //Confirm the given profile is a real profile, or tell if we have a current profile if the parameter is ommited
+    static public function isProfile($profileID)
+    {
+        $checkUser = 0;
+
+        if($profileID === null)
+        {
+            $checkWith = Session::read("userID");
+        }
+        else
+        {
+            $checkWith = Sanitize::int($profileID);
+        }
+
+        return Response::read("profile", "exists", $checkWith);
     }
 
     /***** Profiles verifications *****/
 
+    //Confirm is current user owns the given profile
     static public function ownProfile($profileID)
     {
-        $userID = Session::read("userID");
+        if(!self::isUser())
+            return false;
+        
 
         $userProfiles = Response::read("user", "profiles")['data'];
 
@@ -35,13 +92,9 @@ class isAuthorized
         if($userProfiles["nbOfProfiles"] == 0)
             return false;
 
-        //prevent error until user->profiles gets updated
-        if(empty($userProfiles["profiles"]))
-            return false;
-
         foreach ($userProfiles["profiles"] as $profile)
         {
-            if (isset($profile["user_id"]) && $profile["profile_id"] == $profileID)
+            if ($profile["profileID"] == $profileID)
                 return true;
         }
 
@@ -54,11 +107,43 @@ class isAuthorized
         if(self::ownProfile($profileID))
             return true;
 
-        if(self::isAdmin(Response::read("user", "get")['data']['userAdmin']) == true)
+        if(self::isAdmin() == true)
             return true;
 
         return false;
     }
+
+
+    /*
+    Retourne si on peut éditer le post
+    On vérifie si le post appartient bien au profil actif
+     */
+
+    //TODO
+    //Confirm the current profile can view fully the given profile
+    static public function seeFullProfile($profileID)
+    {
+        if(Session::read("profileID") == $profileID)
+        {
+            return true;
+        }
+
+        if(self::isPrivateProfile($profileID))
+        {
+            if(Response::read("profile", "isFollowing", $profileID)['data']['isConfirmed'] === 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+    /***** Posts verifications *****/
 
     static public function editPost($postID)
     {
@@ -66,23 +151,35 @@ class isAuthorized
         //profile_id du post = profileID
         $data = Response::read("post", "display", $postID)['data'];
 
-        if($data['profileID'] == $profileID)
+        if(!empty($data) && $data['profileID'] == $profileID)
             return true;
 
         return false;
     }
 
+    /*
+    Retourne si le profil est privé
+     */
     static public function isPrivateProfile($profileID)
     {
         $data = Response::read("profile", "isPrivate", $profileID)['data'];
-        if($data['profileIsPrivate'] == 1)
+
+        if(isset($data['profileIsPrivate']) && $data['profileIsPrivate'] == 1)
             return true;
 
         return false;
     }
 
-    static public function getProfilePosts()
+    /*
+    On vérifie si le post existe bien
+     */
+    static public function isPost($postID)
     {
-        return true;
+        $data = Response::read("post", "display", $postID, false)['data'];
+        if(!empty($data))
+            return true;
+
+        return false;
     }
+
 }

@@ -4,7 +4,7 @@
       <h1>Bonjour {{ getUser.userName }} !</h1>
       <p>Veuillez sélecionner un profil :</p>
       <md-list class="md-double-line">
-        <profile v-for="(item, index) in profiles" :profile="item" :index="index" :extended="true" @select="select(id)"></profile>
+        <profile v-for="(item, index) in profiles" :profile="item" :index="index" :extended="true" @select="select"></profile>
         <md-list-item class="md-inset">
           <span>Ajouter un profil</span>
           <md-button @click.native="createProfile" class="md-icon-button md-list-action">
