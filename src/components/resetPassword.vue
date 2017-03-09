@@ -39,6 +39,7 @@
 
 <script>
 import formVerifications from './../formVerifications.js'
+import apiRoot from './../config.js'
 
 export default {
   name: 'resetPassword',
@@ -70,7 +71,7 @@ export default {
    },
    getCode () {
      if(!this.verif_mail(this.email, 'resetPassword-mail')) return
-     this.$http.post('/Eikona/do/auth/forgottenPassword/', {
+     this.$http.post(apiRoot + 'auth/forgottenPassword/', {
        user_email: this.email
      }).then((response) => {
        console.log(response)
@@ -94,7 +95,7 @@ export default {
            this.verif_confirm(this.confirm, this.password, 'resetPassword-confirm') &&
            this.verif_code(this.code, 'resetPassword-code'))) return
 
-      this.$http.post('/Eikona/do/auth/regenere/', {
+      this.$http.post(apiRoot + 'auth/regenere/', {
         user_email: this.email,
         user_passwd: this.password,
         user_passwd_confirm: this.confirm,

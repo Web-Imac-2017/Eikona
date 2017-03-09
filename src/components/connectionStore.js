@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import apiRoot from './../config.js'
+
 Vue.use(Vuex)
 
 const state = {
@@ -28,7 +30,7 @@ const getters = {
 
 const actions = {
   addProfile: (store, profileID) => {
-    Vue.http.get('/Eikona/do/profile/get/' + profileID).then((response) => {
+    Vue.http.get(apiRoot + 'profile/get/' + profileID).then((response) => {
       console.log('SUCCESS: profile addition', response)
       store.commit('ADD_PROFILE', response.data.data)
     }, (response) => {
@@ -46,7 +48,7 @@ const actions = {
     })
   },
   deleteProfil: (store, profile) => {
-    Vue.http.get('/Eikona/do/profile/delete/' + profile.profileID).then((response) => {
+    Vue.http.get(apiRoot + 'profile/delete/' + profile.profileID).then((response) => {
       console.log('SUCCESS: profile deletion', response)
       store.commit('DELETE_PROFILE', profile)
     }, (response) => {
@@ -67,14 +69,14 @@ const actions = {
     })
   },
   selectProfile: (store, id) => {
-    Vue.http.get('/Eikona/do/profile/setCurrent/' + id).then((response) => {
+    Vue.http.get(apiRoot + 'profile/setCurrent/' + id).then((response) => {
       store.commit('SET_CURRENT_PROFILE', id)
     }, (response) => {
       console.error('ERR: selection profile', response)
     })
   },
   initProfiles: (store) => {
-    Vue.http.post('/Eikona/do/user/profiles/', {}).then((response) => {
+    Vue.http.post(apiRoot + 'user/profiles/', {}).then((response) => {
       console.log(response.data.data.profiles)
       response.data.data.profiles.forEach(profile => store.commit('ADD_PROFILE', profile))
     }, (response) => {
@@ -82,7 +84,7 @@ const actions = {
     })
   },
   initUser: (store) => {
-    Vue.http.post('/Eikona/do/user/get', {}).then((response) => {
+    Vue.http.post(apiRoot + 'user/get', {}).then((response) => {
       store.commit('SET_USER', response.data.data)
     }, (response) => {
       console.error('Can\'t get user info', response)

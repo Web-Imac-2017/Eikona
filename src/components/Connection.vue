@@ -24,6 +24,7 @@
 <script>
 import Vuex from 'vuex'
 import store from './connectionStore.js'
+import apiRoot from './../config.js'
 import formVerifications from './../formVerifications.js'
 import resetPassword from './resetPassword.vue'
 
@@ -50,7 +51,7 @@ export default {
     }),
     send () {
       if (!(this.verif_mail(this.email, 'connection-id') && this.verif_password(this.password, 'connection-password'))) return
-      this.$http.post('/Eikona/do/auth/signIn', {
+      this.$http.post(apiRoot + 'auth/signIn', {
         user_email: this.email,
         user_passwd: this.password
       }).then((response) => {

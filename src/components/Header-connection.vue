@@ -18,6 +18,7 @@
 <script>
 import Vuex from 'vuex'
 import store from './connectionStore.js'
+import apiRoot from './../config.js'
 
 export default {
   name: 'header-connection',
@@ -40,7 +41,7 @@ export default {
       this.$router.push('/#inscriptionForm')
     },
     disconnect () {
-      this.$http.post('/Eikona/do/auth/signOut/', {}).then((response) => {
+      this.$http.post(apiRoot + 'auth/signOut/', {}).then((response) => {
         this.clearUser()
         this.$router.push('/Eikona/')
       }, (response) => {

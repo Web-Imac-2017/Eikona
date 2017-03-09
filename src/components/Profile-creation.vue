@@ -21,6 +21,7 @@
 import Vuex from 'vuex'
 import store from './connectionStore.js'
 import formVerifications from './../formVerifications.js'
+import apiRoot from './../config.js'
 
 export default {
   name: 'profile-creation',
@@ -47,7 +48,7 @@ export default {
       }
       if (this.profile.desc != '') value = {...value, profileDesc: this.profile.desc}
       if (this.profile.isPrivate) value = {...value, profilePrivate: 0}
-      this.$http.post('/Eikona/do/profile/create', value).then((response) => {
+      this.$http.post(apiRoot + 'profile/create', value).then((response) => {
         console.log('SUCCESS: profile creation', response)
         this.addProfileStore(response.data.data.profileID)
       }, (response) => {

@@ -34,6 +34,7 @@
 
 
 <script>
+import apiRoot from './../config.js'
 import formVerifications from './../formVerifications.js'
 
 export default {
@@ -66,7 +67,7 @@ export default {
 						this.verif_password(this.password, 'inscription-password') &&
 						this.verif_confirm(this.password, this.confirmation, 'inscription-confirm'))) return
 
-			this.$http.post('do/auth/register/', {
+			this.$http.post(apiRoot + 'auth/register/', {
 				user_name: this.name,
 				user_email: this.email,
 				user_passwd: this.password,
