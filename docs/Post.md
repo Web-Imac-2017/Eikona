@@ -193,7 +193,12 @@ Change le filtre du post donné
 	editedPicture: Lien vers l'image modifié
   }
   ```
+### Note
+
+L'image contactPicture contient des miniatures du post avec chaque filtre. Les filtres sont classés par ordre alphabétique en commencant par l'image originale sans filtre.
+
   
+ 
 ### Erreurs
 
   * **Code:** 401 NOT AUTHORIZED <br />
