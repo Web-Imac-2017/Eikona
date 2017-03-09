@@ -56,7 +56,7 @@ class ProfileModel extends DBInterface
         }
 
         //profile found
-        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
+        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private, profile_key FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $profileID]);
 
         $this->pID = $profileID;
@@ -112,7 +112,7 @@ class ProfileModel extends DBInterface
         if($stmt->fetchColumn() != 0)
             return "userNameAlreadyExists";
 
-        $stmt = $this->cnx->prepare("INSERT INTO profiles (user_id, profile_name, profile_desc, profile_create_time, profile_private) VALUES (:uID, :name, :desc, :create, :private)");
+        $stmt = $this->cnx->prepare("INSERT INTO profiles (user_id, profile_name, profile_desc, profile_create_time, profile_private, profile_key) VALUES (:uID, :name, :desc, :create, :private, UUID())");
 
         $stmt->execute([":uID"     => $uID,
                         ":name"    => $name,
@@ -149,12 +149,12 @@ class ProfileModel extends DBInterface
         if($id == 0) return false;
 
         $stmt = $this->cnx->prepare("
-            SELECT profile_id, user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private
+            SELECT profile_id
             FROM profiles
             WHERE :id = user_id");
         $stmt->execute([":id" => $id]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     /**
@@ -213,17 +213,23 @@ class ProfileModel extends DBInterface
     /**
      * Return the ID of the owner of the profile
      */
-    public function getOwner($returnID = false)
+    public function getOwner()
     {
         if($this->pID == -1)
             return;
 
-        if($returnID)
-        {
-            return $this->p['user_id'];
-        }
-
         return $this->p['user_id'];
+    }
+
+    /**
+     * Return the key of the profile
+     */
+    public function getKey()
+    {
+        if($this->pID == -1)
+            return;
+
+        return $this->p['profile_key'];
     }
 
 

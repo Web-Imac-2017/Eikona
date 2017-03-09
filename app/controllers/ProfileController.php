@@ -36,6 +36,7 @@ class ProfileController
             $rsp->send();
             return;
         }
+
         $name = $_POST['profileName'];
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
@@ -48,24 +49,29 @@ class ProfileController
 
         if($result == "badUserID")
         {
-            $rsp->setFailure(400, "Given user ID is not valid.");
-        }
-        else if($result == "userNameAlreadyExists")
-        {
-            $rsp->setFailure(409, "The profile name is already taken.");
-        }
-        else
-        {
-            $rsp->setSuccess(201, "profile created")
-                ->bindValue("profileID", $result);
+            $rsp->setFailure(400, "Given user ID is not valid.")
+                ->send();
+
+            return;
         }
 
-        /**
-         * Handle profile picture
-         */
+        if($result == "userNameAlreadyExists")
+        {
+            $rsp->setFailure(409, "The profile name is already taken.")
+                ->send();
 
-        //Send JSON response
-        $rsp->send();
+            return;
+        }
+
+        $rsp->setSuccess(201, "profile created")
+            ->bindValue("profileID", $result)
+            ->send();
+
+        //Create profile folder
+        $profileKey = $this->model->getKey();
+
+        $root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+        mkdir($root."/".$profileKey);
     }
 
     /**
@@ -385,7 +391,14 @@ class ProfileController
             $waitFor = $arg;
         }
 
-        $posts = $this->postModel->getPosts($profileID, $limit, $offset, $after, $before, $order);
+        $postsID = $this->postModel->getPosts($profileID, $limit, $offset, $after, $before, $order);
+
+        $posts = array();
+
+        foreach($postsID as $postID)
+        {
+            array_push($posts, Response::read("post", "display", $postID)["data"]);
+        }
 
         $rsp->setSuccess(200)
             ->bindValue("posts", $posts)
@@ -393,7 +406,41 @@ class ProfileController
             ->send();
     }
 
-    // /profile/posts/<profileid>[/after/<timestamp>][/before/<timestamp>][/<lim>[/<offset>]][<desc|asc>]
+
+
+
+    public function drafts()
+    {
+        $rsp = new Response();
+
+        $profileID = Session::read("profileID");
+
+        if(!isAuthorized::editProfile($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to access .")
+                ->send();
+
+            return;
+        }
+
+        //ghet all drafts
+        $postsID = $this->postModel->getDraftsID($profileID);
+
+        $posts = array();
+
+        foreach($postsID as $postID)
+        {
+            array_push($posts, Response::read("post", "display", $postID)["data"]);
+        }
+
+        $rsp->setSuccess(200)
+            ->bindValue("posts", $posts)
+            ->bindValue("nbrPosts", count($posts))
+            ->send();
+    }
+
+
+
 
 
 
@@ -511,34 +558,9 @@ class ProfileController
             return;
         }
 
-        $source = $_FILES['profilePicture']['tmp_name'];
-        $format = getimagesize($source);
-        $tab;
-
-        if(preg_match('#(png|gif|jpeg)$#i', $format['mime'], $tab))
-        {
-            $imSource = imagecreatefromjpeg($source);
-            if($tab[1] == "jpeg")
-                $tab[1] = "jpg";
-            $extension = $tab[1];
-        }
-        else
-        {
-            $rsp->setFailure(406, "Picture format (".$tab.") is not supported.")
-                ->send();
-
-            return;
-        }
-
-        if($format['mime'] == "image/png")
-        {
-            $extension = 'jpg';
-        }
-
-        $newPictName = $profileID.'.'.$extension;
 
         /*enregistrement de l'image*/
-        imagejpeg($imSource, 'medias/profilesPictures/'.$newPictName);
+        saveTo($_FILES['profilePicture']['tmp_name'], 'medias/profilesPictures/'.$profileID.'.jpg');
 
         //Update DB
         $this->model->updatePict($newPictName);
