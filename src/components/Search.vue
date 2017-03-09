@@ -1,12 +1,13 @@
 <template lang="html">
   <md-layout>
-    <form novalidate @submit.stop.prevent="search">
-      <md-input-container id="search-bar" md-inline>
-        <md-icon md-primary>search</md-icon>
-        <label>Rechercher...</label>
-        <md-input type="search" v-model="keywords"></md-input>
-      </md-input-container>
-    </form>
+    <md-layout md-flex="10">
+      <md-icon>search</md-icon>
+    </md-layout>
+    <md-layout>
+      <md-chips md-input-type="search" v-model="keywords" md-input-placeholder="Rechercher..." @change="search">
+        <template scope="chip">{{chip.value}}</template>
+      </md-chips>
+    </md-layout>
   </md-layout>
 </template>
 
@@ -14,7 +15,7 @@
 export default {
   data () {
     return {
-      keywords: ''
+      keywords: []
     }
   },
   methods: {
@@ -24,10 +25,6 @@ export default {
   }
 }
 </script>
+<style>
 
-<style lang="css" scoped>
-  form {
-    width: 80%;
-    margin: 0 10%;
-  }
 </style>

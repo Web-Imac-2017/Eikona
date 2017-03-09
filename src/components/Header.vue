@@ -1,7 +1,7 @@
 <template lang="html">
   <md-layout tag="header" id="header">
     <search class="header-item"></search>
-    <md-layout class="header-item">
+    <md-layout class="header-item" md-align="center">
       <md-button id="logo" title="Accueil" href="/Eikona/" class="md-icon-button"><md-icon alt="Eiko" md-src="assets/Eiko.png"/></md-button>
     </md-layout>
     <connexion id="connexion" class="header-item"></connexion>

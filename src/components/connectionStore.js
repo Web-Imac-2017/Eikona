@@ -75,7 +75,6 @@ const actions = {
   },
   initProfiles: (store) => {
     Vue.http.post('/Eikona/do/user/profiles/', {}).then((response) => {
-      console.log(response.data.data.profiles)
       response.data.data.profiles.forEach(profile => store.commit('ADD_PROFILE', profile))
     }, (response) => {
       console.log('ERR: récupération des profils', response)
