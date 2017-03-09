@@ -157,7 +157,7 @@ class PostModel extends DBInterface
     }
 
      /*
-     * Get post_allow_comments of the post
+     * Get the current applied filter of the post
      *
      */
     public function getFilter()
@@ -171,7 +171,7 @@ class PostModel extends DBInterface
     }
 
      /*
-     * Get post_allow_comments of the post
+     * Get the current state of the post
      *
      */
     public function getState()
@@ -184,6 +184,11 @@ class PostModel extends DBInterface
         return $this->postDatas['post_state'];
     }
 
+    /**
+     * Get the saving directory of the current post
+     * @param  integer [$profileID      = 0] Profile Id to use if no current post is defines
+     * @return string  URL to the saving directory
+     */
     public function getSaveFolder($profileID = 0)
     {
         if($profileID == 0 && $this->postID == 0)
@@ -204,9 +209,14 @@ class PostModel extends DBInterface
     }
 
 
+    /**
+     * Return the number of post of the given profileID
+     * @param  integer $profileID Profile to use
+     * @return integer Number of post published
+     */
     public function nbrPosts($profileID)
     {
-        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE profile_id = :profileID");
+        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE profile_id = :profileID AND post_state = 1");
         $stmt->execute([":profileID" => Sanitize::int($profileID)]);
 
         return $stmt->fetchColumn();
@@ -243,11 +253,23 @@ class PostModel extends DBInterface
 
         $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ". $limit ." OFFSET ".Sanitize::int($offset);
+        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID AND post_state = 1".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
 
         //Execute the query
         $stmt = $this->cnx->prepare($sql);
         $stmt->execute($bindArray);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
+    }
+
+
+
+    public function getDraftsID($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE post_state = 1 AND profile_id = :profile");
+        $stmt->execute([":profile" => $profileID]);
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
     }
