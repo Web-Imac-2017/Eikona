@@ -1,24 +1,20 @@
 <template lang="html">
-  <md-layout>
-    <form v-show="!forgetPassword" id="connectionForm" @submit.stop.prevent="send">
-      <h2>Connectez vous</h2>
-      <div v-if="error_message != ''" class="md-warn">{{ error_message }}</div>
-      <md-input-container id="connection-id">
-        <label>E-mail</label>
-        <md-input required type="email" v-model="email"></md-input>
-        <span class="md-error">Adresse mail inconnue ou incorrecte</span>
-      </md-input-container>
-      <md-input-container md-has-password id="connection-password">
-        <label>Mot de passe</label>
-        <md-input required type="password" v-model="password"></md-input>
-        <span class="md-error">Mot de passe incorrect</span>
-      </md-input-container>
-      <p>Les champs marqués d'un * sont obligatoires.</p>
-      <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
-    </form>
-    <md-button v-show="!forgetPassword" class="md-dense md-accent" @click.native="forgetPassword = !forgetPassword">Mot de passe oublié ?</md-button>
-    <resetPassword v-show="forgetPassword" @close="forgetPassword = false"></resetPassword>
-  </md-layout>
+  <form id="connectionForm" @submit.stop.prevent="send">
+    <h3>Vous avez déjà un compte ?</h3>
+    <div v-if="error_message != ''" class="error-msg">{{ error_message }}</div>
+    <md-input-container>
+      <label>Email</label>
+      <md-input id="connection-id" required type="email" v-model="user_email"></md-input>
+      <span v-if="error_mail" class="md-error">Adresse mail inconnue ou incorrecte</span>
+    </md-input-container>
+    <md-input-container md-has-password>
+      <label>Mot de passe</label>
+      <md-input id="connection-password" required type="password" v-model="user_passwd"></md-input>
+      <span v-if="error_password" class="md-error">Mot de passe incorrect</span>
+    </md-input-container>
+    <p>Les champs marqués d'un * sont obligatoires.</p>
+    <md-button  class="md-primary md-raised" type="submit">SE CONNECTER</md-button>
+  </form>
 </template>
 
 <script>
@@ -89,8 +85,11 @@ export default {
   color: red;
   font-weight: bold;
 }
+
 #connectionForm p {
   font-size: x-small;
   color: darkgray;
+  text-align: center;
 }
+
 </style>

@@ -58,9 +58,20 @@ const router = new VueRouter({
   }]
 })
 
+<<<<<<< HEAD
 // Configuration VueResource
 Vue.http.options.emulateHTTP = true
 Vue.http.options.emulateJSON = true
+=======
+// configuration couleur vue Material
+Vue.material.registerTheme('default', {
+  primary: {
+    color: 'cyan',
+    hue: 800
+  }
+}) 
+
+>>>>>>> 5a24566ba6cf4b0199b49badca1847f7e1b162a6
 
 new Vue({ // eslint-disable-line no-new
   el: '#app',
