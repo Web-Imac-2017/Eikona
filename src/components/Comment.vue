@@ -1,9 +1,14 @@
 <template>
-	<div id="commentaire">
-		<div id="contenu">{{content}}</div>
-		<md-button id="likeButton" @click.native="addLike">J'aime {{nbrLike}}</md-button>
-		<md-button id="commentReponse" @click.native="addReponse">Repondre</md-button>
-	</div>
+	<md-list-item>	
+		<div class="content-commentaire">
+			<p>{{content}}</p>
+			<p>{{nbrLike}} aiment ça</p>
+		</div>
+	 	<md-button  class="md-icon-button md-list-action" @click.native="addLike">
+	 		
+	 		<md-icon>favorite</md-icon>
+	 	</md-button>
+	</md-list-item>
 </template>
 
 <script>
@@ -28,10 +33,25 @@ export default {
 	},
 	methods: {
 		addLike(){
-			//this.@emit('incrementLike')
+			this.$emit('incrementLike', this.id)
+		},
+		addReponse(){
+
 		}
 	}
 	
 }
 
 </script>
+	
+<style>
+	.content-commentaire  p:nth-child(2){
+		color: grey;
+		margin-top: 0;
+		font-size: 80%;
+		font-style: italic;
+	}
+	.content-commentaire  p:nth-child(1){
+		margin-bottom: 0;
+	}
+</style>
