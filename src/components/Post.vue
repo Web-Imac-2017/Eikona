@@ -46,6 +46,9 @@
 			
 			<md-card-content>
 				<div class="description">{{description}}</div>
+				<p>{{comments.length}} commentaires : </p>
+				<md-button class="md-icon-button" id="display-more-comments"><md-icon>expand_more</md-icon></md-button>
+
 				<sectionComments :comments="comments" :errorMessage="errorMessage" :postID="postID"></sectionComments>
 			</md-card-content>
 			
@@ -140,6 +143,9 @@
 </script>
 
 <style scoped>
+	#display-more-comments{
+		left: 45%;
+	}
 	
 	.avatar_poster{
 		text-align: left;

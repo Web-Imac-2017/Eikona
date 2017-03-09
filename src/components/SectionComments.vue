@@ -1,6 +1,6 @@
 <template>
 	<md-layout id="sectionComments" md-column>
-		<p>{{comments.length}} commentaires</p>
+		
 		<md-list >
 						
 			<commentaire v-for="comment in comments" :content="comment.message" :nbrLike="comment.nbrLikeComment" :id="comment.id" @incrementLike="addLikeComment" ></commentaire>

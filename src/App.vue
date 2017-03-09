@@ -1,25 +1,25 @@
 <template>
   <div id="app">
     <topHeader></topHeader>
-    <Post></Post>
+    <post></post>    
     <router-view></router-view>
-    <mainFooter></mainFooter>
+    <MainFooter></MainFooter>
   </div>
 </template>
 
 <script>
 
 let topHeader = require('./components/Header.vue')
-let mainFooter = require('./components/mainFooter.vue')
-import Post from './components/Post.vue'
+let MainFooter = require('./components/MainFooter.vue')
+import post from './components/Post.vue'
 
 
 export default {
   name: 'app',
   components: {
     topHeader,
-    mainFooter,
-    Post
+    MainFooter,
+    post
    
   }
 
