@@ -76,19 +76,12 @@ export default {
 
 /*********************** ANIMATION CSS ********************/
 
-#formulaire {
-  z-index:0; 
-  -webkit-transform: translateZ( 0 );
-  transform: translateZ( 0 );
-  -webkit-transition: -webkit-transform 0.6s ease-in-out;
-  transition: transform 0.6s ease-in-out;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+
   /*background-image: url('../../assets/bg_test.png');
   background-repeat:no-repeat;
   -webkit-background-size: cover; 
   background-size: cover;*/
-}
+
 
 a[ id= "formulaire" ]:target ~ #formulaire {
     -webkit-transform: translateY( 500px);
@@ -122,7 +115,8 @@ a[ id= "formulaire" ]:target ~ #formulaire {
 
 .angled_container:after {
   background-color: #226986;
-
+  background-image: url('../../assets/bg_test.png');  
+  background-size: 100% 100%;
   transform: skewY(-30deg);
   transform-origin: left bottom;
   box-shadow: 1px 1px 10px 0.5px rgba(0, 0, 0, 0.3);
