@@ -9,28 +9,29 @@
           <description id="description" class="home-top-element"></description>
         </md-layout>
       </md-layout>
-      <div id="firstInscription" onclick="scrollWin(0, 100)">
+      <div id="firstInscription">
         <h2>Pas encore inscrit(e) ?</h2>
         <a href="#formulaire"><md-icon>keyboard_arrow_down</md-icon></a>
+        <test></test>
       </div>
     </div>
-    <section id="formulaire">
-      <md-whiteframe md-elevation="5" id="register"><inscription></inscription></md-whiteframe>
-    </section>
   </div>
 </template>
 
 <script>
 import connection from './Connection.vue'
-import inscription from './Inscription.vue'
+import test from './Switch.vue'
 import description from './Home-description.vue'
+
+
 
 export default {
   name: 'home',
   components: {
     connection,
-    inscription,
-    description
+    test,
+    description,
+   
   }
 }
 
