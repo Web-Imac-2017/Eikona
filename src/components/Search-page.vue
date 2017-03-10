@@ -31,24 +31,30 @@ export default {
   computed: {
     keywords: () => this.query.replace(/[+]/g, ' ')
   },
+  mounted () {
+    new Promise((resolve, reject) => {
+        this.searchBy('profile')
+        this.searchBy('description')
+        this.searchBy('tag')
+        this.searchBy('comment')
+        reject(e)
+      resolve()
+    }).then((response) => {
+      console.log("result search", response)
+      if (this.resultProfiles.length + this.resultPosts.length == 0) this.noresult = true
+      this.searching = false
+    }, (reponse) => {
+      console.error(response)
+    })
+  },
   methods: {
-    search () {
-      new Promise(() => {
-        searchBy('profile')
-        searchBy('desc')
-        searchBy('tag')
-        searchBy('comment')
-      }).then(() => {
-        if (this.resultProfiles.length + this.resultPosts.length == 0) this.noresult = true
-        this.searching = false
-      })
-    },
     searchBy (searchType) {
       this.$http.post(apiRoot + 'search/', {
         query: this.query,
         field: searchType
       }).then(
         (response) => {
+          console.log('searchby :' + searchType, response)
           if (searchType === 'profile')
               response.data.data.result.forEach(item => this.resultProfiles.push(item))
           else
@@ -57,10 +63,10 @@ export default {
         (response) => {
           switch (response.status) {
             case 400:
-              console.error('ERR: search without query')
+              throw 'ERR: search by '+searchType+' without query'
               break;
             case 404:
-              console.error('ERR: search no result')
+              console.log('Search by '+searchType+' no result')
               break;
           }
         })
