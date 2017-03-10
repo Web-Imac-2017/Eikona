@@ -76,7 +76,8 @@ const actions = {
     })
   },
   initProfiles: (store) => {
-    Vue.http.post(apiRoot + 'user/profiles/', {}).then((response) => {
+    console.log(apiRoot + 'user/profiles/')
+    Vue.http.post(apiRoot + 'user/profiles/').then((response) => {
       console.log(response.data.data.profiles)
       response.data.data.profiles.forEach(profile => store.commit('ADD_PROFILE', profile))
     }, (response) => {
@@ -84,7 +85,7 @@ const actions = {
     })
   },
   initUser: (store) => {
-    Vue.http.post(apiRoot + 'user/get', {}).then((response) => {
+    Vue.http.post(apiRoot + 'user/get').then((response) => {
       store.commit('SET_USER', response.data.data)
     }, (response) => {
       console.error('Can\'t get user info', response)

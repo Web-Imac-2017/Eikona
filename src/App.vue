@@ -8,7 +8,7 @@
 
 <script>
 import topHeader from './components/Header.vue'
-import mainFooter from './components/mainFooter.vue'
+import mainFooter from './components/MainFooter.vue'
 
 export default {
   name: 'app',
@@ -19,6 +19,3 @@ export default {
 
 }
 </script>
-
-<style lang="css" scoped>
-</style>
