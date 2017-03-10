@@ -55,16 +55,15 @@
 		  },
 		methods: {
 			create () {
-				return
 			      this.$http.post(apiRoot + 'post/create', {
 			        img: this.imageSrc,
 			        postDescription: this.description
 			      }).then((response) => {
+			      	console.log(response);
 			      	console.log('Create success', response);
-
 			        /*this.$router.push('/Eikona/user/profile')*/
 			      }, (response) => {
-			        this.clearUserStore()
+			        console.log(response);
 			        switch (response.status) {
 			          case 201:
 			            console.log('Post created')
