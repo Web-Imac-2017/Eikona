@@ -29,7 +29,6 @@ class AuthController{
 				if(filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)){
 					//si user est unique
 					if($this->model->isUnique($_POST['user_email'])){
-						$ban = new BanController;
                         $emailIsBan = Response::read("ban", "email", $_POST['user_email']);
 						if (!$emailIsBan){
 
@@ -159,6 +158,19 @@ class AuthController{
 	{
 		$resp = new Response();
 
+		$cookie = Cookie::read("stayConnected");
+		if($cookie['connected'] == true){
+			$resp->setSuccess(200, "user connected")
+				 ->bindValue("userID", $cookie['userID'])
+				 ->bindValue("userEmail", $cookie['userEmail'])
+				 ->send();
+				 
+			Session::renewKey();
+			Session::write("userID", $cookie['userEmail']);
+			
+			return;
+		}
+
 		//si les deux champs de connexion sont remplis
 		if(!empty($_POST['user_email']) &&
 		   !empty($_POST['user_passwd'])){
@@ -177,6 +189,11 @@ class AuthController{
 						     ->bindValue("userEmail", $_POST['user_email']);
 						Session::renewKey();
 						Session::write("userID", $user->getID());
+
+						Cookie::set("stayConnected", ["connected" => true,
+													  "userID"    => $user->getID(),
+													  "userEmail" => $_POST['user_email'] 
+													 ], 2*7*24*3600);
 					}else{
 						$resp->setFailure(401, "account not yet activated");
 					}
