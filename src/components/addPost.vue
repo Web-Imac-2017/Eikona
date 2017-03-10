@@ -1,17 +1,19 @@
 <template>
 	<md-layout id="main-layout-add" md-flex="33" md-flex-offset="33" md-column>
-		<div id="Image-input">
-			<div class="Image-input__image-wrapper">
-		      <i v-show="!imageSrc" class="icon fa fa-picture-o"></i>
-		      <img v-show="imageSrc" class="Image-input__image" :src="imageSrc">
-    		</div>
+		<form md-column id="form" @submit.stop.prevent="create">
+			<p v-if="error_message != ''" class='md-warn'>{{ error_message }}</p>
+			<md-layout id="Image-input" md-flex="66" md-column>
+				<md-layout class="Image-input__image-wrapper">
+			      <i v-show="!imageSrc" class="box"></i>
+			      <img v-show="imageSrc" class="Image-input__image" :src="imageSrc">
+	    		</md-layout>
+			</md-layout>
 
-    		<div class="Image-input__input-wrapper">
-			    Choose
-			    <input @change="previewThumbnail" class="Image-input__input" name="thumbnail" type="file">
-			</div>
-		</div>	
-		<form md-column id="form" @submit.stop.prevent="post">
+			<md-layout class="Image-input__input-wrapper">
+			    Choisir une image
+			    <input @change="previewThumbnail" class="Image-input__input" name="thumbnail" type="file"/>
+			</md-layout>
+
 			<md-layout md-flex="66">
 				<md-input-container>
 		  			<label>Description</label>
@@ -19,7 +21,7 @@
 				</md-input-container>
 
 				<md-layout md-align="end">
-					<md-button class="md-raised md-primary" type="submit">Publier</md-button>
+					<md-button class="md-raised md-primary" type="submit">Créer</md-button>
 					<md-button class="md-raised">Annuler</md-button>
 				</md-layout>
 			</md-layout>
@@ -28,28 +30,62 @@
 </template>
 
 <script>
+	import Vuex from 'vuex'
+	import store from './connectionStore.js'
+	import apiRoot from './../config.js'
+	import formVerifications from './../formVerification.js'
 	export default{
 		name: 'addPost',
+		store: store,
 		data () {
 			return {
 				no_image: true,
 				image: null,
 				up: false,
-				imageSrc: null
+				description: '',
+				imageSrc: '',
+				error_message: ''
 			}
 		},
+		computed: {
+		    ...Vuex.mapGetters([
+		      'getUser',
+		      'currentProfile'
+		    ])
+		  },
 		methods: {
-			vmod () {
-				console.log(this.image);
-			},
-			post () {
+			create () {
+				return
+			      this.$http.post(apiRoot + 'post/create', {
+			        img: this.imageSrc,
+			        postDescription: this.description
+			      }).then((response) => {
+			      	console.log('Create success', response);
 
-				console.log("kikoo");
+			        /*this.$router.push('/Eikona/user/profile')*/
+			      }, (response) => {
+			        this.clearUserStore()
+			        switch (response.status) {
+			          case 201:
+			            console.log('Post created')
+			            break
+			          case 400:
+			            this.error_message = 'Une erreur est survenu dans le fichier:fichier manquant/erreur à l\'upload.'
+			            break
+			          case 401:
+			            this.error_message = 'L\'utilisateur n\'est pas connecté'
+			            break
+			          case 415:
+			            this.error_message = 'Le fichier n\'est pas une image png/jpeg/bmp'
+			            break
+			          default:
+			            console.log('Unknown error')
+        			}
+				})
 			},
 			previewThumbnail(event) {
-
             var input = event.target;
-			console.log(input);
+
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
                 var vm = this;
@@ -60,28 +96,21 @@
 
                 reader.readAsDataURL(input.files[0]);
             }
-        }
 		}
 	}
+}
 </script>
 
 <style scoped>
 
-/*.box {
-	background-color: lightgrey;
+.box {
 	opacity: 0.5;
-    background-image: url("../../assets/insert.svg");
+    background-image: url("./../../assets/insert.svg");
     background-size: 35%;
     background-repeat: no-repeat;
     background-position: center;
     width: 100%;
     height: 25vw;
-    text-align: center;
-    vertical-align: text-bottom;
-}
-
-img {
-    width: 6em;
 }
 
 #main-layout-add{
@@ -89,42 +118,18 @@ img {
 	border: 1px solid black;
 }
 
-#image_placement{
-	width: 100%;
-	height: 25vw;
-	display: flex;
-}
-
-md-icon{
-	vertical-align: middle;
-	margin: auto;
-}*/
-
 .Image-input {
-	width: 100%;
-	height: 25vw;
     display: flex;
 }
 
 .Image-input__image-wrapper {
-    flex-basis: 80%;
-    width: 100%;
-    height: 150px;
-    flex: 2.5;
     border-radius: 1px;
-    margin-right: 10px;
-    overflow-y: hidden;
+    margin-bottom: 10px;
     border-radius: 1px;
     background: #eee;
     justify-content: center;
     align-items: center;
-    display: flex;
-}
-
-.Image-input__image-wrapper > .icon {
-    color: #ccc;
-    font-size: 50px;
-    cursor: default;
+    width: 100%;
 }
 
 .Image-input__image {
@@ -137,13 +142,14 @@ md-icon{
     position: relative;
     background: #eee;
     border-radius: 1px;
-    float: left;
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     color: rgba(0,0,0,0.2);
     transition: 0.4s background;
+    width: 100%;
+    height: 50px;
 }
 
 .Image-input__input-wrapper:hover {
@@ -154,14 +160,22 @@ md-icon{
 .Image-input__input {
     cursor: inherit;
     display: block;
-    font-size: 999px;
-    min-height: 100%;
+    font-family: 'Roboto';
+    font-size: 0.8em;
+    font-weight: 300;
+    width: 100%;
+    height: 100%;
     opacity: 0;
     position: absolute;
     right: 0;
     text-align: right;
     top: 0;
     cursor: pointer;
+}
+
+p {
+  font-size: x-small;
+  color: darkgray;
 }
 	
 </style>
