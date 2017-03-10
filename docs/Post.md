@@ -33,7 +33,9 @@ Créer un post pour l'utilisateur courant et le marque comme brouillon.
     **Data:** 
     ```
     { 
-    	profileID : ID du profil créé 
+    	postStatus : État du post (0 à la création = brouillon/non publié)
+    	profileID : Profile ayant créé le post
+	postID : ID du post créé
     }
     ```
     
