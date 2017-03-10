@@ -1,134 +1,127 @@
 <template>
-	<div id="post">
+	<md-layout id="post">
+		<div v-if="errorMessage != ''" class="error-msg">{{ errorMessage }}</div>
 		<md-card class='post'>
 			<md-card-header>
-				<md-avatar>
-		  			<img src="assets/Eiko.png" alt="Avatar">
-				</md-avatar>
-				<div id="infoPosteur">{{userName}}</div>
+				<md-layout>
 
+					<md-layout md-align="start" class="avatar_poster">
+						<md-avatar>
+					  		<img :src=avatarLink alt="Avatar">
+						</md-avatar>
+						<span>{{userName}}</span>
+					</md-layout>
+
+					<md-layout md-align="end">
+						<PostSettings class="md-list-action"></PostSettings>
+					</md-layout>
+
+				</md-layout>
 			</md-card-header>
 
 	 		<md-card-media>
 				<img :src=imageLink alt="Photo test">
 	  		</md-card-media>
-	  		<div class="md-title">{{title}}</div>
-		  	<md-card-actions>
-		  	<div v-if="error_message != ''" class="error-msg">{{ error_message }}</div>
-		  	<md-button-toggle>
-				<md-button class="md-icon-button" @click.native="addLike"><md-icon>favorite</md-icon> </md-button>
-			</md-button-toggle>
-				<span >{{nbrLike}}</span>
-			</md-card-actions>
+
+	  		<md-layout id="infosPost" >
+	  			<md-layout md-align="start"><div class="md-title">{{title}}</div></md-layout>
+				<md-layout md-align="end"><md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
+				<span>{{nbrLike}}</span> </md-layout>
+
+			</md-layout>
+
+
+
+	  		<md-chips v-model="tags" md-static>
+ 				 <template scope="chip">{{ chip.value }}</template>
+			</md-chips>
+
+
+
+
+
+
+
+
 			<md-card-content>
 				<div class="description">{{description}}</div>
-				<input type="text" class="new-comment" placeholder="Ajouter un commentaire" @keyup.enter="addComment" v-model="newComment">
-				<ul class="comments-list">
-					<li class="comment" v-for="comment in comments">
-						<commentaire :content="comment.message" :nbrLike="comment.nbrLikeComment" :id="comment.id" @incrementLike="addLikeComment"></commentaire>
+				<p>{{comments.length}} commentaires : </p>
+				<md-button class="md-icon-button" id="display-more-comments"><md-icon>expand_more</md-icon></md-button>
 
-					</li>
-				</ul>
+				<sectionComments :comments="comments" :errorMessage="errorMessage" :postID="postID"></sectionComments>
 			</md-card-content>
-		</md-card>
 
-	</div>
+		</md-card>
+	</md-layout>
 </template>
 
 
 
 <script>
-	import store from './postStore'
-	import commentaire from './Comment.vue'
+	import store from './postStore.js'
+	import apiRoot from './../config.js'
+	import sectionComments from './SectionComments.vue'
+	import PostSettings from './PostSettings.vue'
+
 	export default{
-		name: 'post',
-		components: {
-			commentaire
-		},
+		name : 'postFront',
+		components: {sectionComments, PostSettings},
 		data () {
 			return {
-				userName : "JackieDu29",
-				imageLink: "assets/testPhoto.jpg",
+
+				postID: 1,
+				userName : 'JackieDu29',
+				imageLink: 'assets/testPhoto.jpg',
+				avatarLink: 'assets/Eiko.png',
 				nbrLike : 0,
-				nbrJour : 0,
 				title: 'Look at my mustach',
 				description: 'une description',
 				comments: [{
 					id: 1,
-					message: "commentaire de test",
+					message: 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard de l\'imprimerie depuis les années 1500, quand un peintre anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte. Il n\'a pas fait que survivre cinq siècles, mais s\'est aussi adapté à la bureautique informatique, sans que son contenu n\'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des applications de mise en page de texte, comme Aldus PageMaker.',
+					nbrLike:0
+				},{
+					id: 2,
+					message: 'commentaire de test',
+					nbrLike:0
+				},{
+					id: 3,
+					message: 'commentaire de test',
+					nbrLike:0
+				},{
+					id: 4,
+					message: 'commentaire de test',
 					nbrLike:0
 				}],
+				tags: ['chevals', 'ornithorynque'],
 				newComment: '',
-				error_message: ''
+				errorMessage: ''
 
 			}
 		},
 
 		methods: {
-			addLike () {
-
-				this.$http.get('/Eikona/do/post/like/<postID>/').then((response) =>{
+			addLike (id) {
+				this.$http.get(apiRoot + 'post/like/'+this.postID).then((response) =>{
 					this.nbrLike++
+					document.getElementById(id).classList.add('md-primary')
 				},(response)=>{
-					switch (response.code) {
+					switch (response.status) {
 						case 401:
-							this.error_message = "Le post spécifié n'existe pas OU l'user n'a pas de profil courant OU vous ne suivez pas la personne"
+							this.errorMessage = 'Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas la personne'
 							break
 						case 400:
-							this.$http.get('/Eikona/do/post/unlike/<postID>/').then((response)=>{
+							this.$http.get(apiRoot + 'post/unlike/'+this.postID).then((response)=>{
 								this.nbrLike--
+								document.getElementById(id).classList.remove('md-primary')
 							},(response)=>{
-								this.error_message = "On ne peut pas aimer son propre post"
+								this.errorMessage = 'On ne peut pas aimer son propre post'
 							})
-
-
 							break
 						case 406:
-							this.error_message= "Le profil courant a liké plus de 200 post durant les 60 dernières minutes. (Securité Anti-Bot)"
+							this.errorMessage= 'Le profil courant a liké plus de 200 post durant les 60 dernières minutes. (Securité Anti-Bot)'
 							break
-
 					}
-
-				})
-
-
-			},
-			addLikeComment(commentID){
-				this.$http.get('/Eikona/do/comment/like/'+ commentID).then((response)=> {
-					this.comments.filter(comment => comment.id === commentID)
-				},(response)=>{
-					switch (response.code) {
-						case 404:
-							this.error_message = " L'id du commentaire ne renvoie à aucun commentaire"
-							break
-						case 401:
-							this.error_message = "Pas de profil courant sélectionné OU User pas connecté OU vous ne suivez pas la personne"
-							break
-						case 400:
-							this.$http.get('/Eikona/do/post/unlike/'+ commentID).then((response)=>{
-								this.comments[i].nbrLike--
-							},(response)=>{
-								this.error_message = "On ne peut pas aimer son propre commentaire"
-							})
-						break
-					}
-
-				})
-
-			},
-
-			addComment(){
-				this.$http.post('/Eikona/do/comment/create/<postID>/', {
-					commentText: this.newComment
-				}).then((response)=>{
-					this.comments.push({
-						message: this.newComment,
-						nbrLikeComment: 0
-					})
-					this.newComment=""
-
-				},(response)=>{
-						this.error_message=''
 				})
 			}
 		}
@@ -136,11 +129,30 @@
 </script>
 
 <style scoped>
+	#display-more-comments{
+		left: 45%;
+	}
+
+	.avatar_poster{
+		text-align: left;
+	}
+
+	#infosPost{
+		display: inline-flex;
+
+	}
+	#infosPost span{
+		margin-top: 13px;
+		margin-right: 5px;
+		font-size: 2em;
+	}
+
 	li{
-		text-decoration: none,
+		text-decoration: none;
 
 	}
 	.post{
 		width: 500px;
+
 	}
 </style>

@@ -2,7 +2,7 @@
   <div id="app">
     <topHeader></topHeader>
     <router-view></router-view>
-    <mainFooter></mainFooter>
+    <MainFooter></MainFooter>
   </div>
 </template>
 
@@ -16,6 +16,5 @@ export default {
     topHeader,
     mainFooter
   }
-
 }
 </script>

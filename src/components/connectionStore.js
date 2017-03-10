@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 import apiRoot from './../config.js'
 
 Vue.use(Vuex)
@@ -77,7 +76,7 @@ const actions = {
   },
   initProfiles: (store) => {
     console.log(apiRoot + 'user/profiles/')
-    Vue.http.post(apiRoot + 'user/profiles/').then((response) => {
+    Vue.http.post(apiRoot + 'user/profiles').then((response) => {
       console.log(response.data.data.profiles)
       response.data.data.profiles.forEach(profile => store.commit('ADD_PROFILE', profile))
     }, (response) => {
