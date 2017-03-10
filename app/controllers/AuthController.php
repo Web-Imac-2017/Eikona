@@ -160,13 +160,13 @@ class AuthController{
 
 		$cookie = Cookie::read("stayConnected");
 		if($cookie['connected'] == true){
+			Session::renewKey();
 			$resp->setSuccess(200, "user connected")
 				 ->bindValue("userID", $cookie['userID'])
 				 ->bindValue("userEmail", $cookie['userEmail'])
 				 ->send();
 				 
-			Session::renewKey();
-			Session::write("userID", $cookie['userEmail']);
+			Session::write("userID", $cookie['userID']);
 			
 			return;
 		}
@@ -187,7 +187,8 @@ class AuthController{
 						$resp->setSuccess(200, "user connected")
 						     ->bindValue("userID", $user->getID())
 						     ->bindValue("userEmail", $_POST['user_email']);
-						Session::renewKey();
+
+						//Session::renewKey();
 						Session::write("userID", $user->getID());
 
 						Cookie::set("stayConnected", ["connected" => true,

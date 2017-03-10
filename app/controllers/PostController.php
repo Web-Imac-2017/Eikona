@@ -772,6 +772,45 @@ class PostController
 
 		$resp->send();
 	}
+    
+    
+    /********* POPULAR ********/
+    
+    public function popular()
+    {
+        $exclude = [];
+        
+        if(isset($_POST['exclude']))
+        {
+            $exclude = $_POST['exclude'];
+        }
+        
+        $postsID = $this->model->popular($exclude);
+        
+        $posts = array();
+
+        foreach($postsID as $postID)
+        {
+            $postInfos = Response::read("post", "display", $postID)["data"];
+            
+            if($postInfos['profile_private'] == 1)
+            {
+                if(!isAuthorized::seeFullProfile($postInfos['profile_private']))
+                {
+                    continue;
+                }
+            }
+            
+            array_push($posts, $postInfos);
+        }
+        
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("posts", $posts)
+            ->bindValue("nbrPosts", count($posts))
+            ->send();
+    }
 
 
 }
