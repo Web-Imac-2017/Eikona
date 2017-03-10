@@ -4,7 +4,6 @@ class PostModel extends DBInterface
 {
     private $postID = -1;
     private $postDatas = null;
-	private $tags = null;
 
     public function __construct($postID = -1)
     {
@@ -52,7 +51,7 @@ class PostModel extends DBInterface
         $stmt->execute([":postID" => $postID]);
 
         $this->postID = $postID;
-        $this->postDatas = $stmt->fetch();
+        $this->postDatas = $stmt->fetch(PDO::FETCH_ASSOC);
 
 		return "success";
     }

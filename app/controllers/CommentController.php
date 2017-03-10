@@ -66,11 +66,17 @@ class CommentController
 						if($profileID){
 							if(isAuthorized::seeFullProfile($this->postModel->getProfileID())){
 								$this->model->create($profileID, $postID, $_POST['commentText']);
-								$resp->setSuccess(200, "Comment posted")
+								$notif = Response::read("notification", "create", "newComment", $profileID, $this->postModel->getProfileID(), $postID);
+								if($notif['code'] == 200){
+									$resp->setSuccess(200, "Comment posted and notification sent")
 								     ->bindValue("userID", $userID)
 								     ->bindValue("profileID", $profileID)
 								     ->bindValue("postID", $postID)
-								     ->bindValue("comment", $_POST['commentText']);
+								     ->bindValue("comment", $_POST['commentText'])
+								     ->bindValue("notif", $notif['data']);
+								}else{
+									$resp->setFailure(409, "post not commented and notification not sent");
+								}									
 							}else{
 								$resp->setFailure(401, "You can not comment this post");
 							}			
@@ -155,9 +161,15 @@ class CommentController
 					if($this->model->getProfileID() != $profileID){
 						if(isAuthorized::seeFullProfile($this->postModel->getProfileID())){
 							$this->likeModel->like($profileID, $commentID);
-							$resp->setSuccess(201, "comment liked")
-						    	 ->bindValue("commentID", $commentID)
-						     	 ->bindValue("profileID", $profileID);
+							$notif = Response::read("notification", "create", "newCommentLike", $profileID, $this->model->getProfileID(), $commentID);
+							if($notif['code'] == 200){
+								$resp->setSuccess(201, "comment liked and notification sent")
+						    		 ->bindValue("commentID", $commentID)
+						     	 	 ->bindValue("profileID", $profileID)
+						     	 	 ->bindValue("notif", $notif['data']);
+							}else{
+								$resp->setFailure(409, "comment not liked and notification not sent");
+							}							
 						}else{
 							$resp->setFailure(401, "You can not like this comment");
 						}	

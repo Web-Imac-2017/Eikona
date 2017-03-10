@@ -79,6 +79,7 @@ class UserModel extends DBInterface{
         return $stmt->fetchColumn() == "1" ? true : false;
     }
 
+
     /**
      * Tell if the specified user is a moderator
      * @param integer $userID User ID to verify
