@@ -497,7 +497,7 @@ class PostModel extends DBInterface
     
     
     
-    public function popular($exclude = [])
+    public function popular($exclude = [], $limit = 30)
     {
         $where = "";    
        
@@ -508,7 +508,7 @@ class PostModel extends DBInterface
             $where = " WHERE pop_score.post_id NOT IN(".$placeholders.")";
         }
         
-        $stmt = $this->cnx->prepare("SELECT pop_score.post_id, profile_private, profiles.profile_id FROM pop_score JOIN posts ON pop_score.post_id = posts.post_id JOIN profiles ON posts.profile_id = profiles.profile_id ".$where." ORDER BY post_score DESC LIMIT 50");
+        $stmt = $this->cnx->prepare("SELECT pop_score.post_id, profile_private, profiles.profile_id FROM pop_score JOIN posts ON pop_score.post_id = posts.post_id JOIN profiles ON posts.profile_id = profiles.profile_id ".$where." ORDER BY post_score DESC LIMIT ".Sanitize::int($limit));
         $stmt->execute($exclude);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
