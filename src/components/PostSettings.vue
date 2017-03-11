@@ -84,7 +84,7 @@ export default{
     	},
     	abonne(ref, subscribe){
     		
-    		this.$http.get('/Eikona/do/profile/follow/' + this.posteurID + '/' + subscribe).then((response) =>{
+    		this.$http.get(apiRoot + 'profile/follow/' + this.posteurID + '/' + subscribe).then((response) =>{
     			closeDialog(ref)
     		},(response)=>{
     			switch (response.status) {
@@ -102,13 +102,13 @@ export default{
 
     	},
     	bloque(ref){
-    		this.$http.post('/Eikona/do/block/' + this.userID +'/' + this.posteurID).then((response)=>{
+    		this.$http.post(apiRoot + 'block/' + this.userID +'/' + this.posteurID).then((response)=>{
     			closeDialog(ref)
     		},(response)=>{
     		})
     	},
     	supprime(ref){
-    		this.$http.get('/Eikona/do/post/delete/' + this.postID).then((response)=>{
+    		this.$http.get(apiRoot +'post/delete/' + this.postID).then((response)=>{
     			closeDialog(ref)
     		},(response)=>{
     			console.log('Le post spécifié n\'existe pas')
