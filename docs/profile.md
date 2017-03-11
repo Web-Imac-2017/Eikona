@@ -1108,3 +1108,76 @@ Data:
     **Explication** Il n'y a pas de profile connecté OU Vous n'avez pas les droits sur ce profil OU Vous ne pouvez pas arrêter de vous suivre vous-même.
     
     
+    
+    
+
+
+
+
+
+
+
+## Fil d'actualité du profil (feed)
+
+Le feed contient les derniers évènements des profils suivis pas le profil courant.
+Celui-ci inclut : Les posts publiés, les commentaires publiés, les likes, et les nouveaux abonnements.
+
+Les évènements sont triés dans trois catégories : *post*, *comment*, *like*, et *follow*
+
+### URL
+```
+/profile/feed[/<limit>[/<before>]
+```
+
+### Méthode
+**GET**
+
+### Variables GET optionnelles
+
+  * **limit** Nombre d'évènement à retourné (Default 30). Attention, le nombre final retourné sera plus petit si des likes/follow sont rassemblés.
+  * **before** Timestamp a partir duquel récuperer des évènements. Les évènements sont récupérés du plus récent au plus ancien.
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ 
+  nbrEcents : Le nombre d'évènements retournés
+  feed : Un tableau contenant les évènements :
+  [{
+     type: "post" - Un évènement de type post publié
+     time: Timestamp de l'évènement
+     postData: Toutes les informations sur le post publié (identique à do/post/display)
+     profileData: Toutes les informations sur le profil qui a publié (identique à do/profile/get)
+  },{
+     type: "comment" - Un évènement de type commentaire ajouté
+     time: Timestamp de l'évènement
+     postData: Toutes les informations sur le post commenté (identique à do/post/display)
+     profileData: Toutes les informations sur le profil qui a commenté (identique à do/profile/get)
+     commentData: Toutes les informations sur le commentaire (identique au format utilisé dans do/post/comments)
+  },{
+    type: "like" -Un évènement de type post(s) aimé(s)
+    time: Timestamp du premier élément liké
+    profileData: Toutes les informations sur le profil qui a liké (identique à do/profile/get)
+    nbrPosts: Nombre de posts présents dans postsData (1 ou +)
+    postsData: Array contenant tous les posts likés.(format identique à do/post/display)
+  },{
+    type: "follow" -Un évènement de type profil(s) suivi(s)
+    time: Timestamp du premier post suivi
+    profileData: Toutes les informations sur le profil qui a suivi (identique à do/profile/get)
+    nbrPosts: Nombre de profils présents dans followedData (1 ou +)
+    followedData: Array contenant tous les profils suivis.(format identique à do/profile/get)
+  }]
+}
+```
+
+### Erreurs
+
+  * **Code:** 401 NOT AUTHORIZED <br />
+    **Explication** Aucun profil courant n'est sélectionné
+    
+    OU
+
+  * **Code:** 401 UNAUTHORIZED <br />
+    **Explication** Il n'y a pas de profile connecté OU Vous n'avez pas les droits sur ce profil OU Vous ne pouvez pas arrêter de vous suivre vous-même.
