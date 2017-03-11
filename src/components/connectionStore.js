@@ -5,6 +5,9 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    user: {
+      userID: null
+    },
     userId: 'none',
     connected: false
   },
@@ -14,6 +17,7 @@ export default new Vuex.Store({
   },
   getters: {
     userId: state => { return state.userId },
-    isConnected: state => { return state.connected }
+    isConnected: state => { return state.connected },
+    getUser: state => state.user
   }
 })
