@@ -41,7 +41,6 @@ export default {
   },
   methods: {
     select () {
-      console.log('Profile select : ', this.profile)
       this.$emit('select', this.profile)
     }
   }

@@ -7,54 +7,67 @@
         <p>{{keywords}}</p>
       </md-layout>
       <md-layout v-else>
+        <md-list v-if="resultProfiles.length > 0">
+          <md-subheader>Profils</md-subheader>
+          <profile v-for="profile in resultProfiles" :profile="profile" :index="-1" :extended="false" @select="profileSelect"></profile>
+        </md-list>
+        <md-whiteframe v-if="resultPosts.length > 0">
+          <md-subheader>Publications</md-subheader>
+          <post v-for="post in resultPosts" :post="post"></post>
+        </md-whiteframe>
       </md-layout>
     </md-layout>
   </md-whiteframe>
 </template>
 
 <script>
+import post from './Post.vue'
+import profile from './Profile.vue'
 import searchResult from './Search-result.vue'
 import apiRoot from './../config.js'
 
 export default {
   name: 'searchPage',
   components: {
-    searchResult
+    post,
+    profile
   },
   props: ['query'],
   data: () => ({
     resultPosts: [],
     resultProfiles: [],
-    searching: true,
-    noresult: false
+    searching: true
   }),
   computed: {
-    keywords: () => this.query.replace(/[+]/g, ' ')
+    keywords () { return this.query.replace(/[+]/g, ' ') },
+    noresult () {
+        if (this.resultProfiles.length + this.resultPosts.length == 0) return true
+        else return false
+    }
   },
   mounted () {
-    new Promise((resolve, reject) => {
-        this.searchBy('profile')
-        this.searchBy('description')
-        this.searchBy('tag')
-        this.searchBy('comment')
-        reject(e)
-      resolve()
-    }).then((response) => {
-      console.log("result search", response)
-      if (this.resultProfiles.length + this.resultPosts.length == 0) this.noresult = true
-      this.searching = false
-    }, (reponse) => {
-      console.error(response)
-    })
+    this.search()
+  },
+  watch: {
+    query: 'search'
   },
   methods: {
-    searchBy (searchType) {
+    search () {
+      this.resultPosts = []
+      this.resultProfiles = []
+      this.searchBy(this.query, 'profile')
+      this.searchBy(this.query, 'description')
+      this.searchBy(this.query, 'tag')
+      this.searchBy(this.query, 'comment')
+      this.searching = false
+    },
+    searchBy (query, searchType) {
       this.$http.post(apiRoot + 'search/', {
-        query: this.query,
+        query: query,
         field: searchType
       }).then(
         (response) => {
-          console.log('searchby :' + searchType, response)
+          console.log('searchby : ' + searchType, response)
           if (searchType === 'profile')
               response.data.data.result.forEach(item => this.resultProfiles.push(item))
           else
@@ -63,13 +76,17 @@ export default {
         (response) => {
           switch (response.status) {
             case 400:
-              throw 'ERR: search by '+searchType+' without query'
+              console.error('ERR: search by ' + searchType + ' without query')
               break;
             case 404:
-              console.log('Search by '+searchType+' no result')
+              console.log('Search by ' + searchType + ' no result')
               break;
           }
         })
+    },
+    profileSelect () {
+      // redirect vers la page du profil
+      this.$router.push('')
     }
   }
 }
