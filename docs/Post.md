@@ -407,6 +407,10 @@ Data:
   * **Code:** 400 BAD REQUEST <br />
     **Explication** Le post n'a pas été aimé
 	
+	
+	
+	
+	
 ## Récupérer les commentaires d'un post
 
 Récupère tous les commentaires d'nu post
@@ -451,3 +455,37 @@ Data:
   * **Code:** 400 NOT AUTHORIZED <br />
     **Explication** On ne peut pas aimer son propre post OU Le post a déjà été aimé par le profil courant
 
+
+
+
+
+## Récupérer les posts populaires
+
+Récupère les posts populaires
+
+### URL
+```
+/post/popular[/<limit>]
+```
+
+### Méthode
+**POST**
+
+### Variable optionnelle GET
+
+  * **limit** : Nombre de posts à retourner. 30 par défaut
+
+### Variable optionnelle POST
+
+  * **exclude** : Post déjà afficher, à ne pas retourner a nouveau. **Format** Liste d'IDs séparés par des virgules.
+
+### Succès
+
+  * **Code:** 200 OK
+Data:
+```json
+{ 
+    nbrPosts: Nombre de posts retournés,
+    posts : Array avec les posts retournés. Sur le même format que post/display.
+}
+```
