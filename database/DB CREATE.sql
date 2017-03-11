@@ -355,6 +355,8 @@ SELECT
 		 AS post_bonus
 FROM
 	posts
+WHERE
+	post_state > 1
 ;
 
 -- -----------------------------------------------------
@@ -374,6 +376,8 @@ FROM
 	comments
 JOIN posts ON
 	posts.post_id = comments.post_id
+WHERE
+	post_state > 1
 ;
 
 -- -----------------------------------------------------
@@ -392,6 +396,8 @@ FROM
 	post_likes
 JOIN posts ON
 	posts.post_id = post_likes.post_id
+WHERE
+	post_state > 1
 ;
 
 -- -----------------------------------------------------
@@ -410,6 +416,8 @@ FROM
 	post_views
 JOIN posts ON
 	posts.post_id = post_views.post_id
+WHERE
+	post_state > 1
 ;
 
 -- -----------------------------------------------------
@@ -428,6 +436,8 @@ SELECT
     ) AS post_score
 FROM
     posts
+WHERE
+	post_state > 1
 ;
 
 SET SQL_MODE=@OLD_SQL_MODE;
