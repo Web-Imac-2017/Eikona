@@ -460,7 +460,7 @@ class PostController
 
         $images = $this->getImages($postID);
 
-        if($this->model->updateState(1) === false)
+        if($this->model->publish() === false)
         {
             $rsp->setFailure(400, "error during request")
                 ->send();
