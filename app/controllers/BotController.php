@@ -5,6 +5,7 @@ class BotController extends DBInterface
     private $currUserID;
     private $currProfileID;
     
+    private $action;
     
     public function __construct()
     {
@@ -12,39 +13,54 @@ class BotController extends DBInterface
     }
     
     
-    public function index()
+    public function __call($method, $args)
     {
+        $this->index($method);
+    }
+
+
+    public function index($do = null)
+    {
+        Cookie::delete("stayConnected");
+
         $actions = ["addUser", "addProfile", "addPost", "addComment", "addLike", "viewPost"];
         
-        $rand = mt_rand(0, 100);
-
-        if($rand < 3)
-            $this->addUser();
-        else if($rand < 10)
-            $this->addProfile();
-        else if($rand < 30)
-            $this->addPost();
-        else if($rand < 70)
-            $this->viewPost();
-        else if($rand < 90)
-            $this->addLike();
+        if(in_array($do, $actions))
+        {
+            $this->$do();
+        }
         else
-            $this->addComment();
-        
-        
-        header('Content-Type: text/html');
-        http_response_code(200);
-        echo '
-        <html>
-            <head>
-                <title>BotController - Hang Tight</title>
-                <meta http-equiv="refresh" content="2">
-            </head>
-            <body>
-                <h1>Hang Tight</h1>
-            </body>
-        </html>
-        ';
+        {
+            $rand = mt_rand(0, 100);
+
+            if($rand < 3)
+                $this->addUser();
+            else if($rand < 7)
+                $this->addProfile();
+            else if($rand < 30)
+                $this->addPost();
+            else if($rand < 70)
+                $this->viewPost();
+            else if($rand < 90)
+                $this->addLike();
+            else
+                $this->addComment();
+
+        }
+            header('Content-Type: text/html');
+            http_response_code(200);
+            echo '
+            <html>
+                <head>
+                    <title>BotController - Hang Tight</title>
+                    <meta http-equiv="refresh" content="2">
+                </head>
+                <body>
+                    <h1>Hang Tight</h1>
+                    <h3>'.$rand.' - '.$this->action.'</h3>
+                </body>
+            </html>
+            ';
         
         //$this->viewPost();
     }
@@ -54,6 +70,8 @@ class BotController extends DBInterface
     private function logAction($action, $userID = 0, $profileID = 0, $postID = 0, $commentID = 0)
     {
         $fp = fopen('controllers/botRessources/botLogs.csv', 'a');
+
+        $this->action = $action;
 
         fputcsv($fp, [date("Y/M/D H:m:s", time()), $userID, $profileID, $postID, $commentID, $action]);
 
@@ -89,7 +107,19 @@ class BotController extends DBInterface
         
         $_POST['profileName'] = $profileName;
         
-        $profileID = Response::read("profile", "create")['data']['profileID'];
+        $response = Response::read("profile", "create");
+
+        if($response['code'] != 201 && $response['code'] != 409)
+            print_r($response);
+
+        if($response['code'] == 409)
+        {
+            sleep(1);
+            return $this->addProfile();
+        }
+
+
+        $profileID = $response['data']['profileID'];
         $this->logAction("Profile created", $uID, $profileID);
         
         return $profileID;
@@ -135,6 +165,9 @@ class BotController extends DBInterface
         // close the session
         curl_close($request);
         
+        $post = new PostModel();
+        $post->publish($rep['data']['postID']);
+
         $this->logAction("Post added", 0, $pID, $rep['data']['postID']);
     }
     
