@@ -776,26 +776,27 @@ class PostController
     
     /********* POPULAR ********/
     
-    public function popular()
+    public function popular($limit = 30)
     {
         $exclude = [];
         
         if(isset($_POST['exclude']))
         {
-            $exclude = $_POST['exclude'];
+            $exclude = explode(",", $_POST['exclude']);
         }
         
-        $postsID = $this->model->popular($exclude);
+        $postsBasics = $this->model->popular($exclude, $limit);
         
         $posts = array();
 
-        foreach($postsID as $postID)
+        foreach($postsBasics as $postBasics)
         {
-            $postInfos = Response::read("post", "display", $postID)["data"];
+            $postInfos = Response::read("post", "display", $postBasics['post_id']);
             
-            if($postInfos['profile_private'] == 1)
+            //remove posts the user cannot see.
+            if($postBasics ['profile_private'] == 1)
             {
-                if(!isAuthorized::seeFullProfile($postInfos['profile_private']))
+                if(!isAuthorized::seeFullProfile($postBasics['profile_private']))
                 {
                     continue;
                 }
@@ -811,6 +812,6 @@ class PostController
             ->bindValue("nbrPosts", count($posts))
             ->send();
     }
-
-
 }
+
+
