@@ -4,6 +4,7 @@
   "description": "Imac's project",
   "author": "WebImac2017 - Groupe1",
   "license": "ISC",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watchify": "watchify -vd -p browserify-hmr -e src/main.js -o dist/build.js",
@@ -31,6 +32,8 @@
   },
   "dependencies": {
     "vue": "^2.0.1",
+    "vue-material": "^0.7.1",
+    "vue-resource": "^1.2.0",
     "vue-router": "^2.2.1",
     "vuex": "^2.1.2"
   },

@@ -4,7 +4,6 @@ class PostModel extends DBInterface
 {
     private $postID = -1;
     private $postDatas = null;
-	private $tags = null;
 
     public function __construct($postID = -1)
     {
@@ -52,7 +51,7 @@ class PostModel extends DBInterface
         $stmt->execute([":postID" => $postID]);
 
         $this->postID = $postID;
-        $this->postDatas = $stmt->fetch();
+        $this->postDatas = $stmt->fetch(PDO::FETCH_ASSOC);
 
 		return "success";
     }
@@ -493,6 +492,26 @@ class PostModel extends DBInterface
         $stmt->execute([":postID" => $this->postID]);
 
 		return true;
+    }
+    
+    
+    
+    
+    public function popular($exclude = [])
+    {
+        $where = "";    
+       
+        if(count($exclude) > 0)
+        {
+            $placeholders = str_repeat('?, ', count($exclude) - 1).'?';
+            
+            $where = " WHERE pop_score.post_id NOT IN(".$placeholders.")";
+        }
+        
+        $stmt = $this->cnx->prepare("SELECT pop_score.post_id, profile_private, profiles.profile_id FROM pop_score JOIN posts ON pop_score.post_id = posts.post_id JOIN profiles ON posts.profile_id = profiles.profile_id ".$where." ORDER BY post_score DESC LIMIT 50");
+        $stmt->execute($exclude);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 }

@@ -6,14 +6,15 @@ class PostController
 	private $tagModel;
 	private $likeModel;
 	private $commentModel;
+	private $postViewModel;
 
 
 	public function __construct()
 	{
-		$this->model        = new PostModel();
-		$this->tagModel     = new TagModel();
-		$this->likeModel    = new LikeModel();
-		$this->commentModel = new CommentModel();
+		$this->model         = new PostModel();
+		$this->tagModel      = new TagModel();
+		$this->likeModel     = new LikeModel();
+		$this->commentModel  = new CommentModel();
 		$this->postViewModel = new PostViewModel();
 	}
 
@@ -594,6 +595,16 @@ class PostController
 					$resp->setSuccess(200, "post liked")
 				    	 ->bindValue("postID", $postID)
 				     	 ->bindValue("profileID", $profileID);
+					$notif = Response::read("notification", "create", "newLike", $profileID, $this->model->getProfileID(), $postID);
+					if($notif['code'] == 200){
+						$resp->setSuccess(200, "post liked and notification sent")
+				    	     ->bindValue("postID", $postID)
+				     	 	 ->bindValue("profileID", $profileID)
+				     	 	 ->bindValue("notif", $notif['data']);
+					}
+					else{
+						$resp->setFailure(409, "post not liked and notification not sent");
+					}					
 				}else{
 					$resp->setFailure(401, "You can not see this post");
 				}						
@@ -657,7 +668,7 @@ class PostController
 
 		$resp->setSuccess(200, "likes returned")
 		     ->bindValue("postID", $postID)
-		     ->bindValue("nbOfLikes", count($likes))
+		     ->bindValue("nbOfLikes", count($likes))	
 		     ->bindValue("like", $likes)
 		     ->send();
 	}
@@ -761,6 +772,45 @@ class PostController
 
 		$resp->send();
 	}
+    
+    
+    /********* POPULAR ********/
+    
+    public function popular()
+    {
+        $exclude = [];
+        
+        if(isset($_POST['exclude']))
+        {
+            $exclude = $_POST['exclude'];
+        }
+        
+        $postsID = $this->model->popular($exclude);
+        
+        $posts = array();
+
+        foreach($postsID as $postID)
+        {
+            $postInfos = Response::read("post", "display", $postID)["data"];
+            
+            if($postInfos['profile_private'] == 1)
+            {
+                if(!isAuthorized::seeFullProfile($postInfos['profile_private']))
+                {
+                    continue;
+                }
+            }
+            
+            array_push($posts, $postInfos);
+        }
+        
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("posts", $posts)
+            ->bindValue("nbrPosts", count($posts))
+            ->send();
+    }
 
 
 }
