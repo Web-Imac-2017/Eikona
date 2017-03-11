@@ -14,7 +14,7 @@ class FrontController
     /**
      * Set trigger path
      */
-    protected $basePath    = "do/";
+    protected $basePath    = "eikona/do/";
 
     /**
      * Init the FrontController
@@ -44,8 +44,7 @@ class FrontController
     protected function parseURI()
     {
         //Clean up URL
-        $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-
+        $path = trim(parse_url(strtolower($_SERVER['REQUEST_URI']), PHP_URL_PATH), '/');
         //Remove basepath
         if(strpos($path, $this->basePath) === 0)
         {
