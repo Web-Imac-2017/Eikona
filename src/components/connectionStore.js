@@ -4,6 +4,7 @@ import apiRoot from './../config.js'
 
 Vue.use(Vuex)
 
+
 const state = {
   user: {
     userName: false
@@ -45,6 +46,7 @@ const actions = {
           console.log('Unknown error')
       }
     })
+
   },
   deleteProfil: (store, profile) => {
     Vue.http.get(apiRoot + 'profile/delete/' + profile.profileID).then((response) => {
@@ -67,6 +69,7 @@ const actions = {
       }
     })
   },
+
   selectProfile: (store, id) => {
     Vue.http.get(apiRoot + 'profile/setCurrent/' + id).then((response) => {
       store.commit('SET_CURRENT_PROFILE', id)
@@ -100,4 +103,5 @@ export default new Vuex.Store({
   getters: getters,
   actions: actions,
   strict: true
+
 })
