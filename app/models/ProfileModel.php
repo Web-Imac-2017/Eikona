@@ -6,6 +6,7 @@ class ProfileModel extends DBInterface
      */
     private $pID = -1;
     private $p   = NULL;
+    private $limit = 3;
 
     /**
      * Class constructor
@@ -242,7 +243,15 @@ class ProfileModel extends DBInterface
     }
 
 
+    public function tooMuchProfiles($userID)
+    {
+        $stmt = $this->cnx->prepare("
+            SELECT COUNT(profile_id) FROM profiles
+            WHERE :userID = user_id");
+        $stmt->execute([":userID" => $userID]);
 
+        return $stmt->fetchColumn() >= $this->limit ? true : false;
+    }
 
     //updating informations
 

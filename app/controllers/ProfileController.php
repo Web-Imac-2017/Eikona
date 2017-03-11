@@ -28,9 +28,19 @@ class ProfileController
     {
         $rsp = new Response();
 
+        $uID = Session::read("userID"); //Get current user ID
+
         /**
          * TODO: Verify if user is connected and can add a new profile
          */
+        
+        
+        if($this->model->tooMuchProfiles($uID))
+        {
+            $rsp->setFailure(400, "Too Much profiles")
+                ->send();
+            return; 
+        }
 
         if (empty($_POST['profileName']))
         {
@@ -42,7 +52,7 @@ class ProfileController
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
 
-        $uID = Session::read("userID"); //Get current user ID
+        
 
         $result = $this->model->create($uID, $name, $desc, $isPrivate);
 
