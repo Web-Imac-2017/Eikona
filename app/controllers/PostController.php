@@ -233,6 +233,7 @@ class PostController
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
 			->bindValue("profileID", $data['profile_id'])
+			->bindValue("profileData", Response::read("profile", "get", $data['profile_id'])["data"])
 			->bindValue("desc", $data['post_description'])
 			->bindValue("publishTime", $data['post_publish_time'])
 			->bindValue("updateTime", $data['post_edit_time'])
