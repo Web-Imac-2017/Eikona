@@ -1073,7 +1073,7 @@ class ProfileController
 
     /********* FEED ***********/
 
-    public function feed($limit = 30)
+    public function feed($limit = 30, $before = 0)
     {
         $profileID = Session::read("profileID");
 
@@ -1094,7 +1094,7 @@ class ProfileController
         //Retrieve aditionnal model:
         $commentModel = new CommentModel();
 
-        $events = $this->model->feed($profileID, $limit);
+        $events = $this->model->feed($profileID, $limit, $before);
         $nbrEvents = count($events);
 
 
