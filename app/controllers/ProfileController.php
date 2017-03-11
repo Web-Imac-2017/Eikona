@@ -1071,5 +1071,124 @@ class ProfileController
              ->send();
    }
 
+    /********* FEED ***********/
+
+    public function feed($limit = 30)
+    {
+        $profileID = Session::read("profileID");
+
+        $rsp = new Response();
+
+        if(empty($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to access this.")
+                ->send();
+
+            return;
+        }
+
+        //post published by profiles followed
+        //posts liked by profiles followed
+        //profiles followed by profiles followed
+
+        //Retrieve aditionnal model:
+        $commentModel = new CommentModel();
+
+        $events = $this->model->feed($profileID, $limit);
+        $nbrEvents = count($events);
+
+
+        $feed = array();
+
+        for($i = 0; $i < $nbrEvents; $i++)
+        {
+            $event = $events[$i];
+
+            $eventBlock = array();
+
+            if($event['type'] == "post")
+            {
+                $eventBlock["type"] = "post";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["postData"] = Response::read("post", "display", $event["dest"])['data'];
+                $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
+
+                array_push($feed, $eventBlock);
+            }
+
+            if($event['type'] == "comment")
+            {
+                $eventBlock["type"] = "comment";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["postData"] = Response::read("post", "display", $event["dest"])['data'];
+
+                $commentData = $commentModel->getComment($event["source"]);
+
+                $eventBlock["commentData"] = $commentData;
+                $eventBlock["profileData"] = Response::read("profile", "get", $commentData["profile_id"]);
+
+                array_push($feed, $eventBlock);
+            }
+
+            if($event['type'] == "like")
+            {
+                $eventBlock["type"] = "like";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
+
+                $posts = array();
+
+                for($j = $i; $i < $nbrEvents; $j++)
+                {
+                    if($events[$j]["type"] == "like" && $events[$j]["source"] == $events[$i]["source"])
+                    {
+                        array_push($posts, Response::read("post", "display", $events[$j]["dest"])['data']);
+                        continue;
+                    }
+                    else
+                    {
+                        $i = $j;
+                        break;
+                    }
+                }
+
+                $eventBlock["postsData"] = $posts;
+            }
+
+            if($event['type'] == "follow")
+            {
+                $eventBlock["type"] = "follow";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
+
+                $posts = array();
+
+                for($j = $i; $i < $nbrEvents; $j++)
+                {
+                    if($events[$j]["type"] == "follow" && $events[$j]["source"] == $events[$i]["source"])
+                    {
+                        array_push($posts, Response::read("profile", "get", $events[$j]["dest"])['data']);
+                        continue;
+                    }
+                    else
+                    {
+                        $i = $j;
+                        break;
+                    }
+                }
+
+                $eventBlock["postsData"] = $posts;
+            }
+
+            array_push($feed, $eventBlock);
+
+            unset($eventBlock);
+        }
+
+        $rsp->setSuccess(200)
+            ->bindValue("nbrEvents", count($feed))
+            ->bindValue("feed", $feed)
+            ->send();
+    }
 }
 ?>

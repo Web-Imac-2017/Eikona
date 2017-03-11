@@ -420,6 +420,21 @@ class PostModel extends DBInterface
         return $time;
     }
 
+    public function publish($postID)
+    {
+
+        $time = time();
+
+        $stmt = $this->cnx->prepare("
+            UPDATE posts
+            SET post_publish_time = :time,
+            post_state = 1
+            WHERE :postID = post_id");
+        $stmt->execute([":time" => $time,
+                        ":postID" => Sanitize::int($postID)]);
+        return $time;
+    }
+
     /*
      * Allow comments for the post
      *
