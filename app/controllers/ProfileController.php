@@ -1110,7 +1110,6 @@ class ProfileController
                 $eventBlock["type"] = "post";
                 $eventBlock["time"] = $event["time"];
                 $eventBlock["postData"] = Response::read("post", "display", $event["dest"])['data'];
-                $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
 
                 array_push($feed, $eventBlock);
             }
