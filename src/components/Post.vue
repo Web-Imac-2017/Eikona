@@ -29,7 +29,7 @@
 
 
 	  		<md-layout id="infosPost" >	  			
-	  			<md-layout md-flex="80"><div class="description">{{post_description}}</div></md-layout>
+	  			<md-layout md-flex="80"><div class="description">{{post.post_description}}</div></md-layout>
 				<md-layout md-align="end" ><md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
 				<span>{{like}}</span> </md-layout> 		
 		  						
@@ -62,14 +62,14 @@
 
 	import store from './postStore.js'
 	import apiRoot from './../config.js'
-	import sectionComments from './SectionComments.vue'
+	import SectionComments from './SectionComments.vue'
 	import PostSettings from './PostSettings.vue'
 
 
 	export default{
 		name: 'postFront',
 		components: {
-			sectionComments,
+			SectionComments,
 			PostSettings
 		},
 		data () {
@@ -118,10 +118,6 @@
 			tags () {
 				// Récpérer les tags attachés à ce post
 				return ['chevals', 'ornithorynque']
-
-			},
-			post_description(){
-				return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec turpis ipsum, pharetra nec erat ut, congue hendrerit mi. In hac habitasse platea dictumst. Duis nec commodo elit. Duis elementum felis in elit faucibus porta.'
 
 			}
 		},
