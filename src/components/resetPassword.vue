@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import formVerifications from './../formVerifications.js'
+import formVerifications from './formVerifications.js'
 import apiRoot from './../config.js'
 
 export default {

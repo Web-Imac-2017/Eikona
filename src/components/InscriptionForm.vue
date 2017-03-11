@@ -35,7 +35,7 @@
 
 <script>
 import apiRoot from './../config.js'
-import formVerifications from './../formVerifications.js'
+import formVerifications from './formVerifications.js'
 
 export default {
 	name: 'inscriptionForm',

@@ -25,7 +25,7 @@
 import Vuex from 'vuex'
 import store from './connectionStore.js'
 import apiRoot from './../config.js'
-import formVerifications from './../formVerifications.js'
+import formVerifications from './formVerifications.js'
 import resetPassword from './resetPassword.vue'
 
 export default {
@@ -51,35 +51,35 @@ export default {
     }),
     send () {
       if (!(this.verif_mail(this.email, 'connection-id') && this.verif_password(this.password, 'connection-password'))) return
-      this.$http.post(apiRoot + 'auth/signIn', {
-        user_email: this.email,
-        user_passwd: this.password
-      }).then((response) => {
-        this.initUserStore()
-        this.initProfilesStore()
-        this.$router.push('/Eikona/user/profile')
-      }, (response) => {
-        this.clearUserStore()
-        switch (response.status) {
-          case 200:
-            console.log('User connected')
-            break
-          case 400:
-            this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
-            break
-          case 401:
-            this.error_message = 'Votre compte n\'est pas activé.'
-            break
-          case 404:
-            document.getElementById('connection-id').classList.add('md-input-invalid')
-            break
-          case 409:
-            document.getElementById('connection-password').classList.add('md-input-invalid')
-            break
-          default:
-            console.log('Unknown error')
-        }
+      this.ban_mail(this.email, () => {
+        document.getElementById('connection-id').classList.add('md-input-invalid')
       })
+        this.$http.post(apiRoot + 'auth/signIn', {
+          user_email: this.email,
+          user_passwd: this.password
+        }).then((response) => {
+          this.initUserStore()
+          this.initProfilesStore()
+          this.$router.push('/Eikona/user/profile')
+        }, (response) => {
+          this.clearUserStore()
+          switch (response.status) {
+            case 400:
+              this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
+              break
+            case 401:
+              this.error_message = 'Votre compte n\'est pas activé.'
+              break
+            case 404:
+              document.getElementById('connection-id').classList.add('md-input-invalid')
+              break
+            case 409:
+              document.getElementById('connection-password').classList.add('md-input-invalid')
+              break
+            default:
+              console.log('Unknown error')
+          }
+        })
     }
   }
 }

@@ -20,7 +20,7 @@
 <script>
 import Vuex from 'vuex'
 import store from './connectionStore.js'
-import formVerifications from './../formVerifications.js'
+import formVerifications from './formVerifications.js'
 import apiRoot from './../config.js'
 
 export default {
