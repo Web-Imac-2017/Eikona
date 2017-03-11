@@ -1097,7 +1097,6 @@ class ProfileController
         $events = $this->model->feed($profileID, $limit, $before);
         $nbrEvents = count($events);
 
-
         $feed = array();
 
         for($i = 0; $i < $nbrEvents; $i++)
@@ -1138,7 +1137,7 @@ class ProfileController
 
                 $posts = array();
 
-                for($j = $i; $i < $nbrEvents; $j++)
+                for($j = $i; $j < $nbrEvents; $j++)
                 {
                     if($events[$j]["type"] == "like" && $events[$j]["source"] == $events[$i]["source"])
                     {
@@ -1152,6 +1151,9 @@ class ProfileController
                     }
                 }
 
+                $i = $j;
+
+                $eventBlock["nbrPosts"] = count($posts);
                 $eventBlock["postsData"] = $posts;
             }
 
@@ -1161,13 +1163,13 @@ class ProfileController
                 $eventBlock["time"] = $event["time"];
                 $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
 
-                $posts = array();
+                $followed = array();
 
                 for($j = $i; $i < $nbrEvents; $j++)
                 {
                     if($events[$j]["type"] == "follow" && $events[$j]["source"] == $events[$i]["source"])
                     {
-                        array_push($posts, Response::read("profile", "get", $events[$j]["dest"])['data']);
+                        array_push($followed, Response::read("profile", "get", $events[$j]["dest"])['data']);
                         continue;
                     }
                     else
@@ -1177,7 +1179,10 @@ class ProfileController
                     }
                 }
 
-                $eventBlock["postsData"] = $posts;
+                $i = $j;
+
+                $eventBlock["nbrFollowed"] = count($followed);
+                $eventBlock["followedData"] = $followed;
             }
 
             array_push($feed, $eventBlock);
