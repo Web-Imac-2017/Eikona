@@ -50,7 +50,7 @@ export default {
     },
     select (id) {
       this.selectProfile(id)
-      // redirection vers page correspondante
+      this.$router.push('/Eikona/user')
     }
   }
 }
