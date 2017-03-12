@@ -29,7 +29,7 @@ class AuthController{
 				if(filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)){
 					//si user est unique
 					if($this->model->isUnique($_POST['user_email'])){
-                        $emailIsBan = Response::read("ban", "email", $_POST['user_email']);
+                        $emailIsBan = Response::read("ban", "is", "email", $_POST['user_email']);
 						if (!$emailIsBan){
 
 						//insertion dans la base de données

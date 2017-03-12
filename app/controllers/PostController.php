@@ -461,7 +461,7 @@ class PostController
 
         $images = $this->getImages($postID);
 
-        if($this->model->publish() === false)
+        if($this->model->publish($postID) === false)
         {
             $rsp->setFailure(400, "error during request")
                 ->send();
@@ -533,7 +533,8 @@ class PostController
                     $rsp->bindValue("postPicture", $folder.$postID.".jpg");
                 else
                     $rsp->bindValue("postPicture", $folder.$postID."-".$filter.".jpg");
-                ->send();
+
+            $rsp->send();
 
             return;
         }
