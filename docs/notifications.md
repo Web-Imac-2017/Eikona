@@ -57,7 +57,15 @@ Data :
 ```json
     notif:{
         profileID : ID du profil,
-        notif : voir format de réponse plus haut
+        notif : [
+            notif_id : id de la notif, 
+            profile_id : profile à l origine de la notif,
+            profile_target_id : profile qui reçoit la notif,
+            notif_type : code numérique du type de notif,
+            notif_taget : id de la target de la notif (post, comment...),
+            notif_time : heure de la notif,
+            notif_seen : si la notif est vue ou non
+        ]
     }
 }
 ```
@@ -91,16 +99,30 @@ Data :
 ```json
     notif:{
         notif : 
-            1 
+            "PROFILE_ID" : [
+                {
+                    notif_id : id de la notif, 
+                    profile_id : profile à l origine de la notif,
+                    profile_target_id : profile qui reçoit la notif,
+                    notif_type : code numérique du type de notif,
+                    notif_taget : id de la target de la notif (post, comment...),
+                    notif_time : heure de la notif,
+                    notif_seen : si la notif est vue ou non
+                }
+            ],
+            "PROFILE_ID" : [
+                {},
+                {}
+            ]
     }
 }
 ```
 
+Le profile ID correspond à l'id du profile dont la ou les notifs appartiennent.
+
 ### Erreurs
 
 * **Code:** 401 UNAUTHORIZED <br />
-  **Explciation** pas de profil courant
+  **Explciation** pas de profil courant OU usre pas connecté
 
-* **Code:** 404 NOT FOUND<br />
-  **Explication** le profil a aucune notifications
 
