@@ -3,7 +3,7 @@
 
 		<md-whiteframe id="main-section" md-elevation="8" md-tag="section">
 
-			<md-dialog md-open-from="#fab" md-close-to="#fab" ref="dialog1" class="dialog_add">
+			<md-dialog md-open-from="#fab" md-close-to="#fab" ref="dialog_add" class="dialog_add">
 				<md-layout md-flex="66" md-column>
 					<md-dialog-title>Create new post</md-dialog-title>
 					<md-dialog-content>
@@ -27,9 +27,7 @@
 			</div>
 
 			<div v-for="image in images" :class="classStatut">
-				<md-button class="modif_button" id="fab" @click.native="openDialog('dialog_modif')">
-					<md-icon>edit_mode</md-icon>
-				</md-button>
+				<md-button class="modif_button" id="fab" @click.native="openDialog('dialog_modif')"></md-button>
 				<img :src="image.src" alt="image non chargee"/>
 			</div>
 		</md-whiteframe>
@@ -103,7 +101,7 @@ export default{
 	flex-flow: row wrap;
 }
 
-.square_image, .add_button, .square-image__modif{
+.square_image, .add_button, .square-image__modif, .modif_button{
 	display: flex;
 	width: 150px;
 	height: 150px;
@@ -150,6 +148,7 @@ export default{
 .modif_button{
 	position: absolute;
 	z-index: 1;
+	margin:0;
 }
 
 </style>
