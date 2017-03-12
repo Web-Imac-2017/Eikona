@@ -1,22 +1,18 @@
 <template>
 	<md-layout>
-
 		<md-card class='post'>
 			<md-card-header>
 				<md-layout>
 					<md-layout md-align="start" class="avatar_poster">
-
-					<md-list>
-						<md-list-item>
-							<md-avatar>
-						  		<img :src="profile.profile_picture" alt="Avatar">
-							</md-avatar>
-							<span>{{profile.profile_name}}</span>
-						</md-list-item>
-
+						<md-list>
+							<md-list-item>
+								<md-avatar>
+							  		<img :src="profile.profile_picture" alt="Avatar">
+								</md-avatar>
+								<span>{{profile.profile_name}}</span>
+							</md-list-item>
+						</md-list>
 					</md-layout>
-					<md-list>
-
 					<md-layout md-align="end">
 						<PostSettings class="md-list-action" :posteurID="1"	></PostSettings>
 					</md-layout>
@@ -27,26 +23,19 @@
 				<img :src="imageLink" alt="Photo test">
   		</md-card-media>
 
-
-	  		<md-layout id="infosPost" >
-	  			<md-layout md-flex="80"><div class="description">{{post.desc}}</div></md-layout>
-				<md-layout md-align="end" ><md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
-				<span>{{like}}</span> </md-layout>
-
+			<md-layout class="infosPost">
+  			<md-layout md-flex="80"><div class="description">{{post.desc}}</div></md-layout>
+				<md-layout md-align="end" >
+					<md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
+					<span>{{like}}</span>
+				</md-layout>
 			</md-layout>
-
-
-
 
 			<md-layout id="post-tagContainer">
 				<md-chip v-for="tag in tags" class="tag" disabled>{{tag}}</md-chip>
 			</md-layout>
 
-
-
-
 			<md-card-content>
-
 				<p>{{comments.length}} commentaires : </p>
 				<md-button class="md-icon-button" id="display-more-comments"><md-icon>expand_more</md-icon></md-button>
 				<sectionComments :comments="comments" :errorMessage="errorMessage" :postID="post.post_id"></sectionComments>
@@ -80,7 +69,7 @@
 
 			}
 		},
-		props: ['post'],
+		props: ['post', 'profilePost'],
 		computed: {
 			profile () {
 				// Recuperer le profile du posteur

@@ -1,13 +1,14 @@
 <template>
 	<md-tabs md-fixed class="md-transparent">
 		<md-tab md-label="Tendances">
-			<thread :posts="popPostsStore" @more="nextPopPosts"></thread>
+			<thread :postsData="popPostsStore" @more="nextPopPosts"></thread>
 		</md-tab>
 
 		<md-tab md-label="Suggestions">
 		</md-tab>
 
 		<md-tab md-label="Abonnements">
+				<thread :postsData="feedStore" @more="nextFeedEvents"></thread>
 		</md-tab>
 
 		<md-tab md-label="Mon profil">
@@ -28,16 +29,19 @@ export default{
 		thread
 	},
 	mounted: () => {
-		this.nextPopPosts(10)
+		this.nextPopPosts(10),
+		this.nextFeedEvents(10)
 	},
 	computed: {
 		...Vuex.mapGetters({
-			popPostsStore: 'popularPosts'
+			popPostsStore: 'popularPosts',
+			feedStore: 'feedEvents'
 		})
 	},
 	methods: {
 		...Vuex.mapActions({
-			nextPopPosts: 'nextPopularPosts'
+			nextPopPosts: 'nextPopularPosts',
+			nextFeedEvents: 'nextFeedEvents'
 		})
 	}
 }

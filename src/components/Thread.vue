@@ -1,9 +1,11 @@
 <template lang="html">
   <md-list>
-    <md-list-item v-for="p in posts">
-      <post :post="p"></post>
-    </md-list-item>
-    <md-list-item @click.native="more">
+    <template v-for="p in postsData">
+      <md-list-item>
+        <post :post="p"></post>
+      </md-list-item>
+    </template>
+    <md-list-item @click.native="more" class="thread-more">
       <p>Afficher plus</p>
       <md-icon>keyboard_arrow_down</md-icon>
     </md-list-item>
@@ -15,7 +17,7 @@ import post from './Post.vue'
 
 export default {
   name: 'thread',
-  props: ['posts'],
+  props: ['postsData'],
   components: {
     post
   },
@@ -26,4 +28,7 @@ export default {
 </script>
 
 <style lang="css">
+.thread-more {
+  text-align: center;
+}
 </style>
