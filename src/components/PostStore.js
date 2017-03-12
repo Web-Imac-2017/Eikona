@@ -29,19 +29,13 @@ const getters = {
 	feedLikes: state => state.feedEvents.filter(e => e.type === 'like'),
 	feedFollows: state => state.feedEvents.filter(e => e.type === 'follow'),
 	feedLastEventTimestamp: state => state.feedLastEventTimestamp,
-	popularPosts: state => state.popularPosts,
-	popularPostsLoadedIds (state) {
-		var exlude = ''
-		popularPosts.forEach(i => exclude += (i.postID + ','))
-		return exclude
-	}
+	popularPosts: state => state.popularPosts
 }
 
 const actions = {
-	nextPopularPosts (store, number) {
-		console.log('Popular excluded : ', store.getters.popularPostsLoadedIds())
+	nextPopularPosts (store, number, exclude) {
 		Vue.http.post(apiRoot + 'post/popular/' + number, {
-			exclude: store.getters.popularPostsLoadedIds()
+			exclude: exclude
 		}).then(response => {
 			console.log('popular feed request : ', response)
 			response.data.data.posts.forEach(item => store.commit('ADD_POPULAR_POST', item))
@@ -51,11 +45,12 @@ const actions = {
 	},
 	nextFeedEvents (store, number) {
 		var before = '/' + (getters.feedLastEventTimestamp!==false?getters.feedLastEventTimestamp:'')
-
-		Vue.http.get(apiRoot + 'profile/feed/' + number + berfore).then(
+		Vue.http.get(apiRoot + 'profile/feed/' + number + before).then(
 			(response) => {
+				console.log('Feed resp : ', response)
 				response.data.data.feed.forEach(e => store.commit('ADD_FEED_EVENT', e))
-				store.commit('SET_LAST_EVENT_TIMESTAMP', response.data.data.feed[response.data.data.feed.length - 1].time)
+				if (response.data.data.feed.length > 0)
+					store.commit('SET_LAST_EVENT_TIMESTAMP', response.data.data.feed[response.data.data.feed.length - 1].time)
 			},
 			(response) => {
 				console.error('ERR: load feed events', response)

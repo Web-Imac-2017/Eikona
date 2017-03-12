@@ -41,8 +41,8 @@ class PostController
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
 			return;
-        }		
-        
+        }
+
 		if(empty($_FILES['img'])){
 			$rsp->setFailure(400, "no file selected")
 			    ->send();
@@ -60,7 +60,7 @@ class PostController
 
             return;
         }
-			
+
         $desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
         preg_match_all('/#([^# ]+)/', $desc, $tags);
         $comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
@@ -229,7 +229,7 @@ class PostController
 		$data = $this->model->getFullPost();
 
         $images = $this->getImages($postID);
-		
+
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
 			->bindValue("profileID", $data['profile_id'])
@@ -533,7 +533,7 @@ class PostController
                     $rsp->bindValue("postPicture", $folder.$postID.".jpg");
                 else
                     $rsp->bindValue("postPicture", $folder.$postID."-".$filter.".jpg");
-                ->send();
+                $rsp->send();
 
             return;
         }
@@ -620,10 +620,10 @@ class PostController
 					}
 					else{
 						$resp->setFailure(409, "post not liked and notification not sent");
-					}					
+					}
 				}else{
 					$resp->setFailure(401, "You can not see this post");
-				}						
+				}
 			}else{
 				$resp->setFailure(400, "You can not like your own post");
 			}
@@ -684,7 +684,7 @@ class PostController
 
 		$resp->setSuccess(200, "likes returned")
 		     ->bindValue("postID", $postID)
-		     ->bindValue("nbOfLikes", count($likes))	
+		     ->bindValue("nbOfLikes", count($likes))
 		     ->bindValue("like", $likes)
 		     ->send();
 	}
@@ -726,9 +726,9 @@ class PostController
 	public function tag($tagName)
 	{
 		//Get all the post where tag_name = $tagName;
-		
+
 		$rsp = new Response();
-		
+
 		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
@@ -765,7 +765,7 @@ class PostController
 		$resp = new Response();
 
 		$profileID = Session::read("profileID");
-        
+
         echo $profileID;
 
 		if($this->postViewModel->view($profileID, $postID))
@@ -788,27 +788,27 @@ class PostController
 
 		$resp->send();
 	}
-    
-    
+
+
     /********* POPULAR ********/
-    
+
     public function popular($limit = 30)
     {
         $exclude = [];
-        
+
         if(isset($_POST['exclude']))
         {
             $exclude = explode(",", $_POST['exclude']);
         }
-        
+
         $postsBasics = $this->model->popular($exclude, $limit);
-        
+
         $posts = array();
 
         foreach($postsBasics as $postBasics)
         {
             $postInfos = Response::read("post", "display", $postBasics['post_id']);
-            
+
             //remove posts the user cannot see.
             if($postBasics ['profile_private'] == 1)
             {
@@ -817,10 +817,10 @@ class PostController
                     continue;
                 }
             }
-            
+
             array_push($posts, $postInfos);
         }
-        
+
         $rsp = new Response();
 
         $rsp->setSuccess(200)
@@ -829,5 +829,3 @@ class PostController
             ->send();
     }
 }
-
-

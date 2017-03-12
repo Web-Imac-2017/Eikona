@@ -50,10 +50,18 @@ export default {
         default:
           return ''
       }
+    },
+    postsLoadedIds () {
+      var ex = ''
+      if (this.list.length > 0) {
+        ex = this.list.shift().postID
+        this.list.forEach(i => {ex += (',' + i.postID)})
+      }
+      return ex
     }
   },
   methods: {
-    more: () => this.$emit('more', 10)
+    more () {this.$emit('more', 10, this.postsLoadedIds)}
   }
 }
 </script>

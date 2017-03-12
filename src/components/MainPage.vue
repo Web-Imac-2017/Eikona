@@ -43,15 +43,13 @@ export default{
 			console.log('Tab : ' + idTab)
 			switch (idTab) {
 				case 0:
-					if (this.popPostsStore.length === 0)
-						this.nextPopPosts(10)
+					if (this.popPostsStore.length === 0) this.nextPopPosts(10, '')
 					break
 				case 1:
 
 					break
 				case 2:
-				if (this.feedStore.length === 0)
-					this.nextFeedEvents(10)
+					if (this.feedStore.length === 0) this.nextFeedEvents(10)
 					break
 				case 3:
 
