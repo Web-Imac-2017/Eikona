@@ -119,13 +119,21 @@ Vérifie la présence d'un mot ou d'un email dans la liste des entités bannies
 
 ### Succès
 
-  * **Code:** 200 OK <br />
+  * **Code:** 404 NOT FOUND <br />
     **Data:** 
     ```
-    {
-        exists : 1 ou 0 selon si l'élément est banni ou non.
-    }
+    {}
     ```
+    Le mot/email n'a pas été trouvé dans la base de données. Il n'est donc pas bannis.
+    
+    OU
+    
+  * **Code** 401 NOT AUTHORIZED <br />
+    **Data:** 
+    ```
+    {}
+    ```
+    L'utilisation de ce mot/email n'est pas autorisée.
  
 ### Erreurs
 
