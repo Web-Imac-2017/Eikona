@@ -30,7 +30,7 @@ class AuthController{
 					//si user est unique
 					if($this->model->isUnique($_POST['user_email'])){
                         $emailIsBan = Response::read("ban", "is", "email", $_POST['user_email']);
-						if (!$emailIsBan){
+						if ($emailIsBan["code"] == 404){
 
 						//insertion dans la base de données
 							$user_register_time = time();
