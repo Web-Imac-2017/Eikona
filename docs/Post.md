@@ -182,8 +182,7 @@ Change le filtre du post donné
 ### Variable GET
 
   * **profileID** : ID du post à modifier
-  * **filter** : Nom du filtre à appliquer. `amaro, brannan, clarendon, earlybird, hefe, hudson, inkwell, kelvin, lark, lofi, mayfair, moon, nashville, reyes, rise, sierra, sutro, toaster, valencia, walden, willow, xproii`
-  
+  * **filter** : Nom du filtre à appliquer. `amaro, brannan, clarendon, earlybird, hefe, hudson, inkwell, kelvin, lark, lofi, mayfair, moon, nashville, reyes, rise, sierra, sutro, toaster, valencia, walden, willow, xproii` OU `none` pour retire le filtre.
 ### Succès
 
   * **Code:** 200 OK
@@ -193,6 +192,8 @@ Change le filtre du post donné
   	postID: Post mis à jour
 	currentFilter: filtre actuel du post
 	editedPicture: Lien vers l'image modifié
+	OU
+	originalPicture: Adresse de l'image original si le filtre viens d'être retiré
   }
   ```
 ### Note
