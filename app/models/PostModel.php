@@ -397,10 +397,19 @@ class PostModel extends DBInterface
             return false;
         }
 
+        if($filter == "none")
+        {
+            $filter = null;
+        }
+        else
+        {
+            $filter = Sanitize::string($filter);
+        }
+
 		/* Sanitize String à ajouter pour Latitude */
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_filter = :filter WHERE post_id = :postID");
-        $stmt->execute([":filter" => Sanitize::string($filter),
+        $stmt->execute([":filter" => $filter,
                          ":postID" => $this->postID]);
 
         $this->postDatas['post_filter'] = $filter;
