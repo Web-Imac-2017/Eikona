@@ -64,6 +64,11 @@ const router = new VueRouter({
     component: require('./components/Settings.vue')
   },
   {
+    name: 'profile_name',
+    path: '/Eikona/:profileID',
+    component: require('./components/ProfilePage.vue')
+  },
+  {
     path: '*',
     redirect: ''
   }]
@@ -75,6 +80,6 @@ Vue.http.options.emulateJSON = true
 
 new Vue({ // eslint-disable-line no-new
   el: '#app',
-  router,
+  router: router,
   render: (h) => h(require('./App.vue'))
 })
