@@ -1,31 +1,36 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 import apiRoot from './../config.js'
 
 Vue.use(Vuex)
+
 
 const state = {
   user: {
     userName: false
   },
-  profiles: [],
+  userProfiles: [],
   currentProfile: -1
 }
 
 const mutations = {
   SET_USER: (state, newUser) => state.user = newUser,
-  ADD_PROFILE: (state, profile) => state.profiles.push(profile),
-  DELETE_PROFILE: (state, profile) => state.profiles.filter(i => i !== profile),
-  SET_CURRENT_PROFILE: (state, id) => state.profiles.filter(el => el.id === id)
+  ADD_PROFILE: (state, profile) => state.userProfiles.push(profile),
+  DELETE_PROFILE: (state, profile) => state.userProfiles.filter(i => i !== profile),
+  ADD_PROFILES: (state, profileArray) => state.userProfiles = profileArray,
+  DELETE_ALL_PROFILE: state => {
+    state.userProfiles = []
+    state.currentProfile = -1
+  },
+  SET_CURRENT_PROFILE: (state, profileid) => state.userProfiles.findIndex(el => el.profile_id == profileid)
 }
 
 const getters = {
-  getUser: state => state.user,
-  profiles: state => state.profiles,
-  currentProfile: state => state.profiles[state.currentProfile],
-  currentProfileIndex: state => state.currentProfile,
-  getProfile: (state, index) => state.profiles[index]
+  getUser (state) { return state.user },
+  profiles (state) { return state.userProfiles },
+  currentProfile (state) { if (state.currentProfile >= 0) return state.userProfiles[state.currentProfile] },
+  currentProfileIndex (state) { return state.currentProfile },
+  getProfile (state, index) { return state.userProfiles[index] }
 }
 
 const actions = {
@@ -46,6 +51,7 @@ const actions = {
           console.log('Unknown error')
       }
     })
+
   },
   deleteProfil: (store, profile) => {
     Vue.http.get(apiRoot + 'profile/delete/' + profile.profileID).then((response) => {
@@ -68,23 +74,26 @@ const actions = {
       }
     })
   },
-  selectProfile: (store, id) => {
-    Vue.http.get(apiRoot + 'profile/setCurrent/' + id).then((response) => {
-      store.commit('SET_CURRENT_PROFILE', id)
+  selectProfile: (store, profileId) => {
+    Vue.http.get(apiRoot + 'profile/setCurrent/' + profileId).then((response) => {
+      store.commit('SET_CURRENT_PROFILE', profileId)
     }, (response) => {
       console.error('ERR: selection profile', response)
     })
   },
   initProfiles: (store) => {
-    Vue.http.post(apiRoot + 'user/profiles/', {}).then((response) => {
-      console.log(response.data.data.profiles)
-      response.data.data.profiles.forEach(profile => store.commit('ADD_PROFILE', profile))
+    Vue.http.post(apiRoot + 'user/profiles').then((response) => {
+      store.commit('DELETE_ALL_PROFILE')
+      console.log('Récupération profiles : ', response)
+      store.commit('ADD_PROFILES', response.data.data.profiles)
     }, (response) => {
       console.log('ERR: récupération des profils', response)
     })
   },
+  clearProfiles: (store) => store.commit('DELETE_ALL_PROFILE'),
   initUser: (store) => {
-    Vue.http.post(apiRoot + 'user/get', {}).then((response) => {
+    Vue.http.post(apiRoot + 'user/get').then((response) => {
+      console.log('Récupération utilisateur : ', response)
       store.commit('SET_USER', response.data.data)
     }, (response) => {
       console.error('Can\'t get user info', response)
@@ -99,4 +108,5 @@ export default new Vuex.Store({
   getters: getters,
   actions: actions,
   strict: true
+
 })

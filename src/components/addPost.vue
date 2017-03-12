@@ -33,7 +33,8 @@
 	import Vuex from 'vuex'
 	import store from './connectionStore.js'
 	import apiRoot from './../config.js'
-	import formVerifications from './../formVerification.js'
+	import formVerifications from './../formVerifications.js'
+  
 	export default{
 		name: 'addPost',
 		store: store,
@@ -61,7 +62,6 @@
 			      }).then((response) => {
 			      	console.log(response);
 			      	console.log('Create success', response);
-			        /*this.$router.push('/Eikona/user/profile')*/
 			      }, (response) => {
 			        console.log(response);
 			        switch (response.status) {
@@ -175,5 +175,5 @@ p {
   font-size: x-small;
   color: darkgray;
 }
-	
+
 </style>

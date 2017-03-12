@@ -15,9 +15,11 @@
 </template>
 
 <script>
+
 import connection from './Connection.vue'
 import inscription from './Inscription.vue'
 import description from './Home-description.vue'
+
 
 export default {
   name: 'home',

@@ -6,14 +6,15 @@ class PostController
 	private $tagModel;
 	private $likeModel;
 	private $commentModel;
+	private $postViewModel;
 
 
 	public function __construct()
 	{
-		$this->model        = new PostModel();
-		$this->tagModel     = new TagModel();
-		$this->likeModel    = new LikeModel();
-		$this->commentModel = new CommentModel();
+		$this->model         = new PostModel();
+		$this->tagModel      = new TagModel();
+		$this->likeModel     = new LikeModel();
+		$this->commentModel  = new CommentModel();
 		$this->postViewModel = new PostViewModel();
 	}
 
@@ -40,8 +41,8 @@ class PostController
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
 			return;
-        }		
-        
+        }
+
 		if(empty($_FILES['img'])){
 			$rsp->setFailure(400, "no file selected")
 			    ->send();
@@ -59,7 +60,7 @@ class PostController
 
             return;
         }
-			
+
         $desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
         preg_match_all('/#([^# ]+)/', $desc, $tags);
         $comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
@@ -228,10 +229,11 @@ class PostController
 		$data = $this->model->getFullPost();
 
         $images = $this->getImages($postID);
-		
+
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
 			->bindValue("profileID", $data['profile_id'])
+			->bindValue("profileData", Response::read("profile", "get", $data['profile_id'])["data"])
 			->bindValue("desc", $data['post_description'])
 			->bindValue("publishTime", $data['post_publish_time'])
 			->bindValue("updateTime", $data['post_edit_time'])
@@ -459,7 +461,7 @@ class PostController
 
         $images = $this->getImages($postID);
 
-        if($this->model->updateState(1) === false)
+        if($this->model->publish($postID) === false)
         {
             $rsp->setFailure(400, "error during request")
                 ->send();
@@ -500,7 +502,7 @@ class PostController
 			return;
 		}
 
-        if(!in_array($filter, FiltR::$availableFilters))
+        if(!in_array($filter, FiltR::$availableFilters) && $filter != "none")
         {
 			$rsp->setFailure(400, "This filter does not exists")
 			    ->send();
@@ -525,9 +527,14 @@ class PostController
         {
             $rsp->setSuccess(200, "Filter unchanged")
                 ->bindValue("postID", $postID)
-                ->bindValue("currentFilter", $filter)
-                ->bindValue("postPicture", $folder.$postID."-".$filter.".jpg")
-                ->send();
+                ->bindValue("currentFilter", $filter);
+
+                if($filter == null)
+                    $rsp->bindValue("postPicture", $folder.$postID.".jpg");
+                else
+                    $rsp->bindValue("postPicture", $folder.$postID."-".$filter.".jpg");
+
+            $rsp->send();
 
             return;
         }
@@ -538,9 +545,20 @@ class PostController
             unlink($folder.$postID."-".$currentFilter.".jpg");
         }
 
-        FiltR::$filter($folder.$postID.".jpg", $folder.$postID."-".$filter.".jpg");
-
         $this->model->updateFilter($filter);
+
+        if($filter == "none")
+        {
+            $rsp->setSuccess(200)
+                ->bindValue("postID", $postID)
+                ->bindValue("currentFilter", null)
+                ->bindValue("originalPicture", $folder.$postID.".jpg")
+                ->send();
+
+            return;
+        }
+
+        FiltR::$filter($folder.$postID.".jpg", $folder.$postID."-".$filter.".jpg");
 
         $rsp->setSuccess(200)
             ->bindValue("postID", $postID)
@@ -594,9 +612,19 @@ class PostController
 					$resp->setSuccess(200, "post liked")
 				    	 ->bindValue("postID", $postID)
 				     	 ->bindValue("profileID", $profileID);
+					$notif = Response::read("notification", "create", "newLike", $profileID, $this->model->getProfileID(), $postID);
+					if($notif['code'] == 200){
+						$resp->setSuccess(200, "post liked and notification sent")
+				    	     ->bindValue("postID", $postID)
+				     	 	 ->bindValue("profileID", $profileID)
+				     	 	 ->bindValue("notif", $notif['data']);
+					}
+					else{
+						$resp->setFailure(409, "post not liked and notification not sent");
+					}
 				}else{
 					$resp->setFailure(401, "You can not see this post");
-				}						
+				}
 			}else{
 				$resp->setFailure(400, "You can not like your own post");
 			}
@@ -699,9 +727,9 @@ class PostController
 	public function tag($tagName)
 	{
 		//Get all the post where tag_name = $tagName;
-		
+
 		$rsp = new Response();
-		
+
 		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
@@ -738,7 +766,7 @@ class PostController
 		$resp = new Response();
 
 		$profileID = Session::read("profileID");
-        
+
         echo $profileID;
 
 		if($this->postViewModel->view($profileID, $postID))
@@ -763,4 +791,42 @@ class PostController
 	}
 
 
+    /********* POPULAR ********/
+
+    public function popular($limit = 30)
+    {
+        $exclude = [];
+
+        if(isset($_POST['exclude']))
+        {
+            $exclude = explode(",", $_POST['exclude']);
+        }
+
+        $postsBasics = $this->model->popular($exclude, $limit);
+
+        $posts = array();
+
+        foreach($postsBasics as $postBasics)
+        {
+            $postInfos = Response::read("post", "display", $postBasics['post_id']);
+
+            //remove posts the user cannot see.
+            if($postBasics ['profile_private'] == 1)
+            {
+                if(!isAuthorized::seeFullProfile($postBasics['profile_private']))
+                {
+                    continue;
+                }
+            }
+
+            array_push($posts, $postInfos);
+        }
+
+        $rsp = new Response();
+
+        $rsp->setSuccess(200)
+            ->bindValue("posts", $posts)
+            ->bindValue("nbrPosts", count($posts))
+            ->send();
+    }
 }

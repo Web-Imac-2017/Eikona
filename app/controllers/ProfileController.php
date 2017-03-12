@@ -5,6 +5,7 @@ class ProfileController
     private $model;
     private $postModel;
     private $followModel;
+    private $notifModel;
 
     /**
      * Init the constructor and link the model
@@ -12,9 +13,10 @@ class ProfileController
      */
     public function __construct()
     {
-        $this->model = new ProfileModel();
-        $this->postModel = new PostModel();
+        $this->model       = new ProfileModel();
+        $this->postModel   = new PostModel();
         $this->followModel = new FollowModel();
+        $this->notifModel  = new NotificationModel();
     }
 
     /**
@@ -26,9 +28,19 @@ class ProfileController
     {
         $rsp = new Response();
 
+        $uID = Session::read("userID"); //Get current user ID
+
         /**
          * TODO: Verify if user is connected and can add a new profile
          */
+        
+        
+        if($this->model->tooMuchProfiles($uID))
+        {
+            $rsp->setFailure(400, "Too Much profiles")
+                ->send();
+            return; 
+        }
 
         if (empty($_POST['profileName']))
         {
@@ -41,7 +53,7 @@ class ProfileController
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
 
-        $uID = Session::read("userID"); //Get current user ID
+        
 
         $result = $this->model->create($uID, $name, $desc, $isPrivate);
 
@@ -741,7 +753,29 @@ class ProfileController
             return;
         }
 
-        $rsp->setSuccess(200)
+        //Si demande à un profil privé
+        if($result === 0)
+        {
+            $code = "newFollowAsk";
+        }
+
+        //Si abonnement à un profil privé
+        if($result === 1){
+            $code = "newFollowing";
+        }
+
+        $notif = Response::read("notification", "create", $code, $currentUser, $profileID, $profileID);
+
+        if($notif['code'] != 200){
+        $rsp->setFailure(400, "error during following")
+            ->send();
+            return;
+        }
+
+        $rsp->setSuccess(200, "follow and notification sent")
+            ->bindValue("userProfile", $currentUser)
+            ->bindValue("profileFollowed", $profileID)
+            ->bindValue("notif", $notif['data'])
             ->send();
     }
 
@@ -1006,8 +1040,169 @@ class ProfileController
             return;
         }
 
+        $notif = Response::read("notification", "create", "followAccepted", $followed, $follower, $followed);
+
+        if($notif['code'] != 200){
+            $rsp->setFailure(400, "followed not confirmed")
+                ->send();
+            return;
+        }
+
+        $rsp->setSuccess(200, "follower confirmed")
+            ->bindValue("follower", $follower)
+            ->bindValue("followed", $followed)
+            ->bindValue("notif", $notif['data'])
+            ->send();
+    }
+
+    public function notifications()
+    {
+        $profileID = Session::read("profileID");
+
+        $resp = new Response();
+
+        if(!$profileID){
+            $rsp->setFailure(401, "You must have profile to do this.")
+                ->send();
+            return;
+        }
+
+        $notif = $this->notifModel->getProfileNotifications($profileID);
+        
+        if($notif == null){
+            $resp->setFailure(404, "You do not have notifications.")
+                 ->send();
+            return;
+        }
+
+        $resp->setSuccess(200, "notifications returned")
+             ->bindValue("profileID", $profileID)
+             ->bindValue("notif", $notif)
+             ->send();
+   }
+
+    /********* FEED ***********/
+
+    public function feed($limit = 30, $before = 0)
+    {
+        $profileID = Session::read("profileID");
+
+        $rsp = new Response();
+
+        if(empty($profileID))
+        {
+            $rsp->setFailure(401, "You are not authorized to access this.")
+                ->send();
+
+            return;
+        }
+
+        //post published by profiles followed
+        //posts liked by profiles followed
+        //profiles followed by profiles followed
+
+        //Retrieve aditionnal model:
+        $commentModel = new CommentModel();
+
+        $events = $this->model->feed($profileID, $limit, $before);
+        $nbrEvents = count($events);
+
+        $feed = array();
+
+        for($i = 0; $i < $nbrEvents; $i++)
+        {
+            $event = $events[$i];
+
+            $eventBlock = array();
+
+            if($event['type'] == "post")
+            {
+                $eventBlock["type"] = "post";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["postData"] = Response::read("post", "display", $event["dest"])['data'];
+
+                array_push($feed, $eventBlock);
+            }
+
+            if($event['type'] == "comment")
+            {
+                $eventBlock["type"] = "comment";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["postData"] = Response::read("post", "display", $event["dest"])['data'];
+
+                $commentData = $commentModel->getComment($event["source"]);
+
+                $eventBlock["commentData"] = $commentData;
+                $eventBlock["profileData"] = Response::read("profile", "get", $commentData["profile_id"]);
+
+                array_push($feed, $eventBlock);
+            }
+
+            if($event['type'] == "like")
+            {
+                $eventBlock["type"] = "like";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
+
+                $posts = array();
+
+                for($j = $i; $j < $nbrEvents; $j++)
+                {
+                    if($events[$j]["type"] == "like" && $events[$j]["source"] == $events[$i]["source"])
+                    {
+                        array_push($posts, Response::read("post", "display", $events[$j]["dest"])['data']);
+                        continue;
+                    }
+                    else
+                    {
+                        $i = $j;
+                        break;
+                    }
+                }
+
+                $i = $j;
+
+                $eventBlock["nbrPosts"] = count($posts);
+                $eventBlock["postsData"] = $posts;
+            }
+
+            if($event['type'] == "follow")
+            {
+                $eventBlock["type"] = "follow";
+                $eventBlock["time"] = $event["time"];
+                $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
+
+                $followed = array();
+
+                for($j = $i; $i < $nbrEvents; $j++)
+                {
+                    if($events[$j]["type"] == "follow" && $events[$j]["source"] == $events[$i]["source"])
+                    {
+                        array_push($followed, Response::read("profile", "get", $events[$j]["dest"])['data']);
+                        continue;
+                    }
+                    else
+                    {
+                        $i = $j;
+                        break;
+                    }
+                }
+
+                $i = $j;
+
+                $eventBlock["nbrFollowed"] = count($followed);
+                $eventBlock["followedData"] = $followed;
+            }
+
+            array_push($feed, $eventBlock);
+
+            unset($eventBlock);
+        }
+
         $rsp->setSuccess(200)
-            ->send;
+            ->bindValue("nbrEvents", count($feed))
+            ->bindValue("feed", $feed)
+            ->send();
     }
 }
 ?>

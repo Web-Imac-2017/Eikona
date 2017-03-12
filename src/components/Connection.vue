@@ -43,6 +43,11 @@ export default {
     }
   },
   mixins: [formVerifications],
+  computed: {
+    ...Vuex.mapGetters([
+      'profiles'
+    ])
+  },
   methods: {
     ...Vuex.mapActions({
       initUserStore: 'initUser',
@@ -57,7 +62,7 @@ export default {
       }).then((response) => {
         this.initUserStore()
         this.initProfilesStore()
-        this.$router.push('/Eikona/user/profile')
+        this.$router.push('/user/profile')
       }, (response) => {
         this.clearUserStore()
         switch (response.status) {
