@@ -23,7 +23,6 @@
 <script>
 import post from './Post.vue'
 import profile from './Profile.vue'
-import searchResult from './Search-result.vue'
 import apiRoot from './../config.js'
 
 export default {
