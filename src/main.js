@@ -46,7 +46,7 @@ const router = new VueRouter({
     component: require('./components/Home.vue')
   },
   {
-    path: '/Eikona/search/:query',
+    path: '/Eikona/search/:type/:query',
     component: require('./components/Search-page.vue'),
     props: true
   },

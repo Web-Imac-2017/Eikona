@@ -3,7 +3,7 @@
     <md-spinner id="search-loader" v-if="searching" md-indeterminate></md-spinner>
     <md-layout v-else>
       <md-layout v-if="noresult">
-        <p>Nous n'avons trouvé aucun résultat correspondant à la recherche</p>
+        <p>Nous n'avons trouvé aucun résultat correspondant à la recherche suivante :</p><br/>
         <p>{{keywords}}</p>
       </md-layout>
       <md-layout v-else>
@@ -31,7 +31,7 @@ export default {
     post,
     profile
   },
-  props: ['query'],
+  props: ['type', 'query'],
   data: () => ({
     resultPosts: [],
     resultProfiles: [],
@@ -48,16 +48,15 @@ export default {
     this.search()
   },
   watch: {
+    type: 'search',
     query: 'search'
   },
   methods: {
     search () {
       this.resultPosts = []
       this.resultProfiles = []
-      this.searchBy(this.query, 'profile')
-      this.searchBy(this.query, 'description')
-      this.searchBy(this.query, 'tag')
-      this.searchBy(this.query, 'comment')
+      if (this.type === 'all') this.searchAll(this.keywords)
+      else this.searchBy(this.keywords, this.type)
       this.searching = false
     },
     searchBy (query, searchType) {
@@ -79,6 +78,28 @@ export default {
               break;
             case 404:
               console.log('Search by ' + searchType + ' no result')
+              break;
+          }
+        })
+    },
+    searchAll (query) {
+      this.$http.post(apiRoot + 'search/', {
+        query: query
+      }).then(
+        (response) => {
+          console.log('searchAll : ', response)
+          if (response.data.data.profiles !== null) response.data.data.profiles.forEach(item => this.resultPosts.push(item))
+          if (response.data.data.posts !== null) response.data.data.posts.forEach(item => this.resultPosts.push(item))
+          if (response.data.data.tags !== null) response.data.data.tags.forEach(item => this.resultPosts.push(item))
+          if (response.data.data.comments !== null) response.data.data.comments.forEach(item => this.resultPosts.push(item))
+        },
+        (response) => {
+          switch (response.status) {
+            case 400:
+              console.error('ERR: search in all without query')
+              break;
+            case 404:
+              console.log('Search in all : no result')
               break;
           }
         })
