@@ -502,7 +502,7 @@ class PostController
 			return;
 		}
 
-        if(!in_array($filter, FiltR::$availableFilters))
+        if(!in_array($filter, FiltR::$availableFilters) && $filter != "none")
         {
 			$rsp->setFailure(400, "This filter does not exists")
 			    ->send();
@@ -527,8 +527,12 @@ class PostController
         {
             $rsp->setSuccess(200, "Filter unchanged")
                 ->bindValue("postID", $postID)
-                ->bindValue("currentFilter", $filter)
-                ->bindValue("postPicture", $folder.$postID."-".$filter.".jpg")
+                ->bindValue("currentFilter", $filter);
+
+                if($filter == null)
+                    $rsp->bindValue("postPicture", $folder.$postID.".jpg");
+                else
+                    $rsp->bindValue("postPicture", $folder.$postID."-".$filter.".jpg");
                 ->send();
 
             return;
@@ -540,9 +544,20 @@ class PostController
             unlink($folder.$postID."-".$currentFilter.".jpg");
         }
 
-        FiltR::$filter($folder.$postID.".jpg", $folder.$postID."-".$filter.".jpg");
-
         $this->model->updateFilter($filter);
+
+        if($filter == "none")
+        {
+            $rsp->setSuccess(200)
+                ->bindValue("postID", $postID)
+                ->bindValue("currentFilter", null)
+                ->bindValue("originalPicture", $folder.$postID.".jpg")
+                ->send();
+
+            return;
+        }
+
+        FiltR::$filter($folder.$postID.".jpg", $folder.$postID."-".$filter.".jpg");
 
         $rsp->setSuccess(200)
             ->bindValue("postID", $postID)
