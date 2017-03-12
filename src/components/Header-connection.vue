@@ -1,5 +1,5 @@
 <template lang="html">
-  <md-layout>
+  <md-layout md-align="end">
     <div v-if="getUser.userName != false">
       <md-button @click.native="settings" class="md-icon-button"><md-icon>settings</md-icon></md-button>
       <md-button @click.native="disconnect" class="md-icon-button"><md-icon>power_settings_new</md-icon></md-button>
@@ -34,11 +34,11 @@ export default {
     ]),
     connexion () {
       console.log('connexion')
-      this.$router.push('/#connectionForm', () => { document.getElementById('connection-id').focus() })
+      this.$router.push('/Eikona/#connectionForm', () => { document.getElementById('connection-id').focus() })
     },
     inscription () {
       console.log('inscription')
-      this.$router.push('/#inscriptionForm')
+      this.$router.push('/Eikona/#inscriptionForm')
     },
     disconnect () {
       this.$http.post(apiRoot + 'auth/signOut/', {}).then((response) => {

@@ -41,7 +41,7 @@ export default {
   },
   methods: {
     select () {
-      this.$emit('select', this.profile)
+      this.$emit('select', this.profile.profile_id)
     }
   }
 }
