@@ -106,25 +106,24 @@ class SearchController
 		];
 
 		if(!empty($_POST['query'])){
-			$res = $this->model->searchAll($query);
+			$res = $this->model->searchAll($_POST['query']);
 			$profiles = $res[0]['count'];
 			$posts = $res[1]['count'];
 			$comments = $res[2]['count'];
 			$tags = $res[3]['count'];
 
-
-			if($profiles != 0){
-				$tab['profiles'] = $this->model->searchProfile($query);
-			}
-			if($posts != 0){
-				$tab['posts'] = $this->model->searchDescription($query);
-			}
-			if($comments != 0){
-				$tab['comments'] = $this->model->searchComment($query);
-			}
-			if($tags != 0){
-				$tab['tags'] = $this->model->searchTag($query);
-			}
+			if($profiles != 0)
+				$tab['profiles'] = $this->model->searchProfile($_POST['query']);
+			
+			if($posts != 0)
+				$tab['posts'] = $this->model->searchDescription($_POST['query']);
+			
+			if($comments != 0)
+				$tab['comments'] = $this->model->searchComment($_POST['query']);
+			
+			if($tags != 0)
+				$tab['tags'] = $this->model->searchTag($_POST['query']);
+			
 			
 			$resp->setSuccess(200, "results found")
 			     ->bindValue("profiles", $tab['profiles'])
