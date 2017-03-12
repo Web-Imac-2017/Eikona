@@ -12,6 +12,9 @@ require_once "Library/Autoloader.php";
 Autoloader::register();
 Autoloader::staticLoads();
 
+//Collect all parameters and make them accessible everywhere
+$PARAMS = new ParamController();
+
 //Open session using the session handler
 Session::open();
 

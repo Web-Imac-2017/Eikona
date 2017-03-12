@@ -6,61 +6,53 @@ class BotController extends DBInterface
     private $currProfileID;
     
     private $action;
+    private $toPrint;
     
     public function __construct()
     {
         parent::__construct();   
     }
-    
-    
-    public function __call($method, $args)
+
+    public function index()
     {
-        $this->index($method);
-    }
-
-
-    public function index($do = null)
-    {
-        Cookie::delete("stayConnected");
-
-        $actions = ["addUser", "addProfile", "addPost", "addComment", "addLike", "viewPost"];
         
-        if(in_array($do, $actions))
-        {
-            $this->$do();
-        }
+        $actions = ["addPost", "addComment", "addLike", "viewPost", "follow"];
+
+        $rand = mt_rand(0, 100);
+
+        if($rand < 20)
+            $action = "addPost";
+        else if($rand < 55)
+            $action = "addComment";
+        else if($rand < 80)
+            $action = "addLike";
+        else if($rand < 95)
+            $action = "viewPost";
         else
-        {
-            $rand = mt_rand(0, 100);
+            $action = "follow";
 
-            if($rand < 3)
-                $this->addUser();
-            else if($rand < 7)
-                $this->addProfile();
-            else if($rand < 30)
-                $this->addPost();
-            else if($rand < 70)
-                $this->viewPost();
-            else if($rand < 90)
-                $this->addLike();
-            else
-                $this->addComment();
+        $this->$action();
 
-        }
-            header('Content-Type: text/html');
-            http_response_code(200);
-            echo '
-            <html>
-                <head>
-                    <title>BotController - Hang Tight</title>
-                    <meta http-equiv="refresh" content="2">
-                </head>
-                <body>
-                    <h1>Hang Tight</h1>
-                    <h3>'.$rand.' - '.$this->action.'</h3>
-                </body>
-            </html>
-            ';
+        header('Content-Type: text/html');
+        http_response_code(200);
+
+        echo '
+        <!doctype html>
+        <html>
+            <head>
+                <title>BotController - Hang Tight</title>
+                <meta http-equiv="refresh" content="2">
+            </head>
+            <body>
+                <h1>Hang Tight</h1>
+                <h3>'.$rand.' - '.$action.' - '.$this->action.'</h3>
+                <br><br>
+                <pre>
+                    '.$this->toPrint.'
+                </pre>
+            </body>
+        </html>
+        ';
         
         //$this->viewPost();
     }
@@ -69,7 +61,7 @@ class BotController extends DBInterface
     
     private function logAction($action, $userID = 0, $profileID = 0, $postID = 0, $commentID = 0)
     {
-        $fp = fopen('controllers/botRessources/botLogs.csv', 'a');
+        $fp = fopen('controllers/botRessources/botLogs.csv', 'a+');
 
         $this->action = $action;
 
@@ -77,54 +69,7 @@ class BotController extends DBInterface
 
         fclose($fp);
     }
-    
-    
-    
-    
-    
-    private function addUser()
-    {
-        $uName = substr(md5(time()), 0, 16);
-        $uMail = $uName."@bot.com";
-        $uPasswd = $uName;
-                        
-        $_POST['user_name'] = $uName;
-        $_POST['user_email'] = $uMail;
-        $_POST['user_passwd'] = $uPasswd;
-        $_POST['user_passwd_confirm'] = $uPasswd;
-        
-        $uID = Response::read("auth", "register")['data']['userID'];
-        $this->logAction("User created", $uID);
-        
-        $this->addProfile();
-    }
-    
-    private function addProfile($userID = 0)
-    {
-        $uID = $this->login($userID);
-            
-        $profileName = "profile".substr(md5(time()), 0, 16);
-        
-        $_POST['profileName'] = $profileName;
-        
-        $response = Response::read("profile", "create");
 
-        if($response['code'] != 201 && $response['code'] != 409)
-            print_r($response);
-
-        if($response['code'] == 409)
-        {
-            sleep(1);
-            return $this->addProfile();
-        }
-
-
-        $profileID = $response['data']['profileID'];
-        $this->logAction("Profile created", $uID, $profileID);
-        
-        return $profileID;
-    }
-    
     private function addPost()
     {
         $pID = $this->getProfile();
@@ -135,7 +80,9 @@ class BotController extends DBInterface
         // initialise the curl request
         $request = curl_init('localhost/eikona/do/post/create/');
 
-        $cfile = new CURLFile('controllers/botRessources/face.jpg');
+        $rand = mt_rand(1, 4);
+
+        $cfile = new CURLFile('controllers/botRessources/'.$rand.'.jpg');
         
         $strCookie = 'PHPSESSID=' . $_COOKIE['PHPSESSID'] . '; path=/';
         
@@ -159,16 +106,27 @@ class BotController extends DBInterface
 
         // output the response
         curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
-        $rep = json_decode(curl_exec($request), true);
-        
-        //print_r($rep);
-        // close the session
+        $rep = curl_exec($request);
+
         curl_close($request);
         
-        $post = new PostModel();
-        $post->publish($rep['data']['postID']);
+        //var_dump($rep);
 
-        $this->logAction("Post added", 0, $pID, $rep['data']['postID']);
+        $rep = json_decode($rep, true);
+
+        $postID = $rep['data']['postID'];
+
+        $postController = new PostController();
+
+        ob_start();
+
+        $postController->setFilter($postID, FiltR::$availableFilters[mt_rand(0, count(FiltR::$availableFilters) - 1)]);
+        $postController->publish($postID);
+
+        /*$this->toPrint .= */ob_get_clean();
+
+
+        $this->logAction("Post added", 0, $pID, $postID);
     }
     
     private function addComment()
@@ -190,7 +148,7 @@ class BotController extends DBInterface
         
         $this->logAction("Comment added", 0, $pID, $postID);
         
-        $this->viewPost($postID);
+        //$this->viewPost($postID);
         
     }
     
@@ -212,7 +170,7 @@ class BotController extends DBInterface
             
             $this->logAction("Post liked", 0, $pID, $postID);
             
-            $this->viewPost($postID);
+            //$this->viewPost($postID);
         }
         
     }
@@ -249,54 +207,147 @@ class BotController extends DBInterface
         }
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    private function login($userID = 0)
+    private function follow()
     {
-        if($userID == 0)
+        $pID = $this->getProfile();
+
+        $stmt = $this->cnx->prepare("SELECT profile_id FROM profiles WHERE profile_id <> :profile ORDER BY RAND() LIMIT 1");
+        $stmt->execute([":profile" => $pID]);
+
+        $toFollow = $stmt->fetchColumn();
+
+        if($toFollow == NULL)
+            return;
+
+        $followModel = new FollowModel();
+        $followModel->follow($toFollow, false);
+
+        $this->logAction("Profile Followed", 0, $pID);
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+    private function getprofile()
+    {
+        //Get a user and log in
+        $rand = mt_rand(1, 5);
+
+        if($rand == 1)
         {
-            $stmt = $this->cnx->prepare("SELECT user_id, user_name, user_email FROM users ORDER BY RAND() LIMIT 1");
-            $stmt->execute();
+            //create a new user
+            $user = $this->addUser();
         }
         else
         {
-            $stmt = $this->cnx->prepare("SELECT user_id, user_name, user_email FROM users WHERE user_id = :uID");
-            $stmt->execute([":uID" => $userID]);
+            //Get an existing one
+            $stmt = $this->cnx->prepare("SELECT user_id, user_name, user_email FROM users ORDER BY RAND() LIMIT 1");
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if(!isset($user["user_id"]))
+            {
+                //No user in DB, create one
+                $user = $this->addUser();
+            }
+        }
+
+        //Log in with user
+        Cookie::delete("stayConnected");
+        Session::write("userID", $user['user_id']);
+
+        $profileModel = new ProfileModel();
+
+        //No profiles, create one
+        if(!$profileModel->hasProfiles($user['user_id']))
+        {
+            $profileID = $this->addProfile($user['user_id']);
+        }
+        else
+        {
+            $rand = mt_rand(1, 5);
+
+            if($rand == 1 && !$profileModel->tooMuchProfiles($user['user_id']))
+            {
+                $profileID = $this->addProfile($user['user_id']);
+            }
+            else
+            {
+                $stmt = $this->cnx->prepare("SELECT profile_id FROM profiles WHERE user_id = :uID ORDER BY RAND() LIMIT 1");
+                $stmt->execute([":uID" => $user['user_id']]);
+                $profileID = $stmt->fetchColumn();
+            }
+        }
+
+        //set current profile
+        Session::write("profileID", $profileID);
+
+        return $profileID;
+    }
+
+    //Create a new User and return its login credentials
+    private function addUser()
+    {
+        $authModel = new AuthModel();
+        
+        $uName = substr(md5(time()), 0, 16);
+        $uMail = $uName."@bot.com";
+        $uPasswd = $uName;
+        
+        if(!$authModel->isUnique($uMail))
+        {
+            sleep(1);
+            $uName = substr(md5(time()), 0, 16);
+            $uMail = $uName."@bot.com";
+            $uPasswd = $uName;
         }
         
-        $user = $stmt->fetch();
+        $_POST['user_name'] = $uName;
+        $_POST['user_email'] = $uMail;
+        $_POST['user_passwd'] = $uPasswd;
+        $_POST['user_passwd_confirm'] = $uPasswd;
         
-        $_POST['user_email'] = $user['user_email'];
-        $_POST['user_passwd'] = $user['user_name'];
-        
-        Response::read("auth", "signIn");
-        
-        return $user['user_id'];
+        $uID = $authModel->addUser($uName, $uMail, $uPasswd, time());
+
+        $this->logAction("User created", $uID);
+
+        return ["user_id" => $uID, "user_name" => $uName, "user_email" => $uMail];
     }
     
-    private function getprofile()
+    private function addProfile($userID)
     {
-        $uID = $this->login();
+        $profileName = "profile".substr(md5(time()), 0, 16);
         
-        $stmt = $this->cnx->prepare("SELECT profile_id FROM profiles WHERE user_id = :uID ORDER BY RAND() LIMIT 1");
-        $stmt->execute([":uID" => $uID]);
-        
-        $profileID = $stmt->fetchColumn();
+        $_POST['profileName'] = $profileName;
 
-        if($profileID === false)
+        $profileModel = new ProfileModel();
+        $response = $profileModel->create($userID, $profileName, "", false);
+        
+        $profileKey = $profileModel->getKey();
+
+        $root = $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/";
+        mkdir($root."/".$profileKey);
+
+        if($response === "userNameAlreadyExists")
         {
-            $profileID = $this->addProfile();
+            sleep(1);
+            return $this->addProfile($userID);
         }
         
-        Session::write("profileID", $profileID);
+        $profileID = $response;
+
+        $this->logAction("Profile created", $userID, $profileID);
 
         return $profileID;
     }
