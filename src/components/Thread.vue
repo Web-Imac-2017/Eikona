@@ -1,6 +1,6 @@
 <template lang="html">
   <md-list>
-    <template v-for="item in list">
+    <template v-for="item in list" :key="item">
       <md-list-item>
         <p>{{ eventMessage(item) }}</p>
         <profile v-if="p.type == 'follow'" :profile="p.profileData" :index="-1" :extended="false"></profile>

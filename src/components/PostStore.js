@@ -29,16 +29,21 @@ const getters = {
 	feedLikes: state => state.feedEvents.filter(e => e.type === 'like'),
 	feedFollows: state => state.feedEvents.filter(e => e.type === 'follow'),
 	feedLastEventTimestamp: state => state.feedLastEventTimestamp,
-	popularPosts: state => state.popularPosts
+	popularPosts: state => state.popularPosts,
+	popularPostsLoadedIds (state) {
+		var exlude = ''
+		popularPosts.forEach(i => exclude += (i.postID + ','))
+		return exclude
+	}
 }
 
 const actions = {
 	nextPopularPosts (store, number) {
-		var exclude = ''
-		getters.popularPosts.forEach(i => exclude += (i.postID + ','))
+		console.log('Popular excluded : ', store.getters.popularPostsLoadedIds())
 		Vue.http.post(apiRoot + 'post/popular/' + number, {
-			exclude: exclude
+			exclude: store.getters.popularPostsLoadedIds()
 		}).then(response => {
+			console.log('popular feed request : ', response)
 			response.data.data.posts.forEach(item => store.commit('ADD_POPULAR_POST', item))
 		}, response => {
 			console.error('ERR: chargement posts populaires')

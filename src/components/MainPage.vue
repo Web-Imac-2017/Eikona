@@ -40,15 +40,24 @@ export default{
 			nextFeedEvents: 'nextFeedEvents'
 		}),
 		onChange (idTab) {
+			console.log('Tab : ' + idTab)
 			switch (idTab) {
-				case expression:
+				case 0:
+					if (this.popPostsStore.length === 0)
+						this.nextPopPosts(10)
+					break
+				case 1:
 
-					break;
+					break
+				case 2:
+				if (this.feedStore.length === 0)
+					this.nextFeedEvents(10)
+					break
+				case 3:
+
+					break
 				default:
-
 			}
-				this.nextPopPosts(10),
-				this.nextFeedEvents(10)
 		}
 	}
 }
