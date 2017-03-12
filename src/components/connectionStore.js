@@ -86,7 +86,6 @@ const actions = {
       store.commit('DELETE_ALL_PROFILE')
       console.log('Récupération profiles : ', response)
       store.commit('ADD_PROFILES', response.data.data.profiles)
-      //response.data.data.profiles.forEach(profile => store.commit('ADD_PROFILE', profile))
     }, (response) => {
       console.log('ERR: récupération des profils', response)
     })

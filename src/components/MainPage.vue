@@ -1,7 +1,7 @@
 <template>
-	<md-tabs md-fixed class="md-transparent">
+	<md-tabs md-fixed class="md-transparent" @change="onChange">
 		<md-tab md-label="Tendances">
-			<thread :eventData="popPostsStore" :isEvents="false" @more="nextPopPosts"></thread>
+			<thread :eventDatas="popPostsStore" :isEvents="false" @more="nextPopPosts"></thread>
 		</md-tab>
 
 		<md-tab md-label="Suggestions">
@@ -28,10 +28,6 @@ export default{
 	components: {
 		thread
 	},
-	mounted: () => {
-		this.nextPopPosts(10),
-		this.nextFeedEvents(10)
-	},
 	computed: {
 		...Vuex.mapGetters({
 			popPostsStore: 'popularPosts',
@@ -42,7 +38,18 @@ export default{
 		...Vuex.mapActions({
 			nextPopPosts: 'nextPopularPosts',
 			nextFeedEvents: 'nextFeedEvents'
-		})
+		}),
+		onChange (idTab) {
+			switch (idTab) {
+				case expression:
+
+					break;
+				default:
+
+			}
+				this.nextPopPosts(10),
+				this.nextFeedEvents(10)
+		}
 	}
 }
 </script>
