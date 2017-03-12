@@ -23,7 +23,7 @@ class SearchModel extends DBInterface
 	public function searchDescription($query)
 	{
 		$stmt = $this->cnx->prepare("
-			SELECT post_id, posts.profile_id, profiles.profile_name, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved
+			SELECT post_id, posts.profile_id, profiles.profile_name, profiles.profile_picture, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved
 			FROM posts
 			JOIN profiles ON posts.profile_id = profiles.profile_id
 			WHERE post_description LIKE :q
