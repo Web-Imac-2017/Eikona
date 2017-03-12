@@ -1,67 +1,85 @@
 <template lang="html">
-  <form id="connectionForm" @submit.stop.prevent="send">
-    <h2>Connectez vous</h2>
-    <div v-if="error_message != ''" class="error-msg">{{ error_message }}</div>
-    <md-input-container>
-      <label>E-mail</label>
-      <md-input id="connection-id" required type="email" v-model="user_email"></md-input>
-      <span v-if="error_mail" class="md-error">Adresse mail inconnue ou incorrecte</span>
-    </md-input-container>
-    <md-input-container md-has-password>
-      <label>Mot de passe</label>
-      <md-input id="connection-password" required type="password" v-model="user_passwd"></md-input>
-      <span v-if="error_password" class="md-error">Mot de passe incorrect</span>
-    </md-input-container>
-    <p>Les champs marqués d'un * sont obligatoires.</p>
-    <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
-  </form>
+  <md-layout>
+    <form v-show="!forgetPassword" id="connectionForm" @submit.stop.prevent="send">
+      <h2>Connectez vous</h2>
+      <div v-if="error_message != ''" class="md-warn">{{ error_message }}</div>
+      <md-input-container id="connection-id">
+        <label>E-mail</label>
+        <md-input required type="email" v-model="email"></md-input>
+        <span class="md-error">Adresse mail inconnue ou incorrecte</span>
+      </md-input-container>
+      <md-input-container md-has-password id="connection-password">
+        <label>Mot de passe</label>
+        <md-input required type="password" v-model="password"></md-input>
+        <span class="md-error">Mot de passe incorrect</span>
+      </md-input-container>
+      <p>Les champs marqués d'un * sont obligatoires.</p>
+      <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
+    </form>
+    <md-button v-show="!forgetPassword" class="md-dense md-accent" @click.native="forgetPassword = !forgetPassword">Mot de passe oublié ?</md-button>
+    <resetPassword v-show="forgetPassword" @close="forgetPassword = false"></resetPassword>
+  </md-layout>
 </template>
 
 <script>
+import Vuex from 'vuex'
 import store from './connectionStore.js'
+import apiRoot from './../config.js'
+import formVerifications from './../formVerifications.js'
+import resetPassword from './resetPassword.vue'
 
 export default {
   name: 'connection',
+  components: {
+    resetPassword
+  },
   store: store,
   data () {
     return {
-      user_email: '',
-      user_passwd: '',
-      error_mail: false,
-      error_password: false,
-      error_message: ''
+      email: '',
+      password: '',
+      error_message: '',
+      forgetPassword: false
     }
   },
+  mixins: [formVerifications],
+  computed: {
+    ...Vuex.mapGetters([
+      'profiles'
+    ])
+  },
   methods: {
+    ...Vuex.mapActions({
+      initUserStore: 'initUser',
+      initProfilesStore: 'initProfiles',
+      clearUserStore: 'clearUser'
+    }),
     send () {
-      console.log('Send : ' + this.user_email + '  ' +  this.user_passwd)
-      this.$http.post('/Eikona/do/auth/signIn/', {
-        user_email: this.user_email,
-        user_passwd: this.user_passwd
+      if (!(this.verif_mail(this.email, 'connection-id') && this.verif_password(this.password, 'connection-password'))) return
+      this.$http.post(apiRoot + 'auth/signIn', {
+        user_email: this.email,
+        user_passwd: this.password
       }).then((response) => {
-        console.log('Connected', response)
-        store.commit('SET_USER', response.data.userID, response.data.userEmail, true)
-        // ouverture pop-up selection profil OU redirection vers page perso, vec pop-up choix de profil
+        this.initUserStore()
+        this.initProfilesStore()
+        this.$router.push('/user/profile')
       }, (response) => {
-        console.log('Not connected', response)
-        store.commit('SET_USER', '', '', false)
-        switch (response.code) {
+        this.clearUserStore()
+        switch (response.status) {
+          case 200:
+            console.log('User connected')
+            break
           case 400:
-            console.log('Bad request')
             this.error_message = 'Erreur de connexion. Veuillez ressayer plus tard.'
             break
           case 401:
-            console.log('Unauthorized')
             this.error_message = 'Votre compte n\'est pas activé.'
             break
           case 404:
-            console.log('Not found')
-            this.error_mail = true
-            document.getElementById('connection-id').className += ' md-input-invalid'
+            document.getElementById('connection-id').classList.add('md-input-invalid')
             break
           case 409:
-            console.log('Conflict')
-            this.error_password = true
+            document.getElementById('connection-password').classList.add('md-input-invalid')
             break
           default:
             console.log('Unknown error')

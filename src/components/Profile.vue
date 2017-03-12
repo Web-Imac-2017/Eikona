@@ -1,57 +1,53 @@
 <template lang="html">
-    <md-layout md-flex="100">
-      <md-button type="button" @click.native="select">
-        <md-layout md-align="center">
-          <md-layout md-flex="25"><md-avatar><img :src="profile.avatarPath" alt="Avatar"/></md-avatar></md-layout>
-          <md-layout md-flex="60">
-            <h5>{{ profile.id }}</h5>
-            <p class="profile-subtitles">{{ profile.posts }} publications - {{ profile.followers }} abonnés - {{ profile.followings }} abonnements</p>
-          </md-layout>
-          <md-layout md-flex="10">
-            <md-icon v-if="activeProfile">radio_button_checked</md-icon>
-            <md-icon v-else>radio_button_unchecked</md-icon>
-          </md-layout>
-      </md-layout>
-    </md-button>
-  </md-layout>
+    <md-list-item>
+      <md-avatar>
+        <img :src="profile.profilePict" alt="Avatar"/>
+      </md-avatar>
+
+      <div class="md-list-text-container">
+        <span>{{ profile.profileName }}</span>
+        <p v-show="extended">{{ profile.nbrPosts}} posts - {{ profile.nbrFollowings }} abonnements - {{ profile.nbrFollowers }} abonnés</p>
+        <p>{{profile.profile_desc}}</p>
+      </div>
+
+      <md-button class="md-icon-button md-list-action" @click.native="select">
+        <md-icon v-if="activeProfile">radio_button_checked</md-icon>
+        <md-icon v-else>radio_button_unchecked</md-icon>
+      </md-button>
+
+      <md-divider class="md-inset"></md-divider>
+    </md-list-item>
 </template>
 
 <script>
+import Vuex from 'vuex'
 import store from './connectionStore.js'
 
 export default {
   name: 'profile',
   store: store,
-  props: ['profile', 'i'],
-  data () {
-    return {
-      extended: true
-    }
-  },
+  props: [
+    'profile',
+    'index',
+    'extended'
+  ],
   computed: {
+    ...Vuex.mapGetters([
+      'currentProfileIndex'
+    ]),
     activeProfile () {
-      return (this.$store.state.currentProfile == this.i)
+      return this.index === this.currentProfileIndex
     }
   },
   methods: {
     select () {
-      console.log('select profile')
-      // redirection vers page correspondante
-      this.$store.commit('SET_CURRENT_PROFILE', this.i)
-
-      // selection profile ajax
-      this.$http.get('/Eikona/do/profile/setCurrent/' + this.$store.state.profiles[this.i]).then((response) => {
-        console.log('Changement de profile :' + this.$store.state.profiles[this.i], response)
-        // redirect vers la page du profile correspondant
-        }, (response) => {
-          console.log('ERR profile selection: ', response)
-      })
+      this.$emit('select', this.profile.profileID)
     }
   }
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 .profile-subtitles {
   font-size: 1vw;
 }

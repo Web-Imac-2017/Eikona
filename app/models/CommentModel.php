@@ -50,6 +50,15 @@ class CommentModel extends DBInterface
 		return "success";
     }
 
+    /************************/
+    /******** GETTER ********/
+    /************************/
+
+    public function getProfileID()
+    {
+        return $this->commentDatas['profile_id'];
+    }
+
     /**
      * Create a new comment
      *
@@ -59,29 +68,53 @@ class CommentModel extends DBInterface
      * @param $time Time the comment was created
      *
     */
-    public function create($profile, $post, $text, $time)
+    public function create($profileID, $postID, $comment)
     {
-    	$text = Sanitize::string($text);
+    	$comment = Sanitize::string($comment);
 
-    	$stmt = $this->cnx->prepare("INSERT INTO comments(profile_id, post_id, comment_text, comment_time) VALUES (:profile, :post, :txt, :time)");
-    	$stmt->execute([	":profile" => $profile,
-    						":post" => $post,
-    						":txt" => $text,
-    						":time" => $time
-    	]);
+        $stmt = $this->cnx->prepare("
+            INSERT INTO comments (profile_id, post_id, comment_text, comment_time)
+            VALUES (:profileID, :postID, :comment, :time)");
+        $stmt->execute([":profileID" => $profileID,
+                        ":postID"    => $postID,
+                        ":comment"   => $comment,
+                        ":time"      => time()]);
     }
 
 	/*
      * Delete the post
      *
      */
-    public function delete()
+    public function delete($commentID)
     {
-        if($this->commentID == 0)
-        {
-            return 0;
-        }
-        $stmt = $this->cnx->prepare("DELETE FROM comments WHERE comment_id = :commentID");
-        $stmt->execute([":commentID" => $this->commentID]);
+        $stmt = $this->cnx->prepare("
+            DELETE FROM comments 
+            WHERE comment_id = :commentID");
+        $stmt->execute([":commentID" => $commentID]);
     }
+
+    public function getComments($postID)
+    {
+        $stmt = $this->cnx->prepare("
+            SELECT comment_id, comments.profile_id, profiles.profile_name, comment_text, comment_time
+            FROM comments
+            JOIN profiles ON comments.profile_id = profiles.profile_id
+            WHERE :postID = post_id");
+        $stmt->execute([":postID" => $postID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getComment($commentID)
+    {
+        $stmt = $this->cnx->prepare("
+            SELECT comment_id, comments.profile_id, profiles.profile_name, comment_text, comment_time
+            FROM comments
+            JOIN profiles ON comments.profile_id = profiles.profile_id
+            WHERE comment_id = :commentID");
+        $stmt->execute([":commentID" => $commentID]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 }

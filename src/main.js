@@ -12,6 +12,8 @@ Vue.use(Vuex)
 Vue.use(VueResource)
 Vue.use(VueMaterial)
 
+
+// Configuration VueRouter
 const scrollBehavior = (to, from, savedPosition) => {
   if (savedPosition) {
     // savedPosition is only available for popstate navigations.
@@ -38,19 +40,38 @@ const scrollBehavior = (to, from, savedPosition) => {
 
 const router = new VueRouter({
   mode: 'history',
+  base: '/Eikona',
   scrollBehavior,
   routes: [{
-    path: '/',
+    path: '',
     component: require('./components/Home.vue')
-  }, {
+  },
+  {
+    path: '/search/:type/:query',
+    component: require('./components/Search-page.vue'),
+    props: true
+  },
+  {
+    path: '/user',
+    component: require('./components/MainPage.vue')
+  },
+  {
+    path: '/user/profile',
+    component: require('./components/Profil-selection.vue')
+  },
+  {
     path: '/user/settings',
     component: require('./components/Settings.vue')
   },
   {
     path: '*',
-    redirect: '/'
+    redirect: ''
   }]
 })
+
+// Configuration VueResource
+Vue.http.options.emulateHTTP = true
+Vue.http.options.emulateJSON = true
 
 new Vue({ // eslint-disable-line no-new
   el: '#app',

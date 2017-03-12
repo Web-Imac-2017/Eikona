@@ -16,7 +16,6 @@ Par exemple, une route demandant à mettre à jour la description d'un profil po
 domain.com/do/profils/update/description/
 ```
 
-
 ## Build Setup
 
 ``` bash
