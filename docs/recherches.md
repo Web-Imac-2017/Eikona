@@ -10,15 +10,14 @@ On peut rechercher :
 
 La recherche est gérée par le SearchController.
 
-## Recherche sur le site
+## Rechercher un profil
 
-Recherche des correspondances avec une chaîne de caractères.
-Par défaut, le recherche s'effectue sur tous les champs cités ci-dessus.
+Permet de rechercher un profil
 
 ### URL
 
 ```
-/search/
+/search/profile
 ```
 
 ### Méthode
@@ -29,25 +28,12 @@ Par défaut, le recherche s'effectue sur tous les champs cités ci-dessus.
 
 * **query** : Valeur de la recherche
 
-### Variables POST optionnelles
-
-* **field** : Permet de cibler la recherche sur une table 
-
-**Valeurs de field**
-
-* **profile** : Permet de rechercher des profiles
-* **description** : Permet de rechercher des posts en fonction des descriptions 
-* **comment** : Permet de rechercher un post en fonction des commentaires
-* **tag** : Permet de chercher un post en fonction des tags
-
 ### Succès 
 
 * **Code** 200 OK
 Data : 
 ```json
 
-POUR FIELD = PROFILE
-{
     result: [
       {
         profile_id : id du profil,
@@ -61,14 +47,46 @@ POUR FIELD = PROFILE
         ........
     ]
 }
+```
 
-POUR FIELD = PROFILE
+### Erreurs
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explciation** Il n'y a pas de query
+
+* **Code:** 404 NOT FOUND<br />
+  **Explication** Aucun résultat pour la recherche
+
+## Rechercher un post
+
+Permet de rechercher un profil
+
+### URL
+
+```
+/search/post
+```
+
+### Méthode
+
+**POST**
+
+### Variables POST
+
+* **query** : Valeur de la recherche
+
+### Succès 
+
+* **Code** 200 OK
+
+```json
 {
     result: [
       {
         post_id: id du post,
         profile_id: id du profil qui a posté le post,
         profile_name: nom du profil,
+        profile_picture : avatar,
         post_type: type du fichier,
         post_extension: extension du fichier,
         post_description: description du post,
@@ -84,8 +102,31 @@ POUR FIELD = PROFILE
         ........
     ]
 }
+```
 
-POUR FIELD = COMMENT
+## Rechercher un commentaire
+
+Permet de rechercher un profil
+
+### URL
+
+```
+/search/comment
+```
+
+### Méthode
+
+**POST**
+
+### Variables POST
+
+* **query** : Valeur de la recherche
+
+### Succès 
+
+* **Code** 200 OK
+
+```json
 {
     result: [
       {
@@ -110,8 +151,31 @@ POUR FIELD = COMMENT
         ........
     ]
 }
+```
 
-POUR FIELD = COMMENT
+## Rechercher un tag
+
+Permet de rechercher un profil
+
+### URL
+
+```
+/search/tag
+```
+
+### Méthode
+
+**POST**
+
+### Variables POST
+
+* **query** : Valeur de la recherche
+
+### Succès 
+
+* **Code** 200 OK
+
+```json
 {
     result: [
       {
@@ -145,13 +209,31 @@ POUR FIELD = COMMENT
 * **Code:** 404 NOT FOUND<br />
   **Explication** Aucun résultat pour la recherche
 
-### Recherche sur toute la table
+### Recherche sur toute la base
 
 les résultats sont triés pas champ. 
 Si un/des profil(s) est/sont trouvé(s), il(s) sera/seront dans un tableau profiles,
 posts pour les posts,
 comments pour les commentaire,
 tags pour les tags
+
+### URL
+
+```
+/search/
+```
+
+### Méthode
+
+**POST**
+
+### Variables POST
+
+* **query** : Valeur de la recherche
+
+### Succès 
+
+* **Code** 200 OK
 
 Si aucune valeur est retrouvé, les tableaux vallent NULL
 
