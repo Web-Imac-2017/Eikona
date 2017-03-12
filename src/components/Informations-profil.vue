@@ -45,8 +45,7 @@ export default {
 
 	data () {
 		return {
-			connected: true,
-			abonne: false,
+			abonne: follower(),
 			notif: false
 		}
 	},
@@ -61,29 +60,118 @@ export default {
 			}
 		}
 	},
+	props:{
+		profile: Object,
+		currentP: Object
+	},
+	created: {
+		connection () {
+			if(currentP.id = '') {connected = false;}
+			else {connected = true;}
+		}
+		follower () {
+			this.$http.get(apiRoot + '/profile/follow/' + this.currentP.profileID).then((response) => {
+					{
+					 	isFollowing : //1 si le followed est suivant par le profil follower, 0 sinon.
+    					isSubscribed : //1 si le follower est abonné au profil followed, 0 sinon.
+    					isConfirmed : //1 si l abonnement est confirmé, 0 sinon   
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default
+					}
+				})
+
+			if(isFollowing === 1){
+				return true;
+			}
+		}
+		//faire requete nmb posts
+		//faire requete nmb followers
+		//faire requete npm followings
+	},
 	methods: {
 		sabonner () {
-			if(!this.connected){
-				console.log("Abonnement");
-				/*this.$http.get('/Eikona/do/<profileID>[/<subscribe>]').then((response) => {
-      				// gérer le succes, toutes les infos renvoyer sont dans response.data 
 
-    			}, (response) => {
-      				// gérer les erreurs
-      			}
-    		})*/
+			if(!this.connected){
+				console.log("Retour page connexion");
+				this.$router.push('');
 			}
 			else{
-				console.log("changement");
 				this.abonne=!this.abonne;
 				this.notif=true;
+				//requete abonnement
+				this.$http.get(apiRoot + '/profile/follow/' + this.currentP.profileID).then((response) => {
+					{
+					    
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default
+					}
+				})				
 			}
 		},
 		desabonner () {
 			this.abonne=!this.abonne;
 			this.notif=false;
+
+			this.$http.get(apiRoot + '/profile/follow/' + this.currentP.profileID).then((response) => {
+					{
+					    
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default
+					}
+				})
 		},
 		notifier () {
+			this.$http.get(apiRoot + '/profile/subscribe/' + this.currentP.profileID).then((response) => {
+					{
+					    
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default
+					}
+				})
 			this.notif=!this.notif;
 		}
 	}

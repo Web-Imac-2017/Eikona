@@ -1,10 +1,10 @@
 <template>
 	<md-layout md-gutter>
-		<infosEditable v-if="current"></infosEditable>
-		<informationsProfilAutre v-else-if="!current"></informationsProfilAutre>
+		<infosEditable v-if="current" :profile="visitedProfile" :currentP="currentProfile"></infosEditable>
+		<informationsProfilAutre v-else-if="!current" :profile="visitedProfile"></informationsProfilAutre>
 
 		<previewsPosts v-if="!current"></previewsPosts>
-		<previewsPostsPerso v-else-if="current"></previewsPostsPerso>
+		<previewsPostsPerso v-else-if="current" :profile="profile"></previewsPostsPerso>
 	</md-layout>	
 </template>
 
@@ -27,10 +27,10 @@ export default{
 	data () {
 		return {
 			current: false,
-			profile: this.$route.params
+			visitedProfile
 		}
 	},
-	computed: {
+	computed: {	
 		...Vuex.mapGetters([
 	      	'currentProfile'
 	   	]),
@@ -39,7 +39,27 @@ export default{
 	    }
 	},
 	created () {
-
+		this.$http.get(apiRoot + '/profile/get/' + this.$route.params.profileID).then((response) => {
+					{
+					    profil.id: //profileID,
+					    ownerID: //ID du user propriétaire du profil,
+					    profileName: //Nom du profil,
+					    profileDesc: //Description du profil,
+					    profileCreateTime: //Timestamp de la création du profil,
+					    profileViews: //Nombre de vues du profil,
+					    profileIsPrivate: //Confidentialité du profil
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 404:
+							console.log('Le profil spécifié n\'existe pas')
+							break
+						default
+					}
+				})
 	},
 	mounted () {
 
