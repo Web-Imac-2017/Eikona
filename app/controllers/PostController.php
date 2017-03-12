@@ -233,6 +233,7 @@ class PostController
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
 			->bindValue("profileID", $data['profile_id'])
+			->bindValue("profileData", Response::read("profile", "get", $data['profile_id'])["data"])
 			->bindValue("desc", $data['post_description'])
 			->bindValue("publishTime", $data['post_publish_time'])
 			->bindValue("updateTime", $data['post_edit_time'])
@@ -460,7 +461,7 @@ class PostController
 
         $images = $this->getImages($postID);
 
-        if($this->model->updateState(1) === false)
+        if($this->model->publish() === false)
         {
             $rsp->setFailure(400, "error during request")
                 ->send();
@@ -501,7 +502,7 @@ class PostController
 			return;
 		}
 
-        if(!in_array($filter, FiltR::$availableFilters))
+        if(!in_array($filter, FiltR::$availableFilters) && $filter != "none")
         {
 			$rsp->setFailure(400, "This filter does not exists")
 			    ->send();
@@ -526,8 +527,12 @@ class PostController
         {
             $rsp->setSuccess(200, "Filter unchanged")
                 ->bindValue("postID", $postID)
-                ->bindValue("currentFilter", $filter)
-                ->bindValue("postPicture", $folder.$postID."-".$filter.".jpg")
+                ->bindValue("currentFilter", $filter);
+
+                if($filter == null)
+                    $rsp->bindValue("postPicture", $folder.$postID.".jpg");
+                else
+                    $rsp->bindValue("postPicture", $folder.$postID."-".$filter.".jpg");
                 ->send();
 
             return;
@@ -539,9 +544,20 @@ class PostController
             unlink($folder.$postID."-".$currentFilter.".jpg");
         }
 
-        FiltR::$filter($folder.$postID.".jpg", $folder.$postID."-".$filter.".jpg");
-
         $this->model->updateFilter($filter);
+
+        if($filter == "none")
+        {
+            $rsp->setSuccess(200)
+                ->bindValue("postID", $postID)
+                ->bindValue("currentFilter", null)
+                ->bindValue("originalPicture", $folder.$postID.".jpg")
+                ->send();
+
+            return;
+        }
+
+        FiltR::$filter($folder.$postID.".jpg", $folder.$postID."-".$filter.".jpg");
 
         $rsp->setSuccess(200)
             ->bindValue("postID", $postID)
@@ -776,26 +792,27 @@ class PostController
     
     /********* POPULAR ********/
     
-    public function popular()
+    public function popular($limit = 30)
     {
         $exclude = [];
         
         if(isset($_POST['exclude']))
         {
-            $exclude = $_POST['exclude'];
+            $exclude = explode(",", $_POST['exclude']);
         }
         
-        $postsID = $this->model->popular($exclude);
+        $postsBasics = $this->model->popular($exclude, $limit);
         
         $posts = array();
 
-        foreach($postsID as $postID)
+        foreach($postsBasics as $postBasics)
         {
-            $postInfos = Response::read("post", "display", $postID)["data"];
+            $postInfos = Response::read("post", "display", $postBasics['post_id']);
             
-            if($postInfos['profile_private'] == 1)
+            //remove posts the user cannot see.
+            if($postBasics ['profile_private'] == 1)
             {
-                if(!isAuthorized::seeFullProfile($postInfos['profile_private']))
+                if(!isAuthorized::seeFullProfile($postBasics['profile_private']))
                 {
                     continue;
                 }
@@ -811,6 +828,6 @@ class PostController
             ->bindValue("nbrPosts", count($posts))
             ->send();
     }
-
-
 }
+
+

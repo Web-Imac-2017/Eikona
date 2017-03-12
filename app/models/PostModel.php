@@ -397,10 +397,19 @@ class PostModel extends DBInterface
             return false;
         }
 
+        if($filter == "none")
+        {
+            $filter = null;
+        }
+        else
+        {
+            $filter = Sanitize::string($filter);
+        }
+
 		/* Sanitize String à ajouter pour Latitude */
 
         $stmt = $this->cnx->prepare("UPDATE posts SET post_filter = :filter WHERE post_id = :postID");
-        $stmt->execute([":filter" => Sanitize::string($filter),
+        $stmt->execute([":filter" => $filter,
                          ":postID" => $this->postID]);
 
         $this->postDatas['post_filter'] = $filter;
@@ -417,6 +426,21 @@ class PostModel extends DBInterface
             WHERE :postID = post_id");
         $stmt->execute([":time" => $time,
                         ":postID" => $postID]);
+        return $time;
+    }
+
+    public function publish($postID)
+    {
+
+        $time = time();
+
+        $stmt = $this->cnx->prepare("
+            UPDATE posts
+            SET post_publish_time = :time,
+            post_state = 1
+            WHERE :postID = post_id");
+        $stmt->execute([":time" => $time,
+                        ":postID" => Sanitize::int($postID)]);
         return $time;
     }
 
@@ -497,7 +521,7 @@ class PostModel extends DBInterface
     
     
     
-    public function popular($exclude = [])
+    public function popular($exclude = [], $limit = 30)
     {
         $where = "";    
        
@@ -508,7 +532,7 @@ class PostModel extends DBInterface
             $where = " WHERE pop_score.post_id NOT IN(".$placeholders.")";
         }
         
-        $stmt = $this->cnx->prepare("SELECT pop_score.post_id, profile_private, profiles.profile_id FROM pop_score JOIN posts ON pop_score.post_id = posts.post_id JOIN profiles ON posts.profile_id = profiles.profile_id ".$where." ORDER BY post_score DESC LIMIT 50");
+        $stmt = $this->cnx->prepare("SELECT pop_score.post_id, profile_private, profiles.profile_id FROM pop_score JOIN posts ON pop_score.post_id = posts.post_id JOIN profiles ON posts.profile_id = profiles.profile_id ".$where." ORDER BY post_score DESC LIMIT ".Sanitize::int($limit));
         $stmt->execute($exclude);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
