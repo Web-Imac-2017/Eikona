@@ -7,20 +7,20 @@
 						<md-list>
 							<md-list-item>
 								<md-avatar>
-							  		<img :src="profile.profile_picture" alt="Avatar">
+							  		<img :src="profilePost.profilePicture" alt="Avatar">
 								</md-avatar>
-								<span>{{profile.profile_name}}</span>
+								<span>{{profilePost.profile_name}}</span>
 							</md-list-item>
 						</md-list>
 					</md-layout>
 					<md-layout md-align="end">
-						<PostSettings class="md-list-action" :posteurID="1"	></PostSettings>
+						<PostSettings class="md-list-action" :posteurID="profilePost.profileID"></PostSettings>
 					</md-layout>
 				</md-layout>
 			</md-card-header>
 
 	 		<md-card-media>
-				<img :src="imageLink" alt="Photo test">
+				<img :src="post.originalPicture" alt="Photo test">
   		</md-card-media>
 
 			<md-layout class="infosPost">
@@ -35,12 +35,14 @@
 				<md-chip v-for="tag in tags" class="tag" disabled>{{tag}}</md-chip>
 			</md-layout>
 
-			<md-card-content>
+			<md-card-content v-if="post.allowComments == 1">
 				<p>{{comments.length}} commentaires : </p>
 				<md-button class="md-icon-button" id="display-more-comments"><md-icon>expand_more</md-icon></md-button>
 				<sectionComments :comments="comments" :errorMessage="errorMessage" :postID="post.post_id"></sectionComments>
 			</md-card-content>
-
+			<md-card-content v-else>
+				<p>Commentaires desactivés</p>
+			</md-card-content>
 		</md-card>
 	</md-layout>
 </template>
@@ -61,23 +63,8 @@
 			sectionComments,
 			PostSettings
 		},
-		data () {
-
-			return {
-
-				imageLink: 'assets/testPhoto.jpg',
-
-			}
-		},
 		props: ['post', 'profilePost'],
 		computed: {
-			profile () {
-				// Recuperer le profile du posteur
-				return {
-					profile_name: 'JackieDu29',
-					profile_picture: 'assets/Eiko.png'
-				}
-			},
 			comments () {
 				// Recuperer les commentaires du post
 				return [{
@@ -107,11 +94,6 @@
 			tags () {
 				// Récpérer les tags attachés à ce post
 				return ['chevals', 'ornithorynque']
-
-			},
-			post_description(){
-				return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec turpis ipsum, pharetra nec erat ut, congue hendrerit mi. In hac habitasse platea dictumst. Duis nec commodo elit. Duis elementum felis in elit faucibus porta.'
-
 			}
 		},
 		methods: {

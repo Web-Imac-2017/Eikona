@@ -1,14 +1,14 @@
 <template>
 	<md-tabs md-fixed class="md-transparent">
 		<md-tab md-label="Tendances">
-			<thread :postsData="popPostsStore" @more="nextPopPosts"></thread>
+			<thread :eventData="popPostsStore" :isEvents="false" @more="nextPopPosts"></thread>
 		</md-tab>
 
 		<md-tab md-label="Suggestions">
 		</md-tab>
 
 		<md-tab md-label="Abonnements">
-				<thread :postsData="feedStore" @more="nextFeedEvents"></thread>
+			<thread :eventDatas="feedStore" :isEvents="true" @more="nextFeedEvents"></thread>
 		</md-tab>
 
 		<md-tab md-label="Mon profil">
