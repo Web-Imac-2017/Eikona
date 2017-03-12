@@ -37,7 +37,7 @@ export default {
   methods: {
     search () {
       var regex = /\s/g
-      this.$router.push('/Eikona/search/' + this.searchType + '/' + this.keywords.replace(regex, '+'))
+      this.$router.push('/search/' + this.searchType + '/' + this.keywords.replace(regex, '+'))
     }
   }
 }

@@ -35,17 +35,17 @@ export default {
     ]),
     connexion () {
       console.log('connexion')
-      this.$router.push('/Eikona/#connectionForm', () => { document.getElementById('connection-id').focus() })
+      this.$router.push('/#connectionForm', () => { document.getElementById('connection-id').focus() })
     },
     inscription () {
       console.log('inscription')
-      this.$router.push('/Eikona/#inscriptionForm')
+      this.$router.push('/#inscriptionForm')
     },
     disconnect () {
       this.$http.post(apiRoot + 'auth/signOut/', {}).then((response) => {
         this.clearUser()
         this.clearProfiles()
-        this.$router.push('/Eikona/')
+        this.$router.push('/')
       }, (response) => {
         switch (response.code) {
           case 400:
@@ -59,7 +59,7 @@ export default {
     },
     settings () {
       console.log('settings')
-      this.$router.push('/Eikona/user/settings')
+      this.$router.push('/user/settings')
     }
   }
 }

@@ -106,7 +106,7 @@ export default {
     },
     profileSelect () {
       // redirect vers la page du profil
-      this.$router.push('')
+      // this.$router.push('/user/')
     }
   }
 }

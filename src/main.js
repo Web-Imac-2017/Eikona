@@ -40,31 +40,32 @@ const scrollBehavior = (to, from, savedPosition) => {
 
 const router = new VueRouter({
   mode: 'history',
+  base: '/Eikona',
   scrollBehavior,
   routes: [{
-    path: '/Eikona/',
+    path: '',
     component: require('./components/Home.vue')
   },
   {
-    path: '/Eikona/search/:type/:query',
+    path: '/search/:type/:query',
     component: require('./components/Search-page.vue'),
     props: true
   },
   {
-    path: '/Eikona/user',
+    path: '/user',
     component: require('./components/MainPage.vue')
   },
   {
-    path: '/Eikona/user/profile',
+    path: '/user/profile',
     component: require('./components/Profil-selection.vue')
   },
   {
-    path: '/Eikona/user/settings',
+    path: '/user/settings',
     component: require('./components/Settings.vue')
   },
   {
     path: '*',
-    redirect: '/Eikona/'
+    redirect: ''
   }]
 })
 

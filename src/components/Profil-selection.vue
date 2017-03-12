@@ -50,7 +50,7 @@ export default {
     },
     select (profileId) {
       this.selectProfile(profileId)
-      this.$router.push('/Eikona/user')
+      this.$router.push('/user')
     }
   }
 }

@@ -61,7 +61,7 @@
 			      }).then((response) => {
 			      	console.log(response);
 			      	console.log('Create success', response);
-			        /*this.$router.push('/Eikona/user/profile')*/
+			        /*this.$router.push('/user/profile')*/
 			      }, (response) => {
 			        console.log(response);
 			        switch (response.status) {
