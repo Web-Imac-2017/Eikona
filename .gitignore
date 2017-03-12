@@ -2,3 +2,8 @@
 node_modules
 dist/build.js
 dist/build.css
+app/medias
+/app/controllers/botRessources/botLogs.csv
+/app/controllers/botRessources/src2.jpg
+/app/Library/FiltR/testRun/
+/app/Library/FiltR/Ressources/

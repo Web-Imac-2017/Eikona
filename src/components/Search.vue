@@ -1,33 +1,51 @@
 <template lang="html">
-  <div>
-    <form novalidate @submit.stop.prevent="search">
-      <md-input-container id="search-bar" md-inline>
-        <md-icon md-primary>search</md-icon>
-        <label>Rechercher...</label>
-        <md-input type="search" v-model="keywords"></md-input>
-      </md-input-container>
+  <md-layout md-align="start">
+    <form @submit.stop.prevent="search" class="field-group">
+      <md-layout>
+        <md-layout md-flex="60">
+          <md-input-container md-inline>
+            <md-icon>search</md-icon>
+            <label>Recherche...</label>
+            <md-input type="search" v-model="keywords"></md-input>
+          </md-input-container>
+        </md-layout>
+        <md-layout md-flex="40">
+          <md-input-container>
+            <label for="movie">Par :</label>
+            <md-select name="movie" id="movie" v-model="searchType">
+              <md-option value="all">Sur tout le site</md-option>
+              <md-option value="profile">Profil</md-option>
+              <md-option value="description">Publication</md-option>
+              <md-option value="tag">Tag</md-option>
+              <md-option value="comment">Commentaire</md-option>
+            </md-select>
+          </md-input-container>
+        </md-layout>
+      </md-layout>
     </form>
-  </div>
+  </md-layout>
 </template>
 
 <script>
 export default {
-  data (){
+  data () {
     return {
-      keywords: ""
+      keywords: [],
+      searchType: 'all'
     }
   },
   methods: {
     search () {
-      console.log('Search')
+      var regex = /\s/g
+      this.$router.push('/search/' + this.searchType + '/' + this.keywords.replace(regex, '+'))
     }
   }
 }
 </script>
 
-<style lang="css" scoped>
-  form {
-    width: 80%;
-    margin: 0 10%;
-  }
+<style scoped>
+form {
+  width: 90%;
+  margin: 0 5%;
+}
 </style>

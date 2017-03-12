@@ -7,19 +7,16 @@
 </template>
 
 <script>
-
-let topHeader = require('./components/Header.vue')
-let mainFooter = require('./components/mainFooter.vue')
-
-
+import topHeader from './components/Header.vue'
+import mainFooter from './components/MainFooter.vue'
+import post from './components/Post.vue'
 export default {
   name: 'app',
   components: {
     topHeader,
-    mainFooter
-   
+    mainFooter,
+    post
   }
-
 }
 </script>
 
