@@ -4,7 +4,7 @@
       <h1>Bonjour {{ getUser.userName }} !</h1>
       <p>Veuillez sélecionner un profil :</p>
       <md-list class="md-triple-line">
-        <profile v-for="(item, index) in profiles" :profile="item" :index="index" :extended="true" @select="select"></profile>
+        <profile v-for="(item, i) in profiles" :profile="item" :key="item" :index="i" :extended="true" @select="select"></profile>
         <md-list-item class="md-inset">
           <span>Ajouter un profil</span>
           <md-button @click.native="createProfile" class="md-icon-button md-list-action">
@@ -48,8 +48,8 @@ export default {
     createProfile () {
       this.creationForm = true
     },
-    select (id) {
-      this.selectProfile(id)
+    select (profileId) {
+      this.selectProfile(profileId)
       this.$router.push('/Eikona/user')
     }
   }

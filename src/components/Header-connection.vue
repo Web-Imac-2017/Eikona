@@ -30,7 +30,8 @@ export default {
   },
   methods: {
     ...Vuex.mapActions([
-      'clearUser'
+      'clearUser',
+      'clearProfiles'
     ]),
     connexion () {
       console.log('connexion')
@@ -43,6 +44,7 @@ export default {
     disconnect () {
       this.$http.post(apiRoot + 'auth/signOut/', {}).then((response) => {
         this.clearUser()
+        this.clearProfiles()
         this.$router.push('/Eikona/')
       }, (response) => {
         switch (response.code) {

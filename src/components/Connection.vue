@@ -43,6 +43,11 @@ export default {
     }
   },
   mixins: [formVerifications],
+  computed: {
+    ...Vuex.mapGetters([
+      'profiles'
+    ])
+  },
   methods: {
     ...Vuex.mapActions({
       initUserStore: 'initUser',
