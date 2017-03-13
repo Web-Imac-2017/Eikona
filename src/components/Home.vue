@@ -1,6 +1,7 @@
 <template lang="html">
   <div id="home">
     <div class="angled_container angled_container--open-right">
+    <profileSwitch class="switchButton"></profileSwitch>
       <md-layout :md-gutter="8" md-align="center">
         <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
           <md-whiteframe md-elevation="5" id="connect"><connection></connection></md-whiteframe>
@@ -9,10 +10,9 @@
           <description id="description" class="home-top-element"></description>
         </md-layout>
       </md-layout>
-      <div id="firstInscription">
+      <div class="firstInscription">
         <h2>Pas encore inscrit(e) ?</h2>
         <a href="#formulaire"><md-icon>keyboard_arrow_down</md-icon></a>
-        <test></test>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@
 
 <script>
 import connection from './Connection.vue'
-import test from './Switch.vue'
+import profileSwitch from './Switch.vue'
 import description from './Home-description.vue'
 
 
@@ -29,15 +29,16 @@ export default {
   name: 'home',
   components: {
     connection,
-    test,
+    profileSwitch,
     description,
    
   }
 }
 
+
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 
 #home {
   text-align: center;
@@ -70,10 +71,19 @@ export default {
   text-align: center;
 }
 
-#firstInscription {
+.firstInscription {
   position: relative;
   top: 25%;
 }
+
+
+.switchButton {
+	position: fixed;
+	top: 10%;
+	right: 10%;
+}
+
+
 
 /*********************** ANIMATION CSS ********************/
 
