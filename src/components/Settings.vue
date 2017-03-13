@@ -43,9 +43,12 @@
 <script>
 import apiRoot from './../config.js'
 import formVerification from './../formVerifications.js'
+import store from './connectionStore.js'
+import Vuex from 'vuex'
 
 export default {
   name: 'settings',
+  store: store,
   data () {
     return {
       confirm: {
@@ -63,7 +66,15 @@ export default {
     }
   },
   mixins: [formVerification],
+  computed: {
+    ...Vuex.mapGetters([
+      'getUser'
+    ])
+  },
   methods:{
+    ...Vuex.mapActions([
+      'updateUser'
+    ]),
     valid (ref) {
       this.$refs[ref].open()
     },
@@ -72,7 +83,7 @@ export default {
       (this.infos.name !== null && !this.verif_name(this.infos.name, 'settings-user-name')) ||
       (this.infos.mail !== null && !this.verif_mail(this.infos.mail, 'settings-user-mail')) ||
       (this.infos.password !== null && !this.verif_password(this.infos.password, 'settings-user-password')) ||
-      (this.infos.password !== null && (this.infos.confirm === null || !this.verif_confirm(this.infos.password, this.infos.confirm, 'settings-user-confirm'))) return
+      (this.infos.password !== null && (this.infos.confirm === null || !this.verif_confirm(this.infos.password, this.infos.confirm, 'settings-user-confirm')))) return
 
       editName (this.infos.name)
       editMail (this.infos.mail)
@@ -80,22 +91,25 @@ export default {
     },
     editName (name) {
       this.$http.post(apiRoot + 'user/edit/NAME', {name: name}).then(response => {
-
+        var u = this.getUser
+        u.userName = response.data.data.userName
+        this.updateUser(u)
       }, response => {
         switch (response.status) {
-          case expression:
-
-            break;
-          default:
-
+          case 400:
+            console.error('Bad request', response);
+            break
+          case 409:
+            console.error('Bad name', response);
+            break
         }
       })
     },
     editMail (mail) {
-      this.$http.post(apiRoot + 'user/edit/' + )
+      //this.$http.post(apiRoot + 'user/edit/' + )
     },
     editPassword (password, confirm) {
-      this.$http.post(apiRoot + 'user/edit/' + )
+      //this.$http.post(apiRoot + 'user/edit/' + )
     }
   }
 }
