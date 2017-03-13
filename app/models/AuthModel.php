@@ -16,11 +16,11 @@ class AuthModel extends DBInterface{
 	 * @param  text $email user_email
 	 * @return boolean	    true / false
 	 */
-	public function isUnique($email)	
+	public function isUnique($email)
 	{
 		$stmt = $this->cnx->prepare("
 			SELECT COUNT(*) FROM users
-			WHERE user_email = :email");	
+			WHERE user_email = :email");
 		$stmt->execute([":email" => $email]);
 
 		return ($stmt->fetchColumn() == 0) ? true : false;
@@ -40,8 +40,8 @@ class AuthModel extends DBInterface{
 		$pwd = hash('sha256', $passwd);
 
 		$stmt = $this->cnx->prepare("
-			INSERT INTO users (user_name, user_email, user_passwd, user_register_time, user_last_activity)
-			VALUES (:name, :email, :pwd, :time, :lastAct)");
+			INSERT INTO users (user_name, user_email, user_passwd, user_register_time, user_last_activity, user_key)
+			VALUES (:name, :email, :pwd, :time, :lastAct, UUID())");
 		$stmt->execute([":name"    => $name,
 			            ":email"   => $email,
 			            ":pwd"     => $pwd,
@@ -64,13 +64,22 @@ class AuthModel extends DBInterface{
 
 		$subject = "ACTIVER VOTRE COMPTE EIKONA";
 
-		//TODO 
+		//TODO
 		//CHANGER L'ADRESSE D'ENVOI POUR LA MISE EN PROD
-		$headers = 'From: zobeleflorian@gmail.com' . "\r\n" .
+		$headers = 'From: j9b455c69@gmail.com' . "\r\n" .
                    'MIME-Version: 1.0' . "\r\n" .
                    'Content-type: text/html; charset=utf-8';
 
        return (mail($email, $subject, $content, $headers)) ? true : false;
+    }
+
+
+    public function getByKey($key)
+    {
+        $stmt = $this->cnx->prepare("SELECT COUNT(user_id) AS nbr, user_id, user_email FROM users WHERE user_key = :key LIMIT 1");
+        $stmt->execute([":key" => $key]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
 
@@ -167,20 +176,20 @@ class AuthModel extends DBInterface{
 			AND :key = sha1(user_register_time)");
 		$stmt->execute([":id"  => $id,
 			            ":key" => $key]);
-		
+
 		return ($stmt->fetchColumn() != 0) ? true : false;
 	}
 
 	/**
 	 * Active le compte de l'utilisateeur
-	 * @param  int $id user_id 	
+	 * @param  int $id user_id
 	 */
 	public function updateUserActivated($id)
-	{	
+	{
 		$stmt = $this->cnx->prepare("
 			UPDATE users SET user_activated = 1
 			WHERE :id= user_id");
-		$stmt->execute([":id" => $id]);	
+		$stmt->execute([":id" => $id]);
 	}
 
 
@@ -208,7 +217,7 @@ class AuthModel extends DBInterface{
 	 * Return User (qu'il existe ou non)
 	 * @param  text $email  user_email
 	 * @param  text $passwd user_passwd
-	 * @return User         
+	 * @return User
 	 */
 	public function checkConnection($email, $passwd)
 	{
