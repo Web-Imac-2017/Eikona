@@ -4,8 +4,8 @@ class ReportController
 {
 
 	private $model;
-	private $postController;
 	private $postModel;
+	private $postController;
 
 	public function __construct()
 	{
@@ -41,6 +41,36 @@ class ReportController
 			$rsp->setFailure(400, "Report not added")
 				->send();
 		}
+	}
+
+	/*
+	 * Display all informations of a reports
+	 * @param $reportID
+	 */
+	public function display($reportID)
+	{
+		$rsp = new Response();
+
+		if(!$this->model->exist($reportID))
+		{
+			$rsp->setFailure(404, "Report does not exist.")
+				->bindValue("ReportID", $reportID)
+			    ->send();
+			return;
+		}
+
+		$data = $this->model->getFullReport($reportID);
+
+		$rsp->setSuccess(200, "Get all report informations")
+			->bindValue("reportID", $reportID)
+			->bindValue("userID", $data["user_id"])
+			->bindValue("postID", $data["post_id"])
+			->bindValue("reportComment", $data["report_comment"])
+			->bindValue("reportStatus", $data["report_status"])
+			->bindValue("reportHandler", $data["report_handler"])
+			->bindValue("reportResult", $data["report_result"])
+			->bindValue("timeStateChange", $data["time_state_change"])
+			->send();
 	}
 
 	/*
@@ -99,6 +129,7 @@ class ReportController
 	 /*
 	 * Cancel the report
 	 * ReportResult is send to the user_id who reported
+	 * @param $reportID
 	 */
 	public function cancel($reportID)
 	{
@@ -250,41 +281,34 @@ class ReportController
 	}
 
 	/*
-	 * Allow the post which were in moderation
-	 * Récupère les posts avec status = 2 et change depuis le moment où ils ont été changés
-	*/
-	public function allow($postID)
-	{
-		if(isset($_POST['allow']))
-		{
-			$postID = $this->model->postID($reportID);
-
-			if(!$this->postController->setPost($postID))
-				return;
-
-			$result = $this->postModel->setPost($postID);
-
-			if($result == "success")
-			{
-				$state = $this->postModel->updateState(1);
-
-				/* NOTIF !!!! ici avec le reportResult de la part de la session de l'userID et pour dire que le post est mtn visible */
-
-				//Mise à jour du report
-
-			} else {
-				$rsp->setFailure(400, "There is a problem with the postID.")
-					->send();
-			}
-		}
-	}
-
-	/*
-	 * Get all the post which are hidden and have been modify since
+	 * Get all the post from the moderator connected, which are hidden and have been modify since
      */
 	public function waiting()
 	{
-		$reports = $this->model->getPostModified();
+		$userID = Session::read("userID");
+		$reportsID = $this->model->getPostModified($userID);
+
+		$rsp = new Response();
+
+		if(!$reportsID)
+		{
+			$rsp->setFailure(400, "There is no reports which has been changed since last time.")
+				->send();
+			return;
+		}
+
+		$rsp->setSuccess(200, "Here is the reports which changed since their status changed.");
+
+		$reports = array();
+
+		foreach($reportsID as $row => $report){
+			$reportID = $report["report_id"];
+			$report = Response::read("Report", "display", $reportID)["data"];
+			array_push($reports, $report);
+		}
+
+		$rsp->bindValue("reports", $reports)
+			->send();
 	}
 
 	/*
@@ -305,7 +329,7 @@ class ReportController
 		$rsp = new Response();
 
 		if($reports == false) {
-			$rsp->setFailure(404);
+			$rsp->setSuccess(200, "You have no reports.");
 		} else if($reports == 0) {
 			$rsp->setSucess(204, "There is no reports.");
 		} else {
