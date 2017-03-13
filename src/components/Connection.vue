@@ -55,11 +55,13 @@ export default {
       clearUserStore: 'clearUser'
     }),
     send () {
-      if (!(this.verif_mail(this.email, 'connection-id') && this.verif_password(this.password, 'connection-password'))) return
+      if (!(this.verif_mail(this.email, 'connection-id') &&
+            this.verif_password(this.password, 'connection-password'))) return
       this.$http.post(apiRoot + 'auth/signIn', {
         user_email: this.email,
         user_passwd: this.password
       }).then((response) => {
+        this.clearUserStore()
         this.initUserStore()
         this.initProfilesStore()
         this.$router.push('/user/profile')

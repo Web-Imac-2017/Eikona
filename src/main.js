@@ -65,7 +65,7 @@ const router = new VueRouter({
   },
   {
     name: 'profile_name',
-    path: '/Eikona/:profileID',
+    path: '/:profileID',
     component: require('./components/ProfilePage.vue')
   },
   {
