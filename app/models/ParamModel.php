@@ -34,7 +34,7 @@ class ParamModel extends DBInterface
         foreach($defaultsParams as $pName => $pValue)
         {
             $insertStmt->execute([":name" => $pName,
-                                  ":value" => $pValue
+                                  ":value" => $pValue,
                                   ":time" => 0]);
         }
     }
