@@ -272,8 +272,11 @@ class ReportController
 								->bindValue("PostState", $state)
 								->bindValue("notif", $notif['data'])
 								->send();
+							return;
 						}else{
-							$resp->setFailure(409, "notif error");
+							$resp->setFailure(409, "notif error")
+							     ->send();
+							return;
 						}
 						
 					} else {
