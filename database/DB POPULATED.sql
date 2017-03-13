@@ -20,89 +20,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-# Affichage de la table banned_emails
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `banned_emails`;
-
-CREATE TABLE `banned_emails` (
-  `banned_email` varchar(100) NOT NULL,
-  PRIMARY KEY (`banned_email`),
-  UNIQUE KEY `banned_email_UNIQUE` (`banned_email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Affichage de la table banned_words
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `banned_words`;
-
-CREATE TABLE `banned_words` (
-  `word` varchar(50) NOT NULL,
-  PRIMARY KEY (`word`),
-  UNIQUE KEY `word_UNIQUE` (`word`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Affichage de la table blocked
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `blocked`;
-
-CREATE TABLE `blocked` (
-  `blocker_id` int(11) NOT NULL,
-  `blocked_id` int(11) NOT NULL,
-  `block_time` int(11) NOT NULL,
-  PRIMARY KEY (`blocker_id`,`blocked_id`),
-  UNIQUE KEY `ONLY_ONE_BLOCK` (`blocker_id`,`blocked_id`),
-  KEY `BLOCKED_ID_idx` (`blocked_id`),
-  CONSTRAINT `BLOCKED_ID` FOREIGN KEY (`blocked_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `BLOCKER_ID` FOREIGN KEY (`blocker_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Affichage de la table comment_likes
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `comment_likes`;
-
-CREATE TABLE `comment_likes` (
-  `profile_id` int(11) NOT NULL,
-  `comment_id` int(11) NOT NULL,
-  `like_time` int(11) NOT NULL,
-  PRIMARY KEY (`profile_id`,`comment_id`),
-  UNIQUE KEY `ONLY_ONE_LIKE` (`profile_id`,`comment_id`) COMMENT 'This key is here to ensure that nobody is linking the same comment twice.',
-  KEY `COMMENT_LIKED_idx` (`comment_id`),
-  CONSTRAINT `COMMENT_LIKED` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`comment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `COMMENT_LIKER_ID` FOREIGN KEY (`profile_id`) REFERENCES `profiles` (`profile_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Affichage de la table comments
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `comments`;
-
-CREATE TABLE `comments` (
-  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
-  `profile_id` int(11) NOT NULL,
-  `post_id` int(11) NOT NULL,
-  `comment_text` text NOT NULL,
-  `comment_time` int(11) NOT NULL,
-  PRIMARY KEY (`comment_id`,`profile_id`,`post_id`),
-  KEY `POST_COMMENTED_idx` (`post_id`),
-  KEY `COMMENTER_ID_idx` (`profile_id`),
-  CONSTRAINT `COMMENTER_ID` FOREIGN KEY (`profile_id`) REFERENCES `profiles` (`profile_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `POST_COMMENTED` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `comments` WRITE;
-/*!40000 ALTER TABLE `comments` DISABLE KEYS */;
-
 INSERT INTO `comments` (`comment_id`, `profile_id`, `post_id`, `comment_text`, `comment_time`)
 VALUES
 	(6,4,2,'comment---21c6767f95cf124b',1489323653),
@@ -384,43 +301,7 @@ VALUES
 	(288,209,62,'comment---e2cbf970cdf0bad1',1489331219),
 	(289,257,150,'comment---06cf60b71bb6933b',1489332815);
 
-/*!40000 ALTER TABLE `comments` ENABLE KEYS */;
-UNLOCK TABLES;
 
-
-# Affichage de la table comments_score
-# ------------------------------------------------------------
-
-DROP VIEW IF EXISTS `comments_score`;
-
-CREATE TABLE `comments_score` (
-   `post_id` INT(11) NOT NULL,
-   `comment_id` INT(11) NOT NULL DEFAULT '0',
-   `comment_score` DOUBLE(19) NULL DEFAULT NULL
-) ENGINE=MyISAM;
-
-
-
-# Affichage de la table followings
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `followings`;
-
-CREATE TABLE `followings` (
-  `follower_id` int(11) NOT NULL,
-  `followed_id` int(11) NOT NULL,
-  `following_time` int(11) NOT NULL,
-  `follower_subscribed` tinyint(1) NOT NULL DEFAULT '0',
-  `follow_confirmed` tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`follower_id`,`followed_id`),
-  UNIQUE KEY `FOLLOW_JUST_ONE_TIME` (`follower_id`,`followed_id`),
-  KEY `FOLLOWED_ID_idx` (`followed_id`),
-  CONSTRAINT `FOLLOWED_ID` FOREIGN KEY (`followed_id`) REFERENCES `profiles` (`profile_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FOLLOWER_ID` FOREIGN KEY (`follower_id`) REFERENCES `profiles` (`profile_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `followings` WRITE;
-/*!40000 ALTER TABLE `followings` DISABLE KEYS */;
 
 INSERT INTO `followings` (`follower_id`, `followed_id`, `following_time`, `follower_subscribed`, `follow_confirmed`)
 VALUES
@@ -455,92 +336,7 @@ VALUES
 UNLOCK TABLES;
 
 
-# Affichage de la table likes_score
-# ------------------------------------------------------------
 
-DROP VIEW IF EXISTS `likes_score`;
-
-CREATE TABLE `likes_score` (
-   `post_id` INT(11) NOT NULL,
-   `like_score` DOUBLE(19) NULL DEFAULT NULL
-) ENGINE=MyISAM;
-
-
-
-# Affichage de la table notifications
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `notifications`;
-
-CREATE TABLE `notifications` (
-  `notif_id` int(11) NOT NULL AUTO_INCREMENT,
-  `profile_target_id` int(11) NOT NULL,
-  `notif_type` varchar(5) NOT NULL COMMENT 'Type de notification\n- Nouvel abonné\n- Like\n- …',
-  `notif_target` int(11) DEFAULT NULL,
-  `notif_time` int(11) NOT NULL,
-  `notif_seen` tinyint(1) NOT NULL DEFAULT '0',
-  `profile_id` int(11) NOT NULL,
-  PRIMARY KEY (`notif_id`,`profile_target_id`),
-  KEY `PROFILE_NOTIFIED_idx` (`profile_target_id`),
-  CONSTRAINT `PROFILE_NOTIFIED` FOREIGN KEY (`profile_target_id`) REFERENCES `profiles` (`profile_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Affichage de la table PARAMS
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `PARAMS`;
-
-CREATE TABLE `PARAMS` (
-  `PARAM_NAME` varchar(255) NOT NULL COMMENT 'Paramètre à utiliser sur le site\n	- Nombre maximum de profils\n	- Messages par défaut\n	- etc.',
-  `PARAM_VALUE` text,
-  `PARAM_edit_time` int(11) NOT NULL COMMENT '	',
-  `PARAM_edit_user_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`PARAM_NAME`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `PARAMS` WRITE;
-/*!40000 ALTER TABLE `PARAMS` DISABLE KEYS */;
-
-INSERT INTO `PARAMS` (`PARAM_NAME`, `PARAM_VALUE`, `PARAM_edit_time`, `PARAM_edit_user_id`)
-VALUES
-	('USER_MAX_PROFILES','3',0,NULL);
-
-/*!40000 ALTER TABLE `PARAMS` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Affichage de la table pop_score
-# ------------------------------------------------------------
-
-DROP VIEW IF EXISTS `pop_score`;
-
-CREATE TABLE `pop_score` (
-   `post_id` INT(11) NOT NULL DEFAULT '0',
-   `post_score` DOUBLE(19) NULL DEFAULT NULL
-) ENGINE=MyISAM;
-
-
-
-# Affichage de la table post_likes
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `post_likes`;
-
-CREATE TABLE `post_likes` (
-  `profile_id` int(11) NOT NULL,
-  `post_id` int(11) NOT NULL,
-  `like_time` int(11) NOT NULL,
-  PRIMARY KEY (`profile_id`,`post_id`),
-  UNIQUE KEY `ONLY_ONE_LIKE` (`profile_id`,`post_id`) COMMENT 'This key ensure a same profile cannot like a post multiple times',
-  KEY `POST_LIKED_idx` (`post_id`),
-  CONSTRAINT `LIKER_ID` FOREIGN KEY (`profile_id`) REFERENCES `profiles` (`profile_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `POST_LIKED` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `post_likes` WRITE;
-/*!40000 ALTER TABLE `post_likes` DISABLE KEYS */;
 
 INSERT INTO `post_likes` (`profile_id`, `post_id`, `like_time`)
 VALUES
@@ -1150,28 +946,6 @@ VALUES
 	(255,86,1489332814),
 	(255,155,1489331221),
 	(255,156,1489331221);
-
-/*!40000 ALTER TABLE `post_likes` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Affichage de la table post_views
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `post_views`;
-
-CREATE TABLE `post_views` (
-  `profile_id` int(11) NOT NULL,
-  `post_id` int(11) NOT NULL,
-  `view_time` int(11) NOT NULL,
-  PRIMARY KEY (`profile_id`,`post_id`,`view_time`),
-  KEY `POST_idx` (`post_id`),
-  CONSTRAINT `POST` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `VIEWER_ID` FOREIGN KEY (`profile_id`) REFERENCES `profiles` (`profile_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `post_views` WRITE;
-/*!40000 ALTER TABLE `post_views` DISABLE KEYS */;
 
 INSERT INTO `post_views` (`profile_id`, `post_id`, `view_time`)
 VALUES
@@ -2447,38 +2221,6 @@ VALUES
 	(252,163,1489331206),
 	(5,164,1489332814);
 
-/*!40000 ALTER TABLE `post_views` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Affichage de la table posts
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `posts`;
-
-CREATE TABLE `posts` (
-  `post_id` int(11) NOT NULL AUTO_INCREMENT,
-  `profile_id` int(11) NOT NULL,
-  `post_type` varchar(5) NOT NULL COMMENT 'photo ou video',
-  `post_extension` varchar(5) NOT NULL,
-  `post_description` varchar(255) DEFAULT NULL,
-  `post_publish_time` int(11) NOT NULL,
-  `post_edit_time` int(11) NOT NULL,
-  `post_state` int(11) NOT NULL DEFAULT '1' COMMENT '1 - Post publié, pas de soucis\n2 - Post en modération, n’est pas visible',
-  `post_filter` varchar(10) DEFAULT NULL,
-  `post_geo_lat` varchar(45) DEFAULT NULL,
-  `post_geo_lng` varchar(45) DEFAULT NULL,
-  `post_geo_name` varchar(100) DEFAULT NULL,
-  `post_allow_comments` tinyint(1) NOT NULL DEFAULT '1',
-  `post_approved` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0 - En attente de première validation\n1 - Post approuvé lors de la première validation',
-  PRIMARY KEY (`post_id`,`profile_id`),
-  KEY `PROFILE_OWNER_idx` (`profile_id`),
-  CONSTRAINT `PROFILE_OWNER` FOREIGN KEY (`profile_id`) REFERENCES `profiles` (`profile_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `posts` WRITE;
-/*!40000 ALTER TABLE `posts` DISABLE KEYS */;
-
 INSERT INTO `posts` (`post_id`, `profile_id`, `post_type`, `post_extension`, `post_description`, `post_publish_time`, `post_edit_time`, `post_state`, `post_filter`, `post_geo_lat`, `post_geo_lng`, `post_geo_name`, `post_allow_comments`, `post_approved`)
 VALUES
 	(1,1,'image','jpg','',1489323215,1489323209,1,NULL,NULL,NULL,NULL,1,0),
@@ -2645,45 +2387,6 @@ VALUES
 	(164,72,'image','jpg','',1489331215,1489331207,1,'valencia',NULL,NULL,NULL,1,0),
 	(165,181,'image','jpg','',1489332825,1489332816,1,'moon',NULL,NULL,NULL,1,0);
 
-/*!40000 ALTER TABLE `posts` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Affichage de la table posts_bonus
-# ------------------------------------------------------------
-
-DROP VIEW IF EXISTS `posts_bonus`;
-
-CREATE TABLE `posts_bonus` (
-   `post_id` INT(11) NOT NULL DEFAULT '0',
-   `post_bonus` DOUBLE(19) NULL DEFAULT NULL
-) ENGINE=MyISAM;
-
-
-
-# Affichage de la table profiles
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `profiles`;
-
-CREATE TABLE `profiles` (
-  `profile_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `profile_name` varchar(45) NOT NULL,
-  `profile_desc` varchar(255) DEFAULT NULL,
-  `profile_create_time` int(11) NOT NULL,
-  `profile_views` int(11) NOT NULL DEFAULT '0',
-  `profile_private` tinyint(1) NOT NULL DEFAULT '0',
-  `profile_picture` varchar(150) NOT NULL DEFAULT 'default.jpg',
-  `profile_key` varchar(36) DEFAULT NULL COMMENT '« UUID() » ',
-  PRIMARY KEY (`profile_id`,`user_id`),
-  UNIQUE KEY `profile_name_UNIQUE` (`profile_name`),
-  KEY `USER_ID` (`user_id`),
-  CONSTRAINT `USER_ID` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `profiles` WRITE;
-/*!40000 ALTER TABLE `profiles` DISABLE KEYS */;
 
 INSERT INTO `profiles` (`profile_id`, `user_id`, `profile_name`, `profile_desc`, `profile_create_time`, `profile_views`, `profile_private`, `profile_picture`, `profile_key`)
 VALUES
@@ -2949,70 +2652,6 @@ VALUES
 	(260,154,'profiletest1489345298','Profile test description',1489345298,0,0,'default.jpg','51e4c338-0756-11e7-b5f3-f0f0e0903453'),
 	(261,154,'profiletest1489345430','Profile test description',1489345430,0,0,'default.jpg','a0b88ec2-0756-11e7-b5f3-f0f0e0903453');
 
-/*!40000 ALTER TABLE `profiles` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Affichage de la table reports
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `reports`;
-
-CREATE TABLE `reports` (
-  `report_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `post_id` int(11) NOT NULL,
-  `report_comment` text,
-  `report_status` int(11) NOT NULL DEFAULT '0',
-  `report_handler` int(11) DEFAULT NULL,
-  `report_result` text,
-  `time_state_change` int(11) DEFAULT NULL,
-  PRIMARY KEY (`report_id`,`user_id`,`post_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Affichage de la table tags
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `tags`;
-
-CREATE TABLE `tags` (
-  `tag_name` varchar(40) NOT NULL,
-  `post_id` int(11) NOT NULL,
-  `use_time` int(11) NOT NULL,
-  PRIMARY KEY (`tag_name`,`post_id`),
-  UNIQUE KEY `UNIQUE_TAG` (`tag_name`,`post_id`) COMMENT 'This unique key is used to make sure a post cannot receive the same tag multiple times.',
-  KEY `POST_TAGGED_idx` (`post_id`),
-  CONSTRAINT `POST_TAGGED` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-# Affichage de la table users
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `users`;
-
-CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(45) NOT NULL,
-  `user_email` varchar(100) NOT NULL,
-  `user_passwd` varchar(256) NOT NULL COMMENT '				',
-  `user_register_time` int(11) NOT NULL,
-  `user_last_activity` int(11) NOT NULL,
-  `user_moderator` tinyint(1) NOT NULL DEFAULT '0',
-  `user_admin` tinyint(1) NOT NULL DEFAULT '0',
-  `user_activated` tinyint(1) NOT NULL DEFAULT '1',
-  `user_code` varchar(20) DEFAULT NULL,
-  `user_key` varchar(36) DEFAULT NULL COMMENT 'UUID()',
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_email_UNIQUE` (`user_email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-
 INSERT INTO `users` (`user_id`, `user_name`, `user_email`, `user_passwd`, `user_register_time`, `user_last_activity`, `user_moderator`, `user_admin`, `user_activated`, `user_code`, `user_key`)
 VALUES
 	(1,'932b3781132a87d8','932b3781132a87d8@bot.com','7c479735a2bea5a00df8b900e444349957a59b8a542f855b42a892c5ede252fd',1489323121,1489323121,0,0,1,NULL,'5d58be50-07d7-11e7-8466-481bb021958a'),
@@ -3171,79 +2810,6 @@ VALUES
 	(154,'TestAccount 1489345290','test1489345289@test.fr','c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646',1489345289,1489345289,0,0,1,NULL,'5d59ca70-07d7-11e7-8466-481bb021958a'),
 	(155,'TestAccount 1489401044','test1489401044@test.fr','c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646',1489401044,1489401044,0,0,1,NULL,'1d394028-07d8-11e7-8466-481bb021958a'),
 	(156,'TestAccount 1489402314','test1489402314@test.fr','c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646',1489402314,1489402314,0,0,1,NULL,'125e800c-07db-11e7-8466-481bb021958a');
-
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Affichage de la table views_score
-# ------------------------------------------------------------
-
-DROP VIEW IF EXISTS `views_score`;
-
-CREATE TABLE `views_score` (
-   `post_id` INT(11) NOT NULL,
-   `view_score` DOUBLE(19) NULL DEFAULT NULL
-) ENGINE=MyISAM;
-
-
-
-
-
-# Replace placeholder table for comments_score with correct view syntax
-# ------------------------------------------------------------
-
-DROP TABLE `comments_score`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `comments_score`
-AS SELECT
-   `comments`.`post_id` AS `post_id`,
-   `comments`.`comment_id` AS `comment_id`,if(((unix_timestamp() - `comments`.`comment_time`) < (96 * 3600)),truncate((((96 * 3600) - (unix_timestamp() - `posts`.`post_publish_time`)) / log(pow((unix_timestamp() - `posts`.`post_publish_time`),64))),2),0) AS `comment_score`
-FROM (`comments` join `posts` on((`posts`.`post_id` = `comments`.`post_id`))) where (`posts`.`post_publish_time` > 0);
-
-
-# Replace placeholder table for likes_score with correct view syntax
-# ------------------------------------------------------------
-
-DROP TABLE `likes_score`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `likes_score`
-AS SELECT
-   `post_likes`.`post_id` AS `post_id`,if(((unix_timestamp() - `post_likes`.`like_time`) < (72 * 3600)),truncate((((72 * 3600) - (unix_timestamp() - `posts`.`post_publish_time`)) / log(pow((unix_timestamp() - `posts`.`post_publish_time`),64))),2),0) AS `like_score`
-FROM (`post_likes` join `posts` on((`posts`.`post_id` = `post_likes`.`post_id`))) where (`posts`.`post_publish_time` > 0);
-
-
-# Replace placeholder table for posts_bonus with correct view syntax
-# ------------------------------------------------------------
-
-DROP TABLE `posts_bonus`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `posts_bonus`
-AS SELECT
-   `posts`.`post_id` AS `post_id`,if(((unix_timestamp() - `posts`.`post_publish_time`) < (24 * 3600)),truncate((((24 * 3600) - (unix_timestamp() - `posts`.`post_publish_time`)) / log(pow((unix_timestamp() - `posts`.`post_publish_time`),64))),2),0) AS `post_bonus`
-FROM `posts` where (`posts`.`post_publish_time` > 0);
-
-
-# Replace placeholder table for views_score with correct view syntax
-# ------------------------------------------------------------
-
-DROP TABLE `views_score`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `views_score`
-AS SELECT
-   `post_views`.`post_id` AS `post_id`,if(((unix_timestamp() - `post_views`.`view_time`) < (48 * 3600)),truncate((((48 * 3600) - (unix_timestamp() - `posts`.`post_publish_time`)) / log(pow((unix_timestamp() - `posts`.`post_publish_time`),64))),2),0) AS `view_score`
-FROM (`post_views` join `posts` on((`posts`.`post_id` = `post_views`.`post_id`))) where (`posts`.`post_publish_time` > 0);
-
-
-# Replace placeholder table for pop_score with correct view syntax
-# ------------------------------------------------------------
-
-DROP TABLE `pop_score`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `pop_score`
-AS SELECT
-   `posts`.`post_id` AS `post_id`,(((if(((select count(0)
-FROM `comments_score` where (`comments_score`.`post_id` = `posts`.`post_id`)) > 0),(select sum(`comments_score`.`comment_score`) from `comments_score` where (`comments_score`.`post_id` = `posts`.`post_id`)),0) + if(((select count(0) from `likes_score` where (`likes_score`.`post_id` = `posts`.`post_id`)) > 0),(select sum(`likes_score`.`like_score`) from `likes_score` where (`likes_score`.`post_id` = `posts`.`post_id`)),0)) + if(((select count(0) from `views_score` where (`views_score`.`post_id` = `posts`.`post_id`)) > 0),(select sum(`views_score`.`view_score`) from `views_score` where (`views_score`.`post_id` = `posts`.`post_id`)),0)) + (select `posts_bonus`.`post_bonus` from `posts_bonus` where (`posts_bonus`.`post_id` = `posts`.`post_id`) limit 1)) AS `post_score` from `posts` where (`posts`.`post_publish_time` > 0);
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
