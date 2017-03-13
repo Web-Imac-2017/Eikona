@@ -34,7 +34,7 @@
 				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
 			</md-layout>
 		</md-whiteframe>
-	</md-layout> 
+	</md-layout>
 </template>
 
 <script>
