@@ -259,15 +259,26 @@ class ReportController
 					if($result == "success")
 					{
 						$state = $this->postModel->updateState(2);
-						/* NOTIF !!!! reportResult from UserID */
+
 
 						$this->model->moderate($reportID, $reportStatus, $reportResult);
 
-						$rsp->setSuccess(200, "Post is now hidden. Notif send.")
-							->bindValue("ReportID", $reportID)
-							->bindValue("PostID", $postID)
-							->bindValue("PostState", $state)
-							->send();
+						$notif = Response::read("notification", "create", "changeReportState", 0, $this->postModel->getProfileID(), $postID);
+
+						if($notif['code'] == 200){
+							$rsp->setSuccess(200, "Post is now hidden. Notif send.")
+								->bindValue("ReportID", $reportID)
+								->bindValue("PostID", $postID)
+								->bindValue("PostState", $state)
+								->bindValue("notif", $notif['data'])
+								->send();
+							return;
+						}else{
+							$rsp->setFailure(409, "notif error")
+							     ->send();
+							return;
+						}
+						
 					} else {
 						$rsp->setFailure(400, "There is a problem with the postID.")
 							->send();
@@ -277,6 +288,7 @@ class ReportController
 		} else {
 			$rsp->setFailure(404, "The report has not worked.")
 				->send();
+			return;
 		}
 	}
 
