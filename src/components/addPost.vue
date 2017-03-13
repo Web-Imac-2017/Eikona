@@ -33,7 +33,7 @@
 	import Vuex from 'vuex'
 	import store from './connectionStore.js'
 	import apiRoot from './../config.js'
-	import formVerifications from './../formVerification.js'
+	import formVerifications from './formVerification.js'
 	export default{
 		name: 'addPost',
 		store: store,
@@ -176,5 +176,5 @@ p {
   font-size: x-small;
   color: darkgray;
 }
-	
+
 </style>

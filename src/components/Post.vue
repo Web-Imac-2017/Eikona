@@ -1,44 +1,47 @@
 <template>
 	<md-layout>
-		<div v-if="errorMessage != ''" class="error-msg">{{ errorMessage }}</div>
 		<md-card class='post'>
 			<md-card-header>
 				<md-layout>
 					<md-layout md-align="start" class="avatar_poster">
-						<md-avatar>
-					  		<img :src="profile.profile_picture" alt="Avatar">
-						</md-avatar>
-						<span>{{profile.profile_name}}</span>
+						<md-list>
+							<md-list-item>
+								<md-avatar>
+							  		<img :src="profilePost.profilePicture" alt="Avatar">
+								</md-avatar>
+								<span>{{profilePost.profile_name}}</span>
+							</md-list-item>
+						</md-list>
 					</md-layout>
 					<md-layout md-align="end">
-						<PostSettings class="md-list-action"></PostSettings>
+						<PostSettings class="md-list-action" :posteurID="profilePost.profileID"></PostSettings>
 					</md-layout>
 				</md-layout>
 			</md-card-header>
 
 	 		<md-card-media>
-				<img :src="imageLink" alt="Photo test">
+				<img :src="post.originalPicture" alt="Photo test">
   		</md-card-media>
 
-  		<md-layout class="infosPost" >
-  			<md-layout md-align="start">
-					<div class="md-title">{{title}}</div>
-				</md-layout>
-				<md-layout md-align="end">
+			<md-layout class="infosPost">
+  			<md-layout md-flex="80"><div class="description">{{post.desc}}</div></md-layout>
+				<md-layout md-align="end" >
 					<md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
 					<span>{{like}}</span>
 				</md-layout>
 			</md-layout>
 
-			<md-chips v-model="tags" md-static>
- 				 <template scope="chip">{{ chip.value }}</template>
-			</md-chips>
+			<md-layout id="post-tagContainer">
+				<md-chip v-for="tag in tags" class="tag" disabled>{{tag}}</md-chip>
+			</md-layout>
 
-			<md-card-content>
-				<div class="description">{{post.post_description}}</div>
+			<md-card-content v-if="post.allowComments == 1">
 				<p>{{comments.length}} commentaires : </p>
 				<md-button class="md-icon-button" id="display-more-comments"><md-icon>expand_more</md-icon></md-button>
 				<sectionComments :comments="comments" :errorMessage="errorMessage" :postID="post.post_id"></sectionComments>
+			</md-card-content>
+			<md-card-content v-else>
+				<p>Commentaires desactivés</p>
 			</md-card-content>
 		</md-card>
 	</md-layout>
@@ -47,10 +50,12 @@
 
 
 <script>
+
 	import store from './postStore.js'
 	import apiRoot from './../config.js'
 	import sectionComments from './SectionComments.vue'
 	import PostSettings from './PostSettings.vue'
+
 
 	export default{
 		name: 'postFront',
@@ -58,27 +63,8 @@
 			sectionComments,
 			PostSettings
 		},
-		data () {
-			return {
-				// Normalement, il ne devrait plus y avoir de data quand tout sera dynamique
-				imageLink: 'assets/testPhoto.jpg',
-				title: 'Enleve moi ce titre, il n\'en a pas dans la base de donnée',
-
-				// A quoi elle sert ?
-				newComment: '',
-
-				errorMessage: ''
-			}
-		},
-		props: ['post'],
+		props: ['post', 'profilePost'],
 		computed: {
-			profile () {
-				// Recuperer le profile du posteur
-				return {
-					profile_name: 'JackieDu29',
-					profile_picture: 'assets/Eiko.png'
-				}
-			},
 			comments () {
 				// Recuperer les commentaires du post
 				return [{
@@ -101,7 +87,9 @@
 			},
 			like () {
 				// Récupérer le nombre de like du post
+
 				return 0
+
 			},
 			tags () {
 				// Récpérer les tags attachés à ce post
@@ -116,18 +104,18 @@
 				},(response)=>{
 					switch (response.status) {
 						case 401:
-							this.errorMessage = 'Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas la personne'
+							console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas la personne')
 							break
 						case 400:
 							this.$http.get(apiRoot + 'post/unlike/'+this.post.post_id).then((response)=>{
 								this.nbrLike--
 								document.getElementById(id).classList.remove('md-primary')
 							},(response)=>{
-								this.errorMessage = 'On ne peut pas aimer son propre post'
+								console.log('On ne peut pas aimer son propre post')
 							})
 							break
 						case 406:
-							this.errorMessage= 'Le profil courant a liké plus de 200 post durant les 60 dernières minutes. (Securité Anti-Bot)'
+							console.log('Le profil courant a liké plus de 200 post durant les 60 dernières minutes. (Securité Anti-Bot)')
 							break
 					}
 				})
@@ -137,6 +125,20 @@
 </script>
 
 <style scoped>
+
+	.tag{
+		margin: 0 4px 5px 0;
+	}
+	#post-tagContainer {
+		padding: 0 10px;
+		margin-bottom: 10px;
+		margin-top: 10px
+	}
+	.description{
+		font-size: 16px;
+		margin: 10px 0 5px 10px;
+	}
+
 	#display-more-comments{
 		left: 45%;
 	}
@@ -149,7 +151,7 @@
 	.infosPost span{
 		margin-top: 13px;
 		margin-right: 5px;
-		font-size: 2em;
+		font-size: 20px;
 	}
 	li{
 		text-decoration: none;

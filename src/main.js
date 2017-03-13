@@ -51,9 +51,14 @@ const router = new VueRouter({
     props: true
   },
   {
+    path: '/Eikona/user',
+    component: require('./components/MainPage.vue')
+  },
+  {
     path: '/Eikona/user/profile',
     component: require('./components/Profil-selection.vue')
-  }, {
+  },
+  {
     path: '/Eikona/user/settings',
     component: require('./components/Settings.vue')
   },

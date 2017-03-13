@@ -37,7 +37,7 @@ export default {
 
 	methods:{
 		addLikeComment(id){
-				this.$http.get('/Eikona/do/comment/like/'+id).then((response)=> {
+				this.$http.get(apiRoot + 'comment/like/'+id).then((response)=> {
 
 					var i
 					for (i=0, len=this.comments.length; i < len; i++){
@@ -65,7 +65,7 @@ export default {
 			},
 
 			addComment(){
-				this.$http.post('/Eikona/do/comment/create/'+this.postID, {
+				this.$http.post(apiRoot + 'comment/create/'+this.postID, {
 					commentText: this.newComment
 				}).then((response)=>{
 					this.comments.push({
