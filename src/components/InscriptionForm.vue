@@ -105,5 +105,6 @@ a{
 p {
   font-size: x-small;
   color: darkgray;
+  text-align: center;
 }
 </style>
