@@ -1,5 +1,14 @@
+import apiRoot from './config.js'
+
 export default {
   methods: {
+    banned_word (word) {
+      return Vue.http.post(apiRoot + '/ban/is/word/', {word: word}).then(response => {
+
+      }, response => {
+        
+      })
+    }
     verif_mail (value, inputContainerId) {
 			  var regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 			  if(!regex.test(value)){

@@ -23,14 +23,14 @@ export default {
     post
   },
   mounted () {
-    this.$http.get(apiRoot + 'auth/signIn').then(function (response) {
+    this.$http.get(apiRoot + 'auth/signIn/').then(function (response) {
       this.clearUser()
       this.clearProfiles()
       this.initUser()
       this.initProfiles()
       this.$router.push('/user')
     }, function (response) {
-      console.error('No cookies', response);
+      console.log('No cookies', response);
     })
   },
   methods: {
