@@ -85,8 +85,16 @@ export default {
       (this.infos.password !== null && !this.verif_password(this.infos.password, 'settings-user-password')) ||
       (this.infos.password !== null && (this.infos.confirm === null || !this.verif_confirm(this.infos.password, this.infos.confirm, 'settings-user-confirm')))) return
 
-      if (this.infos.name !== null) editName (this.infos.name)
-      if (this.infos.mail !== null) editMail (this.infos.mail)
+      this.banned_mail(this.infos.mail).then(() => {
+        if (this.infos.mail !== null) editMail (this.infos.mail)
+      }, () => {
+        this.infos.mail = '-Email Banni- ' + this.infos.mail
+      })
+      this.banned_word(this.infos.name).then(() => {
+        if (this.infos.name !== null) editMail (this.infos.name)
+      }, () => {
+        this.infos.name = '-Nom Banni- ' + this.infos.name
+      })
       if (this.infos.password !== null) editPassword (this.infos.password, this.infos.confirm)
     },
     editName (name) {
