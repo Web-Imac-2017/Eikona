@@ -487,16 +487,6 @@ class PostModel extends DBInterface
 		return $this->postDatas['post_approved'];
     }
 
-	public function getState()
-    {
-        if($this->postID == 0)
-        {
-            return false;
-        }
-
-		return $this->postDatas['post_state'];
-    }
-
 
     /*
      * Delete the post
