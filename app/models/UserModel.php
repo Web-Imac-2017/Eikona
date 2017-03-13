@@ -1,9 +1,49 @@
 <?php
 
-class UserModel extends DBInterface{
+interface UserModelInterface
+{
+	public function setUser($userID);
 
-	private $id = 0;
-	private $u = NULL;
+    public function exists($userID);
+
+    public function isModerator($userID);
+
+    public function isAdmin($userID);
+
+	public function getFullUser();
+
+	public function getID();
+
+	public function getName();
+
+	public function getEmail();
+
+	public function getActivated();
+
+	public function getKey();
+
+	public function updateName($newName);
+
+	public function updateEmail($newEmail);
+
+	public function updatePassword($newPasswd);
+
+	public function setModerator($userID);
+
+	public function setAdmin($userID);
+
+	public function setToUser($userID);
+
+	public function isUnique($email);
+
+	public function userExists($userID);
+}
+
+class UserModel extends DBInterface implements UserModelInterface
+{
+
+	private $userID = 0;
+	private $user = NULL;
 
 
 	public function __construct($_id = 0)
@@ -13,37 +53,36 @@ class UserModel extends DBInterface{
 		$this->setUser($_id);
 	}
 
-
 	/**
-	 * Instancie la classe User
+	 * Class initializer. Tries to load informations on the given user
 	 * @param int $userID user_id
 	 */
 	public function setUser($userID)
 	{
 		$userID = Sanitize::int($userID);
 
-		if($userID < 1 || $userID == $this->id)
+		if($userID < 1 || $userID == $this->userID)
 		{
-			$this->id = 0;
-			$this->u = NULL;
+			$this->userID = 0;
+			$this->user = NULL;
+
 			return "wrongFormat";
 		}
 
 		//Confirm the id before doing anything
-		$stmt = $this->cnx->prepare("
-			SELECT COUNT(user_id) FROM users
-			WHERE user_id = :id");
+		$stmt = $this->cnx->prepare("SELECT COUNT(user_id) FROM users WHERE user_id = :id");
 		$stmt->execute([":id" => $userID]);
 
 		//user not found
 		if($stmt->fetchColumn() == 0)
 		{
-			$this->id = 0;
-			$this->u = NULL;
+			$this->userID = 0;
+			$this->user = NULL;
+
 			return "notFound";
 		}
 
-		//profile found
+		//user found
 		$stmt = $this->cnx->prepare("
 			SELECT user_id, user_name, user_email, user_passwd, user_register_time,
 			       user_last_activity, user_moderator, user_admin, user_activated, user_key
@@ -51,8 +90,8 @@ class UserModel extends DBInterface{
 			WHERE user_id = :id");
 		$stmt->execute([":id" => $userID]);
 
-		$this->id = $userID;
-		$this->u = $stmt->fetch();
+		$this->userID = $userID;
+		$this->user = $stmt->fetch();
 
 		return "success";
 	}
@@ -70,10 +109,7 @@ class UserModel extends DBInterface{
         if($userID < 1)
             return false;
 
-
-		$stmt = $this->cnx->prepare("
-			SELECT COUNT(user_id) FROM users
-			WHERE user_id = :id");
+		$stmt = $this->cnx->prepare("SELECT COUNT(user_id) FROM users WHERE user_id = :id");
 		$stmt->execute([":id" => $userID]);
 
         return $stmt->fetchColumn() == "1" ? true : false;
@@ -91,10 +127,7 @@ class UserModel extends DBInterface{
         if($userID < 1)
             return false;
 
-
-		$stmt = $this->cnx->prepare("
-			SELECT user_moderator FROM users
-			WHERE user_id = :id");
+		$stmt = $this->cnx->prepare("SELECT user_moderator FROM users WHERE user_id = :id");
 		$stmt->execute([":id" => $userID]);
 
         return $stmt->fetchColumn() == "1" ? true : false;
@@ -111,9 +144,7 @@ class UserModel extends DBInterface{
         if($userID < 1)
             return false;
 
-		$stmt = $this->cnx->prepare("
-			SELECT user_admin FROM users
-			WHERE user_id = :id");
+		$stmt = $this->cnx->prepare("SELECT user_admin FROM users WHERE user_id = :id");
 		$stmt->execute([":id" => $userID]);
 
         return $stmt->fetchColumn() == "1" ? true : false;
@@ -125,9 +156,13 @@ class UserModel extends DBInterface{
 	/***** GETTER *****/
 	/*****************/
 
+    /**
+	 * Return all the informations about the user
+	 * @return int user_id
+	 */
 	public function getFullUser()
 	{
-		return $this->u;
+		return $this->user;
 	}
 
 	/**
@@ -136,7 +171,7 @@ class UserModel extends DBInterface{
 	 */
 	public function getID()
 	{
-		return $this->id;
+		return $this->userID;
 	}
 
 	/**
@@ -145,7 +180,7 @@ class UserModel extends DBInterface{
 	 */
 	public function getName()
 	{
-		return $this->u['user_name'];
+		return $this->user['user_name'];
 	}
 
 	/**
@@ -154,7 +189,7 @@ class UserModel extends DBInterface{
 	 */
 	public function getEmail()
 	{
-		return $this->u['user_email'];
+		return $this->user['user_email'];
 	}	
 
 	/**
@@ -163,16 +198,7 @@ class UserModel extends DBInterface{
 	 */
 	public function getActivated()
 	{
-		return $this->u['user_activated'];
-	}
-
-	/**
-	 * Return if user id admin
-	 * @return boolean true(1) / false(0)
-	 */
-	public function getAdmin()
-	{
-		return $this->u['user_admin'];
+		return $this->user['user_activated'];
 	}
 
 	/**
@@ -181,7 +207,7 @@ class UserModel extends DBInterface{
 	 */
 	public function getKey()
 	{
-		return $this->u['user_key'];
+		return $this->user['user_key'];
 	}
 
 	/******************/
@@ -190,50 +216,49 @@ class UserModel extends DBInterface{
 
 	/**
 	 * Update user name
-	 * @param  text $newName user_name
-	 * @return boolean       true / false
+	 * @param  text    $newName user_name
+	 * @return boolean true / false
 	 */
 	public function updateName($newName)
 	{
-		if($this->id == 0) return false;
+		if($this->userID == 0)
+            return false;
 
 		$name = Sanitize::userName($newName);
 
-		if(!$name) return false;
+		if(!$name)
+            return false;
 
-		$stmt = $this->cnx->prepare("
-			UPDATE users
-			SET user_name = :name
-			WHERE user_id = :id");
+		$stmt = $this->cnx->prepare("UPDATE users SET user_name = :name WHERE user_id = :id");
 		$stmt->execute([":name" => $name,
-						":id"   => $this->id]);
+						":id"   => $this->userID]);
 
-		$this->u['user_name'] = $name;
+		$this->user['user_name'] = $name;
+
 		return true;
 	}
 
 
 	/**
 	 * Update user email
-	 * @param  text $newEmail user_email
-	 * @return boolean           true / false
+	 * @param  text    $newEmail user_email
+	 * @return boolean true / false
 	 */
 	public function updateEmail($newEmail)
 	{
-		if($this->id == 0) return false;
+		if($this->userID == 0)
+            return false;
 
 		$email = Sanitize::userEmail($newEmail);
 
-		if(!$email) return false;
+		if(!$email)
+            return false;
 
-		$stmt = $this->cnx->prepare("
-			UPDATE users
-			SET user_email = :email
-			WHERE user_id = :id");
+		$stmt = $this->cnx->prepare("UPDATE users SET user_email = :email WHERE user_id = :id");
 		$stmt->execute([":email" => $email,
-			            ":id"    => $this->id]);
+			            ":id"    => $this->userID]);
 
-		$this->u['user_email'] = $email;
+		$this->user['user_email'] = $email;
 
 		return true;
 	}
@@ -242,19 +267,18 @@ class UserModel extends DBInterface{
 	 * Update user password
 	 * @param  text $newPasswd user_passwd
 	 */
-	public function updatePassword($newPasswd){
-		if($this->id == 0) return false;
+	public function updatePassword($newPasswd)
+    {
+		if($this->userID == 0)
+            return false;
 
 		$pwd = hash('sha256', $newPasswd);
 
-		$stmt = $this->cnx->prepare("
-			UPDATE users
-			SET user_passwd = :pwd
-			WHERE user_id = :id");
+		$stmt = $this->cnx->prepare("UPDATE users SET user_passwd = :pwd WHERE user_id = :id");
 		$stmt->execute([":pwd" => $pwd,
-			            ":id"  => $this->id]);
+			            ":id"  => $this->userID]);
 
-		$this->u['user_passwd'] = $pwd;
+		$this->user['user_passwd'] = $pwd;
 
 		return true;
 	}
@@ -264,62 +288,54 @@ class UserModel extends DBInterface{
 	/******************/
 
 	/**
-	 * L'utilisateur devient un modérateur
-	 * @param int $id user_id
+	 * Make given usen a moderator
+	 * @param int $userID user_id
 	 */
-	public function setModerator($id)
+	public function setModerator($userID)
 	{
-		if($this->id == 0) return false;
+		if($this->userID == 0)
+            return false;
 
-		$stmt = $this->cnx->prepare("
-			UPDATE users
-			SET user_moderator = true
-			WHERE user_id = :id");
-		$stmt->execute([":id" => $id]);
+		$stmt = $this->cnx->prepare("UPDATE users SET user_moderator = true WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
 
-		$this->u['user_moderator'] = true;
+		$this->user['user_moderator'] = true;
 
 		return true;
 	}
 
 	/**
-	 * L'utilisateur devient un admin
-	 * @param int $id user_id
+	 * Make given user an administrator
+	 * @param int $userID user_id
 	 */
-	public function setAdmin($id)
+	public function setAdmin($userID)
 	{
-		if($this->id == 0) return false;
+		if($this->userID == 0)
+            return false;
 
-		$stmt = $this->cnx->prepare("
-			UPDATE users
-			SET user_admin = true,
-			    user_moderator = true
-			WHERE user_id = :id");
-		$stmt->execute([":id" => $id]);
+		$stmt = $this->cnx->prepare("UPDATE users SET user_admin = true, user_moderator = true WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
 
-		$this->u['user_moderator'] = true;
-		$this->u['user_admin'] = true;
+		$this->user['user_moderator'] = true;
+		$this->user['user_admin'] = true;
 
 		return true;
 	}
 
 	/**
-	 * L'utilisateur devient un simple user
-	 * @param int $id user_id
+	 * Make tgivenhe user a simple user without privileges
+	 * @param int $userID user_id
 	 */
-	public function setToUser($id)
+	public function setToUser($userID)
 	{
-		if($this->id == 0) return false;
+		if($this->userID == 0)
+            return false;
 
-		$stmt = $this->cnx->prepare("
-			UPDATE users
-			SET user_admin = false,
-			    user_moderator = false
-			WHERE user_id = :id");
-		$stmt->execute([":id" => $id]);
+		$stmt = $this->cnx->prepare("UPDATE users SET user_admin = false, user_moderator = false WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
 
-		$this->u['user_moderator'] = false; 
-		$this->u['user_admin'] = false;
+		$this->user['user_moderator'] = false;
+		$this->user['user_admin'] = false;
 
 		return true;
 	}
@@ -329,15 +345,13 @@ class UserModel extends DBInterface{
 	/******************/
 
 	/**
-	 * Vérifie si l'utilisateur est unique
+	 * Confirm uniqueness of user through the email
 	 * @param  text $email user_email
 	 * @return boolean	    true / false
 	 */
 	public function isUnique($email)	
 	{
-		$stmt = $this->cnx->prepare("
-			SELECT COUNT(*) FROM users
-			WHERE user_email = :email");	
+		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM users WHERE user_email = :email");
 		$stmt->execute([":email" => $email]);
 
 		return ($stmt->fetchColumn() == 0) ? true : false;
@@ -345,15 +359,13 @@ class UserModel extends DBInterface{
 
 	/**
 	 * Return if user exists
-	 * @param  int $id user_id
+	 * @param  int $userID user_id
 	 * @return boolean     true / false
 	 */
-	public function userExists($id)
+	public function userExists($userID)
 	{
-		$stmt = $this->cnx->prepare("
-			SELECT COUNT(*) FROM users
-			WHERE user_id = :id");	
-		$stmt->execute([":id" => $id]);
+		$stmt = $this->cnx->prepare("SELECT COUNT(*) FROM users WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
 
 		return ($stmt->fetchColumn() == 1) ? true : false;
 	}
