@@ -353,72 +353,84 @@ USE `Roger` ;
 -- -----------------------------------------------------
 -- View `Roger`.`posts_bonus`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `Roger`.`posts_bonus` ;
+DROP TABLE IF EXISTS `Roger`.`posts_bonus`;
 USE `Roger`;
 CREATE  OR REPLACE VIEW `posts_bonus` AS
 SELECT
 	post_id,
     IF (UNIX_TIMESTAMP() - post_publish_time < 24*3600, 
-        TRUNCATE((24*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        TRUNCATE(((24*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(UNIX_TIMESTAMP() - post_publish_time)) * 0.0155, 2)
         , 0)
 		 AS post_bonus
 FROM
 	posts
+WHERE 
+	post_publish_time > 0 AND
+	post_state = 1
 ;
 
 -- -----------------------------------------------------
 -- View `Roger`.`comments_score`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `Roger`.`comments_score` ;
+DROP TABLE IF EXISTS `Roger`.`comments_score`;
 USE `Roger`;
 CREATE  OR REPLACE VIEW `comments_score` AS
 SELECT
 	comments.post_id AS post_id,
     comments.comment_id AS comment_id,
 	IF (UNIX_TIMESTAMP() - comment_time < 96*3600, 
-        TRUNCATE((96*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        TRUNCATE(((96*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(UNIX_TIMESTAMP() - post_publish_time)) * 0.0155, 2)
         , 0)
 		 AS comment_score
 FROM
 	comments
 JOIN posts ON
 	posts.post_id = comments.post_id
+WHERE 
+	post_publish_time > 0 AND
+	post_state = 1
 ;
 
 -- -----------------------------------------------------
 -- View `Roger`.`likes_score`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `Roger`.`likes_score` ;
+DROP TABLE IF EXISTS `Roger`.`likes_score`;
 USE `Roger`;
 CREATE  OR REPLACE VIEW `likes_score` AS
 SELECT
 	post_likes.post_id AS post_id,
 	IF (UNIX_TIMESTAMP() - like_time < 72*3600, 
-        TRUNCATE((72*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        TRUNCATE(((72*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(UNIX_TIMESTAMP() - post_publish_time)) * 0.0155, 2)
         , 0)
 		 AS like_score
 FROM
 	post_likes
 JOIN posts ON
 	posts.post_id = post_likes.post_id
+WHERE 
+	post_publish_time > 0 AND
+	post_state = 1
 ;
 
 -- -----------------------------------------------------
 -- View `Roger`.`views_score`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `Roger`.`views_score` ;
+DROP TABLE IF EXISTS `Roger`.`views_score`;
 USE `Roger`;
 CREATE  OR REPLACE VIEW `views_score` AS
 SELECT
 	post_views.post_id AS post_id,
 	IF (UNIX_TIMESTAMP() - view_time < 48*3600, 
-        TRUNCATE((48*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(POW(UNIX_TIMESTAMP() - post_publish_time, 64)), 2)
+        TRUNCATE(((48*3600 - (UNIX_TIMESTAMP() - post_publish_time)) / LOG(UNIX_TIMESTAMP() - post_publish_time)) * 0.0155, 2)
         , 0)
 		 AS view_score
 FROM
 	post_views
 JOIN posts ON
 	posts.post_id = post_views.post_id
+WHERE 
+	post_publish_time > 0 AND
+	post_state = 1
 ;
 
 -- -----------------------------------------------------
