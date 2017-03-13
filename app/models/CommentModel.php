@@ -105,4 +105,16 @@ class CommentModel extends DBInterface
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getComment($commentID)
+    {
+        $stmt = $this->cnx->prepare("
+            SELECT comment_id, comments.profile_id, profiles.profile_name, comment_text, comment_time
+            FROM comments
+            JOIN profiles ON comments.profile_id = profiles.profile_id
+            WHERE comment_id = :commentID");
+        $stmt->execute([":commentID" => $commentID]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 }

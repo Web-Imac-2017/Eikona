@@ -83,6 +83,7 @@ class isAuthorized
         if(!self::isUser())
             return false;
         
+
         $userProfiles = Response::read("user", "profiles")['data'];
 
         if(empty($userProfiles))
@@ -91,13 +92,9 @@ class isAuthorized
         if($userProfiles["nbOfProfiles"] == 0)
             return false;
 
-        //prevent error until user->profiles gets updated
-        if(empty($userProfiles["profiles"]))
-            return false;
-
         foreach ($userProfiles["profiles"] as $profile)
         {
-            if (isset($profile["user_id"]) && $profile["profile_id"] == $profileID)
+            if ($profile["profileID"] == $profileID)
                 return true;
         }
 

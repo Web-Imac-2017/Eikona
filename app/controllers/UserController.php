@@ -130,11 +130,18 @@ class UserController{
 			return;
 		}
 
-		$profiles = $this->profileModel->getUserProfiles($userID);
+		$profilesID = $this->profileModel->getUserProfiles($userID);
+
+        $profiles = array();
+
+        foreach($profilesID as $profileID)
+        {
+            array_push($profiles, Response::read("profile", "get", $profileID)["data"]);
+        }
 
 		$resp = new Response();
 
-		if($profiles){
+		if(count($profiles) > 0){
 			$resp->setSuccess(200, "user profiles returned")
 			     ->bindValue("userID", $userID)
 			     ->bindValue("nbOfProfiles", count($profiles))

@@ -56,7 +56,7 @@ class ProfileModel extends DBInterface
         }
 
         //profile found
-        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
+        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private, profile_key FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $profileID]);
 
         $this->pID = $profileID;
@@ -112,7 +112,7 @@ class ProfileModel extends DBInterface
         if($stmt->fetchColumn() != 0)
             return "userNameAlreadyExists";
 
-        $stmt = $this->cnx->prepare("INSERT INTO profiles (user_id, profile_name, profile_desc, profile_create_time, profile_private) VALUES (:uID, :name, :desc, :create, :private)");
+        $stmt = $this->cnx->prepare("INSERT INTO profiles (user_id, profile_name, profile_desc, profile_create_time, profile_private, profile_key) VALUES (:uID, :name, :desc, :create, :private, UUID())");
 
         $stmt->execute([":uID"     => $uID,
                         ":name"    => $name,
@@ -149,12 +149,12 @@ class ProfileModel extends DBInterface
         if($id == 0) return false;
 
         $stmt = $this->cnx->prepare("
-            SELECT profile_id, user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private
+            SELECT profile_id
             FROM profiles
             WHERE :id = user_id");
         $stmt->execute([":id" => $id]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     /**
@@ -228,21 +228,37 @@ class ProfileModel extends DBInterface
     /**
      * Return the ID of the owner of the profile
      */
-    public function getOwner($returnID = false)
+    public function getOwner()
     {
         if($this->pID == -1)
             return;
 
-        if($returnID)
-        {
-            return $this->p['user_id'];
-        }
-
         return $this->p['user_id'];
     }
 
+    /**
+     * Return the key of the profile
+     */
+    public function getKey()
+    {
+        if($this->pID == -1)
+            return;
+
+        return $this->p['profile_key'];
+    }
 
 
+    public function tooMuchProfiles($userID)
+    {
+        global $PARAMS;
+
+        $stmt = $this->cnx->prepare("
+            SELECT COUNT(profile_id) FROM profiles
+            WHERE :userID = user_id");
+        $stmt->execute([":userID" => $userID]);
+
+        return $stmt->fetchColumn() >= $PARAMS->USER_MAX_PROFILES ? true : false;
+    }
 
     //updating informations
 
@@ -395,6 +411,110 @@ class ProfileModel extends DBInterface
 
         $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, profile_picture, followings.follower_subscribed, followings.follow_confirmed FROM profiles JOIN followings ON followings.followed_id = profiles. profile_id WHERE followings.follower_id = :profileID ORDER BY profiles.profile_name");
         $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+
+
+
+    public function feed($profileID, $limit, $before = 0)
+    {
+        if($before == 0)
+        {
+            $before = time();
+        }
+        else
+        {
+            $before = Sanitize::int($before);
+        }
+
+        $stmt = $this->cnx->prepare("
+            #GET THE FEED
+            SELECT
+                'post' AS type,
+                post_id AS dest,
+                post_publish_time AS time,
+                profile_id AS source
+            FROM
+                posts
+            WHERE
+                post_state = 1 AND
+                post_publish_time < :before AND
+                profile_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            UNION
+            SELECT
+                'like' AS type,
+                post_id AS dest,
+                like_time AS time,
+                profile_id AS source
+            FROM
+                post_likes
+            WHERE
+                like_time < :before AND
+                profile_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            UNION
+            SELECT
+                'follow' AS type,
+                followed_id AS dest,
+                following_time AS time,
+                follower_id AS source
+            FROM
+                followings
+            WHERE
+                follow_confirmed = 1 AND
+                following_time < :before AND
+                follower_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            UNION
+            SELECT
+                'comment' AS type,
+                post_id AS dest,
+                comment_time AS time,
+                comment_id AS source
+            FROM
+                comments
+            WHERE
+                comment_time < :before AND
+                profile_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            ORDER BY time DESC
+            LIMIT ".$limit.";"
+        );
+        $stmt->execute([":profileID" => Sanitize::int($profileID),
+                        ":before" => $before]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

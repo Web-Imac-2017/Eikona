@@ -24,7 +24,7 @@ class PostModel extends DBInterface
 		/* If post is already define -> current post */
 		if($postID == $this->postID)
 		{
-			return;
+			return true;
 		}
 
         if($postID < 1)
@@ -47,7 +47,7 @@ class PostModel extends DBInterface
         }
 
         //Post found
-        $stmt = $this->cnx->prepare("SELECT post_id, profile_id, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
+        $stmt = $this->cnx->prepare("SELECT post_id, profile_id, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, post_filter, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $postID]);
 
         $this->postID = $postID;
@@ -57,7 +57,7 @@ class PostModel extends DBInterface
     }
 
     /**
-     * Create a new post
+     * Create a new post as a draft
      *
      * @param $type Type of the post to be posted
      * @param $extension Extension of the picture/video of the post
@@ -74,13 +74,14 @@ class PostModel extends DBInterface
 		// To change when there will be profile
 		$profile = Session::read("profileID");
 
-        $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_edit_time, post_publish_time, post_allow_comments) VALUES (:profile, :type, :extension, :description, :editTime, :publishTime, :comments)");
+        $stmt = $this->cnx->prepare("INSERT INTO posts(profile_id, post_type, post_extension, post_description, post_edit_time, post_state, post_publish_time, post_allow_comments) VALUES (:profile, :type, :extension, :description, :editTime, :state, :publishTime, :comments)");
         $stmt->execute([ ":profile"     => $profile,
 						 ":type"        => $type,
                          ":extension"   => $extension,
                          ":description" => $description,
 						 ":editTime"    => time(),
-						 ":publishTime" => time(),
+						 ":publishTime" => 0,
+						 ":state"       => 0,
                          ":comments"    => $comments]);
 
         $postID = $this->cnx->lastInsertId();
@@ -154,10 +155,67 @@ class PostModel extends DBInterface
         return $this->postDatas['post_allow_comments'];
     }
 
+     /*
+     * Get the current applied filter of the post
+     *
+     */
+    public function getFilter()
+    {
+        if($this->postID == 0)
+        {
+            return 0;
+        }
 
+        return $this->postDatas['post_filter'];
+    }
+
+     /*
+     * Get the current state of the post
+     *
+     */
+    public function getState()
+    {
+        if($this->postID == 0)
+        {
+            return 0;
+        }
+
+        return $this->postDatas['post_state'];
+    }
+
+    /**
+     * Get the saving directory of the current post
+     * @param  integer [$profileID      = 0] Profile Id to use if no current post is defines
+     * @return string  URL to the saving directory
+     */
+    public function getSaveFolder($profileID = 0)
+    {
+        if($profileID == 0 && $this->postID == 0)
+        {
+            return;
+        }
+        else if($profileID == 0)
+        {
+            $profileID = $this->postDatas['profile_id'];
+        }
+
+        $stmt = $this->cnx->prepare("SELECT profile_key FROM profiles WHERE profile_id = :profile");
+        $stmt->execute([":profile" => $profileID]);
+
+        $profileKey = $stmt->fetchColumn();
+
+        return $_SERVER['DOCUMENT_ROOT']."/Eikona/app/medias/img/".$profileKey."/";
+    }
+
+
+    /**
+     * Return the number of post of the given profileID
+     * @param  integer $profileID Profile to use
+     * @return integer Number of post published
+     */
     public function nbrPosts($profileID)
     {
-        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE profile_id = :profileID");
+        $stmt = $this->cnx->prepare("SELECT COUNT(*) FROM posts WHERE profile_id = :profileID AND post_state = 1");
         $stmt->execute([":profileID" => Sanitize::int($profileID)]);
 
         return $stmt->fetchColumn();
@@ -194,11 +252,23 @@ class PostModel extends DBInterface
 
         $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ". $limit ." OFFSET ".Sanitize::int($offset);
+        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID AND post_state = 1".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
 
         //Execute the query
         $stmt = $this->cnx->prepare($sql);
         $stmt->execute($bindArray);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
+    }
+
+
+
+    public function getDraftsID($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT post_id FROM posts WHERE post_state = 1 AND profile_id = :profile");
+        $stmt->execute([":profile" => $profileID]);
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
     }
@@ -316,6 +386,37 @@ class PostModel extends DBInterface
 		return $name;
     }
 
+    /*
+     * Update the geoname of the post with the given $name
+     *
+     */
+    public function updateFilter($filter)
+    {
+        if($this->postID == 0)
+        {
+            return false;
+        }
+
+        if($filter == "none")
+        {
+            $filter = null;
+        }
+        else
+        {
+            $filter = Sanitize::string($filter);
+        }
+
+		/* Sanitize String à ajouter pour Latitude */
+
+        $stmt = $this->cnx->prepare("UPDATE posts SET post_filter = :filter WHERE post_id = :postID");
+        $stmt->execute([":filter" => $filter,
+                         ":postID" => $this->postID]);
+
+        $this->postDatas['post_filter'] = $filter;
+
+		return $filter;
+    }
+
     public function updateTime($postID)
     {
         $time = time();
@@ -325,6 +426,21 @@ class PostModel extends DBInterface
             WHERE :postID = post_id");
         $stmt->execute([":time" => $time,
                         ":postID" => $postID]);
+        return $time;
+    }
+
+    public function publish($postID)
+    {
+
+        $time = time();
+
+        $stmt = $this->cnx->prepare("
+            UPDATE posts
+            SET post_publish_time = :time,
+            post_state = 1
+            WHERE :postID = post_id");
+        $stmt->execute([":time" => $time,
+                        ":postID" => Sanitize::int($postID)]);
         return $time;
     }
 
@@ -411,6 +527,26 @@ class PostModel extends DBInterface
         $stmt->execute([":postID" => $this->postID]);
 
 		return true;
+    }
+    
+    
+    
+    
+    public function popular($exclude = [], $limit = 30)
+    {
+        $where = "";    
+       
+        if(count($exclude) > 0)
+        {
+            $placeholders = str_repeat('?, ', count($exclude) - 1).'?';
+            
+            $where = " WHERE pop_score.post_id NOT IN(".$placeholders.")";
+        }
+        
+        $stmt = $this->cnx->prepare("SELECT pop_score.post_id, profile_private, profiles.profile_id FROM pop_score JOIN posts ON pop_score.post_id = posts.post_id JOIN profiles ON posts.profile_id = profiles.profile_id ".$where." ORDER BY post_score DESC LIMIT ".Sanitize::int($limit));
+        $stmt->execute($exclude);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 }

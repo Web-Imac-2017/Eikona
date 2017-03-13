@@ -29,8 +29,8 @@ class AuthController{
 				if(filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)){
 					//si user est unique
 					if($this->model->isUnique($_POST['user_email'])){
-						$ban = new BanController;
-						if (!$ban->model->isEmailBan($_POST['user_email'])){
+                        $emailIsBan = Response::read("ban", "is", "email", $_POST['user_email']);
+						if ($emailIsBan["code"] == 404){
 
 						//insertion dans la base de données
 							$user_register_time = time();
@@ -158,7 +158,41 @@ class AuthController{
 	{
 		$resp = new Response();
 
-		//si les deux champs de connexion sont remplis
+        //Check if user has a "Stay connected" cookie
+		$userKey = Cookie::read("stayConnected");
+
+        if($userKey !== false)
+        {
+            $user = $this->model->getByKey($userKey);
+
+            if($user["nbr"] == 0)
+            {
+                //Cookie is not valid
+                $resp->setFailure("409", "The cookie received does not match any registered account.")
+                    ->send();
+
+                Cookie::delete("stayConnected");
+
+                return;
+            }
+
+            //Cookie is valid
+            Session::renewKey();
+            Session::write("userID", $user['user_id']);
+
+            $resp->setSuccess(200, "User connected.")
+                 ->bindValue("userID", $user['user_id'])
+                 ->bindValue("userEmail", $user['user_email'])
+                 ->send();
+
+
+            return;
+		}
+
+        //Make sure no cookie are left behind
+        Cookie::delete("stayConnected");
+
+		//Proceed to connection
 		if(!empty($_POST['user_email']) &&
 		   !empty($_POST['user_passwd'])){
 
@@ -174,8 +208,11 @@ class AuthController{
 						$resp->setSuccess(200, "user connected")
 						     ->bindValue("userID", $user->getID())
 						     ->bindValue("userEmail", $_POST['user_email']);
-						Session::renewKey();
+
+						//Session::renewKey();
 						Session::write("userID", $user->getID());
+
+						Cookie::set("stayConnected", $user->getKey(), 2*7*24*3600);
 					}else{
 						$resp->setFailure(401, "account not yet activated");
 					}
@@ -198,21 +235,30 @@ class AuthController{
 	 */
 	public function signOut($silence = false)
 	{
-		if(!$silence){
-			$resp = new Response();
-
-			if(!Session::read("userID")){
-				$resp->setFailure(400, "User not connected");
-			}else{
-				$resp->setSuccess(200, "user deconnected")
-				     ->bindValue("id", Session::read("userID"));
-			}
-			$resp->send();
-		}
+        Cookie::set("stayConnected", "", -1);
 
 		Session::renewKey();
 		Session::remove("userID");
 		Session::remove("profileID");
+
+		if(!$silence)
+        {
+			$resp = new Response();
+
+			if(!Session::read("userID"))
+            {
+				$resp->setFailure(400, "User not connected");
+			}
+            else
+            {
+				$resp->setSuccess(200, "user deconnected")
+				     ->bindValue("id", Session::read("userID"));
+			}
+
+			$resp->send();
+		}
+
+        return;
 	}
 
 }
