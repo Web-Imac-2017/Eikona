@@ -52,7 +52,7 @@ class BannedEmailsModel extends DBInterface
         $stmt = $this->cnx->prepare("SELECT banned_email AS email FROM banned_emails ORDER BY banned_email");
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     /**

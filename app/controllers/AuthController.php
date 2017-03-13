@@ -29,35 +29,41 @@ class AuthController{
 				if(filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)){
 					//si user est unique
 					if($this->model->isUnique($_POST['user_email'])){
+						$ban = new BanController;
+						if (!$ban->model->isEmailBan($_POST['user_email'])){
+
 						//insertion dans la base de données
-						$user_register_time = time();
-						$id = $this->model->addUser(
-							$_POST['user_name'],
-							$_POST['user_email'],
-							$_POST['user_passwd'],
-							$user_register_time);
-						//envoi d'un mail d'activation
-						if($this->model->sendMail($id, $_POST['user_email'], $user_register_time)){
-							$resp->setSuccess(201, "user added and activation mail sent")
-						         ->bindValue("email", $_POST['user_email'])
-						         ->bindValue("userID", $id);
+							$user_register_time = time();
+							$id = $this->model->addUser(
+								$_POST['user_name'],
+								$_POST['user_email'],
+								$_POST['user_passwd'],
+								$user_register_time);
+							//envoi d'un mail d'activation
+							if($this->model->sendMail($id, $_POST['user_email'], $user_register_time)){
+								$resp->setSuccess(201, "user added and activation mail sent")
+							         ->bindValue("email", $_POST['user_email'])
+							         ->bindValue("userID", $id);
+							}else{
+								$resp->setFailure(400, "mail not sent");
+							}
 						}else{
-							$resp->setFailure(400, "mail not sent");
+							$resp->setFailure(406, "email banned");
 						}
 					}else{
 						$resp->setFailure(403, "user already exists");
-					}				
+					}
 				}else{
 					$resp->setFailure(409, "user_email is not an email");
-				}				
+				}
 			}else{
 				$resp->setFailure(409, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
 			}
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
 		}
-		
-		//envoi de la réponse	
+
+		//envoi de la réponse
 		$resp->send();
 	}
 
@@ -77,14 +83,14 @@ class AuthController{
 			if($res){
 				$this->model->updateUserActivated($_REQUEST['user_id']);
 				$resp->setSuccess(200, "Account activated")
-				     ->bindValue("userID", $_REQUEST['user_id']); 
+				     ->bindValue("userID", $_REQUEST['user_id']);
 			}else{
 				$resp->setFailure(409, "user_id or and user_key do not exist");
 			}
 		}else{
 			$resp->setFailure(400, "tous les champs ne sont pas remplis");
-		} 	
-		
+		}
+
 		//envoi de la réponse
 		$resp->send();
 	}
@@ -117,7 +123,7 @@ class AuthController{
 		$resp = new Response();
 
 		if(!empty($_POST['user_email']) &&
-		   !empty($_POST['user_passwd']) && 
+		   !empty($_POST['user_passwd']) &&
 		   !empty($_POST['user_passwd_confirm']) &&
 		   !empty($_POST['code'])){
 
@@ -133,7 +139,7 @@ class AuthController{
 					}
 				}else{
 					$resp->setFailure(409, "invalid reset code");
-				}				
+				}
 			}else{
 				$resp->setFailure(404, "unknown user");
 			}
@@ -191,7 +197,7 @@ class AuthController{
 	 * @return Response JSON
 	 */
 	public function signOut($silence = false)
-	{		
+	{
 		if(!$silence){
 			$resp = new Response();
 
@@ -203,10 +209,10 @@ class AuthController{
 			}
 			$resp->send();
 		}
-		
+
 		Session::renewKey();
 		Session::remove("userID");
 		Session::remove("profileID");
 	}
-	
+
 }

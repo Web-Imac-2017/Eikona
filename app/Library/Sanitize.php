@@ -7,8 +7,11 @@ class Sanitize
      * @param $string The string to be parsed
      * @param $removeEmojis Shall we remove emoji as well?
      */
-    static public function string($string, $removeEmojis = false)
+    static public function string($string, $removeEmojis = false, $removeBannedWords = true)
     {
+        if($removeBannedWords)
+            $string = self::bannedWords($string);
+
         $string = htmlspecialchars($string, ENT_QUOTES);
 
         if($removeEmojis)
@@ -91,8 +94,10 @@ class Sanitize
      */
     static public function profileName($pName)
     {
+        $name = self::bannedWords($pName);
+
         //replace accented characters
-        $name = iconv('UTF-8', 'ASCII//TRANSLIT', $pName);
+        $name = iconv('UTF-8', 'ASCII//TRANSLIT', $name);
 
         //Remove unwanted characters
         $name = preg_replace('/[\$+!*\'(),\{\}\|\\\^~[\]`<>\#%";\/\?:@&=\s+]/', '', $name);
@@ -111,8 +116,10 @@ class Sanitize
      */
     public static function userName($uName)
     {
+        $name = self::bannedWords($uName);
+
         //replace punctuation characters
-        $name = preg_replace("#[[:punct:]]#", "", $uName);
+        $name = preg_replace("#[[:punct:]]#", "", $name);
 
         //sanitize
         $name = filter_var($name, FILTER_SANITIZE_STRING);
@@ -144,4 +151,12 @@ class Sanitize
         return strtolower($email);
     }
 
+    public static function bannedWords($string)
+    {
+        $banned = Response::read("Ban", "get", "word")['data']['words'];
+
+        $cleanText = str_ireplace($banned, "", $string);
+
+        return $cleanText;
+    }
 }

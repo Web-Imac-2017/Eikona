@@ -114,7 +114,7 @@ class FollowModel extends DBInterface
                         ":subscribe" => $subscribe,
                         ":confirmed" => $confirmed]);
 
-        return true;
+        return $confirmed;
     }
 
 
@@ -264,7 +264,7 @@ class FollowModel extends DBInterface
             return false;
         }
 
-        $stmt = $this->cnx->prepare("UPDATE followings SET follower_confirmed = 1 WHERE follower_id = :follower AND followed_id = :followed");
+        $stmt = $this->cnx->prepare("UPDATE followings SET follow_confirmed = 1 WHERE follower_id = :follower AND followed_id = :followed");
         $stmt->execute([":follower" => $follower,
                         ":followed" => $followed]);
 
