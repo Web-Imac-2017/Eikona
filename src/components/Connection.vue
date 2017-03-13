@@ -95,8 +95,11 @@ export default {
   color: red;
   font-weight: bold;
 }
+
 #connectionForm p {
   font-size: x-small;
   color: darkgray;
+  text-align: center;
 }
+
 </style>
