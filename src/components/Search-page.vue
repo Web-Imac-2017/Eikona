@@ -60,9 +60,8 @@ export default {
       this.searching = false
     },
     searchBy (query, searchType) {
-      this.$http.post(apiRoot + 'search/', {
-        query: query,
-        field: searchType
+      this.$http.post(apiRoot + 'search/' + searchType, {
+        query: query
       }).then(
         (response) => {
           console.log('searchby : ' + searchType, response)
