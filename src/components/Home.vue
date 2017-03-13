@@ -45,7 +45,7 @@ export default {
 
 #register {
  max-width: 40%;
- padding: 50px 100px;
+ padding: 40px 80px;
  text-align: center;
  margin: 50px auto;
  background-color: white;
@@ -83,10 +83,10 @@ export default {
   background-size: cover;*/
 
 
-a[ id= "formulaire" ]:target ~ #formulaire {
+/*a[ id= "formulaire" ]:target ~ #formulaire {
     -webkit-transform: translateY( 500px);
     transform: translateY( 500px );
-}
+}*/
 
 /*********************** BACKGROUND CSS ********************/
 
