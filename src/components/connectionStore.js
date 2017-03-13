@@ -34,6 +34,9 @@ const getters = {
 }
 
 const actions = {
+  updateUser (store, user) {
+    store.commit('SET_USER', user)
+  },
   addProfile: (store, profileID) => {
     Vue.http.get(apiRoot + 'profile/get/' + profileID).then((response) => {
       console.log('SUCCESS: profile addition', response)
