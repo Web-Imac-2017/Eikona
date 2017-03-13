@@ -10,7 +10,7 @@ class Cookie
 {
     public static function set($name, $value, $expires)
     {
-        setcookie($name, $value, time() + $expires, '/', 'localhost', isset($_SERVER["HTTPS"]), true);
+        setcookie($name, serialize($value), time() + $expires, '/', 'localhost', isset($_SERVER["HTTPS"]), true);
     }
 
     public static function read($name)
@@ -18,7 +18,7 @@ class Cookie
         if(!isset($_COOKIE[$name]))
             return false;
 
-        return $_COOKIE[$name];
+        return @unserialize($_COOKIE[$name]);
     }
 
     public static function delete($name)

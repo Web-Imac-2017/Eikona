@@ -170,21 +170,43 @@ class BanController implements BanInterface
     {
         $word = strtolower($word);
 
+        
+        if($this->wordsModel->exists($email) == 1)
+        {
+            $rsp = new Response();
+            $rsp->setSuccess(401, "This word is not authorized")
+                ->bindValue("exists", true)
+                ->send();
+            
+            return;
+        }
+        
         $rsp = new Response();
-        $rsp->setSuccess(200)
-            ->bindValue("exists", $this->wordsModel->exists($word))
+        $rsp->setSuccess(404, "This word was not found. It is authorized")
+            ->bindValue("exists", false)
             ->send();
-
     }
 
     private function isEmailBan($email)
     {
         $email = strtolower($email);
         
+        if($this->emailsModel->exists($email) == 1)
+        {
+            $rsp = new Response();
+            $rsp->setSuccess(401, "This email is not authorized")
+                ->bindValue("exists", true)
+                ->send();
+            
+            return;
+        }
+        
         $rsp = new Response();
-        $rsp->setSuccess(200)
-            ->bindValue("exists", $this->emailsModel->exists($email))
+        $rsp->setSuccess(404, "This email was not found. It is authorized")
+            ->bindValue("exists", false)
             ->send();
+
+        return;
     }
 
 

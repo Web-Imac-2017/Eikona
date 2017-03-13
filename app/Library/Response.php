@@ -120,7 +120,7 @@ class Response
      */
     public function unlinkValue($vName)
     {
-        unset($data);
+        unset($this->data[$vName]);
 
         return $this;
     }
