@@ -288,6 +288,7 @@ class ReportController
 		} else {
 			$rsp->setFailure(404, "The report has not worked.")
 				->send();
+			return;
 		}
 	}
 
