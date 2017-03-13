@@ -1,7 +1,7 @@
 <template lang="html">
 	<div>
 		<span class="notification-counter" value="1">1</span>
-		<md-menu md-direction="bottom left" md-size="6">
+		<md-menu md-direction="bottom left" md-size="7">
 		  <md-button md-menu-trigger>
 		  	<md-avatar class="md-large">
 			  <img src="../../assets/arbre_bleu.jpg" alt="People">
@@ -12,9 +12,9 @@
 		  	<div class="author-card">
 		    	<md-menu-item>
 		    		<md-avatar class="md-large">
-		  				<img src="../../assets/arbre_violet.jpg" alt="People">
+		  				<img src="../../assets/arbre_bleu.jpg" alt="People">
 					</md-avatar>
-					<span>Jean Bono</span>
+					<span>profil actuel</span>
 					<md-badge>1</md-badge>
 				</md-menu-item>
 			</div>
@@ -24,7 +24,7 @@
 		    		<md-avatar class="md-large">
 		  				<img src="../../assets/arbre_violet.jpg" alt="People">
 					</md-avatar>
-					<span>Sara Pel</span>
+					<span>profi2</span>
 				</md-menu-item>
 			</div>
 
@@ -33,7 +33,7 @@
 		    		<md-avatar class="md-large">
 		  				<img src="../../assets/arbre_violet.jpg" alt="People">
 					</md-avatar>
-					<span>Axel Air</span>
+					<span>profil3</span>
 				</md-menu-item>
 			</div>
 		  </md-menu-content>
@@ -67,7 +67,7 @@ export default {
 }
 
 .author-card {
-  padding: 8px 16px;
+  padding: 15px 16px;
  }
 
  .author-card .md-avatar {
