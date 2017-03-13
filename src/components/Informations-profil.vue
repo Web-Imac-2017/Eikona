@@ -34,7 +34,7 @@
 				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
 			</md-layout>
 		</md-whiteframe>
-	</md-layout> 
+	</md-layout>
 </template>
 
 <script>
@@ -66,7 +66,7 @@ export default {
 			if(!this.connected){
 				console.log("Abonnement");
 				/*this.$http.get('/Eikona/do/<profileID>[/<subscribe>]').then((response) => {
-      				// gérer le succes, toutes les infos renvoyer sont dans response.data 
+      				// gérer le succes, toutes les infos renvoyer sont dans response.data
 
     			}, (response) => {
       				// gérer les erreurs
