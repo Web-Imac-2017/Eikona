@@ -66,7 +66,8 @@ export default {
 						this.verif_name(this.name, 'inscription-name') &&
 						this.verif_password(this.password, 'inscription-password') &&
 						this.verif_confirm(this.password, this.confirmation, 'inscription-confirm'))) return
-
+			this.banned_mail(this.email).catch(() => {this.email = ' -Email Banni- ' + this.email})
+			this.banned_word(this.name).catch(() => {this.name = ' -Mot Banni- ' + this.name})
 			this.$http.post(apiRoot + 'auth/register/', {
 				user_name: this.name,
 				user_email: this.email,

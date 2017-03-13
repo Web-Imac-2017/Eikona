@@ -29,12 +29,13 @@ class ParamModel extends DBInterface
         if($nbrParams >= count($defaultsParams))
             return;
 
-        $insertStmt = $this->cnx->prepare("INSERT INTO PARAMS(PARAM_NAME, PARAM_VALUE) VALUES(:name, :value)");
+        $insertStmt = $this->cnx->prepare("INSERT INTO PARAMS(PARAM_NAME, PARAM_VALUE, PARAM_edit_time) VALUES(:name, :value, :time)");
 
         foreach($defaultsParams as $pName => $pValue)
         {
             $insertStmt->execute([":name" => $pName,
-                                  ":value" => $pValue]);
+                                  ":value" => $pValue,
+                                  ":time" => 0]);
         }
     }
 

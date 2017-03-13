@@ -40,8 +40,8 @@ class AuthModel extends DBInterface{
 		$pwd = hash('sha256', $passwd);
 
 		$stmt = $this->cnx->prepare("
-			INSERT INTO users (user_name, user_email, user_passwd, user_register_time, user_last_activity)
-			VALUES (:name, :email, :pwd, :time, :lastAct)");
+			INSERT INTO users (user_name, user_email, user_passwd, user_register_time, user_last_activity, user_key)
+			VALUES (:name, :email, :pwd, :time, :lastAct, UUID())");
 		$stmt->execute([":name"    => $name,
 			            ":email"   => $email,
 			            ":pwd"     => $pwd,
@@ -71,6 +71,15 @@ class AuthModel extends DBInterface{
                    'Content-type: text/html; charset=utf-8';
 
        return (mail($email, $subject, $content, $headers)) ? true : false;
+    }
+
+
+    public function getByKey($key)
+    {
+        $stmt = $this->cnx->prepare("SELECT COUNT(user_id) AS nbr, user_id, user_email FROM users WHERE user_key = :key LIMIT 1");
+        $stmt->execute([":key" => $key]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
 

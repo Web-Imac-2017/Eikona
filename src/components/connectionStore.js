@@ -34,6 +34,9 @@ const getters = {
 }
 
 const actions = {
+  updateUser (store, user) {
+    store.commit('SET_USER', user)
+  },
   addProfile: (store, profileID) => {
     Vue.http.get(apiRoot + 'profile/get/' + profileID).then((response) => {
       console.log('SUCCESS: profile addition', response)
@@ -82,10 +85,11 @@ const actions = {
     })
   },
   initProfiles: (store) => {
-    Vue.http.post(apiRoot + 'user/profiles').then((response) => {
+    Vue.http.post(apiRoot + 'user/profiles/').then((response) => {
       store.commit('DELETE_ALL_PROFILE')
       console.log('Récupération profiles : ', response)
-      store.commit('ADD_PROFILES', response.data.data.profiles)
+      if (response.data.data.profiles.length > 0)
+        store.commit('ADD_PROFILES', response.data.data.profiles)
     }, (response) => {
       console.log('ERR: récupération des profils', response)
     })
