@@ -274,7 +274,7 @@ class ReportController
 								->send();
 							return;
 						}else{
-							$resp->setFailure(409, "notif error")
+							$rsp->setFailure(409, "notif error")
 							     ->send();
 							return;
 						}
