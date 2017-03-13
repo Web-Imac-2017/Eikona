@@ -263,7 +263,7 @@ class ReportController
 
 						$this->model->moderate($reportID, $reportStatus, $reportResult);
 
-						$notif = Response::read("notification", "create", 0, $this->postModel->getProfileID(), $postID);
+						$notif = Response::read("notification", "create", "changeReportState", 0, $this->postModel->getProfileID(), $postID);
 
 						if($notif['code'] == 200){
 							$rsp->setSuccess(200, "Post is now hidden. Notif send.")
