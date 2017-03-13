@@ -72,7 +72,7 @@ export default {
       (this.infos.name !== null && !this.verif_name(this.infos.name, 'settings-user-name')) ||
       (this.infos.mail !== null && !this.verif_mail(this.infos.mail, 'settings-user-mail')) ||
       (this.infos.password !== null && !this.verif_password(this.infos.password, 'settings-user-password')) ||
-      (this.infos.password !== null && (this.infos.confirm === null || !this.verif_confirm(this.infos.password, this.infos.confirm, 'settings-user-confirm'))) return
+      (this.infos.password !== null && (this.infos.confirm === null || !this.verif_confirm(this.infos.password, this.infos.confirm, 'settings-user-confirm')))) return
 
       editName (this.infos.name)
       editMail (this.infos.mail)
@@ -92,10 +92,10 @@ export default {
       })
     },
     editMail (mail) {
-      this.$http.post(apiRoot + 'user/edit/' + )
+      //this.$http.post(apiRoot + 'user/edit/' + )
     },
     editPassword (password, confirm) {
-      this.$http.post(apiRoot + 'user/edit/' + )
+      //this.$http.post(apiRoot + 'user/edit/' + )
     }
   }
 }
