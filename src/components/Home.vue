@@ -116,7 +116,7 @@ export default {
 
 .angled_container:after {
   background-color: #226986;
-  background-image: url('../../assets/arbre_bleu.jpg');
+  background-image: url('../assets/arbre_bleu.jpg');
   background-size: 100% 100%;
   transform: skewY(-30deg);
   transform-origin: left bottom;
