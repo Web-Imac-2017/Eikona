@@ -20,7 +20,7 @@
 
 <script>
 import connection from './Connection.vue'
-import profileSwitch from './Switch.vue'
+import profileSwitch from './ProfileSwitch.vue'
 import description from './Home-description.vue'
 
 
