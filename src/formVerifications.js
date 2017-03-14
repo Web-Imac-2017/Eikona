@@ -40,6 +40,13 @@ export default {
 				return false
 			} else document.getElementById(inputContainerId).classList.remove('md-input-invalid')
 			return true
+    },
+    verif_tag(value){
+    	var regex = /^[a-zA-Z0-9_-]{3,20}$/
+			if(!regex.test(value)){				
+				return false
+			} else 
+			return true
     }
   }
 }

@@ -24,7 +24,7 @@
 			</md-card-header>
 
 	 		<md-card-media>
-				<img :src="imageLink" alt="Photo test">
+				<img :src="imageLink" alt="Photo post">
   		</md-card-media>
 
 
