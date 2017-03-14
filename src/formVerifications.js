@@ -1,4 +1,5 @@
 import apiRoot from './config.js'
+import Vue from 'vue'
 
 export default {
   methods: {
