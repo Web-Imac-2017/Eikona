@@ -9,40 +9,31 @@
           <description id="description" class="home-top-element"></description>
         </md-layout>
       </md-layout>
-      <div id="firstInscription" onclick="scrollWin(0, 100)">
+      <div class="firstInscription">
         <h2>Pas encore inscrit(e) ?</h2>
         <a href="#formulaire"><md-icon>keyboard_arrow_down</md-icon></a>
       </div>
     </div>
-    <section id="formulaire">
-      <md-whiteframe md-elevation="5" id="register"><inscription></inscription></md-whiteframe>
-    </section>
   </div>
 </template>
 
 <script>
-
 import connection from './Connection.vue'
-import inscription from './Inscription.vue'
 import description from './Home-description.vue'
-
 
 export default {
   name: 'home',
   components: {
     connection,
-    inscription,
     description
   }
 }
-
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 #home {
   text-align: center;
 }
-
 
 #register {
  max-width: 40%;
@@ -70,10 +61,11 @@ export default {
   text-align: center;
 }
 
-#firstInscription {
+.firstInscription {
   position: relative;
   top: 25%;
 }
+
 
 /*********************** ANIMATION CSS ********************/
 
