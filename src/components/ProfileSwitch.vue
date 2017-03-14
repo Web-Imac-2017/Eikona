@@ -32,7 +32,7 @@ import profileCreation from './Profile-creation.vue'
 
 export default {
   name: 'profileSwitch',
-  /*store: store,*/
+  store: store,
   components: {
 		profile,
     profileCreation
