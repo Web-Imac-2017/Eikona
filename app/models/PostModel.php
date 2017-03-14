@@ -47,7 +47,7 @@ class PostModel extends DBInterface
         }
 
         //Post found
-        $stmt = $this->cnx->prepare("SELECT post_id, profile_id, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, post_filter, post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
+        $stmt = $this->cnx->prepare("SELECT post_id, profile_id, post_type, post_extension, post_description, post_publish_time, post_edit_time, post_state, /*post_filter,*/ post_geo_lat, post_geo_lng, post_geo_name, post_allow_comments, post_approved FROM posts WHERE post_id = :postID");
         $stmt->execute([":postID" => $postID]);
 
         $this->postID = $postID;
