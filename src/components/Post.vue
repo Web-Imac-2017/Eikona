@@ -112,7 +112,7 @@
 				}
 			},
 			addLike (id) {
-				this.$http.get(apiRoot + 'post/like/'+this.post.post_id).then((response) => {
+				this.$http.get(apiRoot + 'post/like/'+this.post.postID).then((response) => {
 					this.nbrLike++
 					document.getElementById(id).classList.add('md-primary')
 				},(response)=>{
@@ -121,7 +121,7 @@
 							console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas la personne')
 							break
 						case 400:
-							this.$http.get(apiRoot + 'post/unlike/'+this.post.post_id).then((response)=>{
+							this.$http.get(apiRoot + 'post/unlike/'+this.post.postID).then((response)=>{
 								this.nbrLike--
 								document.getElementById(id).classList.remove('md-primary')
 							},(response)=>{

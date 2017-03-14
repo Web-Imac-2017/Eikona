@@ -9,11 +9,11 @@
       <md-layout v-else>
         <md-list v-if="resultProfiles.length > 0">
           <md-subheader>Profils</md-subheader>
-          <profile v-for="profile in resultProfiles" :profile="profile" :index="-1" :extended="false" @select="profileSelect"></profile>
+          <profile v-for="profile in resultProfiles" :profile="getProfileFormat(profile)" :index="-1" :extended="false" @select="profileSelect"></profile>
         </md-list>
         <md-whiteframe v-if="resultPosts.length > 0">
           <md-subheader>Publications</md-subheader>
-          <post v-for="post in resultPosts" :post="post" :profilePost=""></post>
+          <post v-for="post in resultPosts" :post="getPostFormat(post)" :profilePost="getProfileFormat(post)"></post>
         </md-whiteframe>
       </md-layout>
     </md-layout>
@@ -32,11 +32,13 @@ export default {
     profile
   },
   props: ['type', 'query'],
-  data: () => ({
-    resultPosts: [],
-    resultProfiles: [],
-    searching: true
-  }),
+  data () {
+    return {
+      resultPosts: [],
+      resultProfiles: [],
+      searching: true
+    }
+  },
   computed: {
     keywords () { return this.query.replace(/[+]/g, ' ') },
     noresult () {
@@ -52,6 +54,21 @@ export default {
     query: 'search'
   },
   methods: {
+    getProfileFormat (item) {
+      return {
+        profileID: item.profile_id,
+        profilePict: item.profile_picture,
+        profileName: item.profile_name
+      }
+    },
+    getPostFormat (item) {
+      return {
+        postID: item.post_id,
+        originalPicture: null,
+        desc: item.description,
+        allowComments: item.post_allow_comments
+      }
+    },
     search () {
       this.resultPosts = []
       this.resultProfiles = []
@@ -79,6 +96,7 @@ export default {
             case 404:
               console.log('Search by ' + searchType + ' no result')
               break;
+            default:
           }
         })
     },
@@ -102,12 +120,13 @@ export default {
             case 404:
               console.log('Search in all : no result')
               break;
+            default:
           }
         })
     },
-    profileSelect () {
+    profileSelect (id) {
       // redirect vers la page du profil
-      // this.$router.push('/user/')
+      this.$router.push('/p/' + id)
     }
   }
 }
