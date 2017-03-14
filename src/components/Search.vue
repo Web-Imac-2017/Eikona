@@ -15,7 +15,7 @@
             <md-select name="movie" id="movie" v-model="searchType">
               <md-option value="all">Sur tout le site</md-option>
               <md-option value="profile">Profil</md-option>
-              <md-option value="post">Publication</md-option>
+              <md-option value="description">Publication</md-option>
               <md-option value="tag">Tag</md-option>
               <md-option value="comment">Commentaire</md-option>
             </md-select>

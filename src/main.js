@@ -84,7 +84,7 @@ Vue.material.registerTheme('default', {
     color: 'cyan',
     hue: 800
   }
-}) 
+})
 
 new Vue({ // eslint-disable-line no-new
   el: '#app',
