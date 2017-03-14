@@ -13,7 +13,7 @@
         </md-list>
         <md-whiteframe v-if="resultPosts.length > 0">
           <md-subheader>Publications</md-subheader>
-          <post v-for="post in resultPosts" :post="post"></post>
+          <post v-for="post in resultPosts" :post="post" :profilePost=""></post>
         </md-whiteframe>
       </md-layout>
     </md-layout>
@@ -87,11 +87,12 @@ export default {
         query: query
       }).then(
         (response) => {
-          console.log('searchAll : ', response)
-          if (response.data.data.profiles !== null) response.data.data.profiles.forEach(item => this.resultPosts.push(item))
+          if (response.data.data.profiles !== null) response.data.data.profiles.forEach(item => this.resultProfiles.push(item))
           if (response.data.data.posts !== null) response.data.data.posts.forEach(item => this.resultPosts.push(item))
           if (response.data.data.tags !== null) response.data.data.tags.forEach(item => this.resultPosts.push(item))
           if (response.data.data.comments !== null) response.data.data.comments.forEach(item => this.resultPosts.push(item))
+          console.log('searchAll : ', response)
+          console.log('Search results : ', this.resultProfiles, this.resultPosts)
         },
         (response) => {
           switch (response.status) {

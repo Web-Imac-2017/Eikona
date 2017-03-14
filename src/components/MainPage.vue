@@ -40,7 +40,6 @@ export default{
 			nextFeedEvents: 'nextFeedEvents'
 		}),
 		onChange (idTab) {
-			console.log('Tab : ' + idTab)
 			switch (idTab) {
 				case 0:
 					if (this.popPostsStore.length === 0) this.nextPopPosts(10, '')
