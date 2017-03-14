@@ -74,6 +74,7 @@ export default {
 <style lang="css">
 .thread-list {
   margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 .thread-more {
   text-align: center;
