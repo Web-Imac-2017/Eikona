@@ -64,7 +64,10 @@ class FrontController
         if(isset($params))
             $this->setParams(explode("/", $params));
     }
-
+    
+    /**
+     * Set which controller to call, and confirm it exists
+     */
     protected function setController($controller)
     {
         $controller .= "Controller";
@@ -75,7 +78,10 @@ class FrontController
 
         return $this;
     }
-
+    
+    /**
+     * Set which method to call, and confirm it exists
+     */
     protected function setAction($action)
     {
         $reflector = new reflectionclass($this->controller);
@@ -87,13 +93,20 @@ class FrontController
         return $this;
     }
 
+    
+    /**
+     * Add params to the list.
+     */
     protected function setParams(array $params)
     {
         $this->params = $params;
 
         return $this;
     }
-
+    
+    /**
+     * Execute the request
+     */
     public function run()
     {
         call_user_func_array(array(new $this->controller, $this->action), $this->params);

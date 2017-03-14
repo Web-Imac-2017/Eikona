@@ -1,6 +1,15 @@
 <?php
 
-class BlockController
+interface BlockControllerInterface
+{
+    public function block($blocker_id, $blocked_id);
+
+    public function unblock($blocker_id, $blocked_id);
+
+    public function isBlocked($blocker_id, $blocked_id);
+}
+
+class BlockController extends BlockControllerInterface
 {
     private $model;
     private $view;
@@ -9,13 +18,21 @@ class BlockController
     {
         $this->model = new BlockModel();
     }
-
-    private function entryIsOkay($blocker_id, $blocked_id){
+    
+    /**
+     * Validate given users ID
+     * @param  integer $blocker_id User ID
+     * @param  integer $blocked_id User ID
+     * @return boolean true if they are both valid, false otherwise
+     */
+    private function entryIsOkay($blocker_id, $blocked_id)
+    {
         $blocker_id = Sanitize::int($blocker_id);
         $blocked_id = Sanitize::int($blocked_id);
 
         $resp = new Response();
-
+        
+        //IS this the same user both times
         if ($blocker_id == $blocked_id)
         {
             $resp->setFailure(406, "blocker and blocked are identical")
@@ -25,6 +42,7 @@ class BlockController
             return false;
         }
 
+        //Is this id valid?
         if ($blocker_id <= 0)
         {
             $resp->setFailure(400, "bad id format for the blocker")
@@ -33,6 +51,7 @@ class BlockController
             return false;
         }
 
+        //Is this id valid?
         if ($blocked_id <= 0)
         {
             $resp->setFailure(400, "bad id format for the blocker")
@@ -42,6 +61,8 @@ class BlockController
         }
 
         $userModel = new UserModel();
+        
+        //Does this user exists?
         if ( !($userModel->userExists($blocker_id)) )
         {
             $resp->setFailure(404, "user not found")
@@ -49,7 +70,8 @@ class BlockController
                  ->send();
             return false;
         }
-
+        
+        //Does this user exists?
         if ( !($userModel->userExists($blocked_id)) )
         {
             $resp->setFailure(404, "user not found")
@@ -60,7 +82,12 @@ class BlockController
 
         return true;
     }
-
+    
+    /**
+     * Block a user
+     * @param integer $blocker_id User who is blocking
+     * @param integer $blocked_id User who is getting blocked
+     */
     public function block($blocker_id, $blocked_id)
     {
         $resp = new Response();
@@ -81,6 +108,12 @@ class BlockController
         }
     }
 
+    
+    /**
+     * Unlock a user
+     * @param integer $blocker_id User who was blocking
+     * @param integer $blocked_id User who was blocked
+     */
     public function unblock($blocker_id, $blocked_id)
     {
         $resp = new Response();
@@ -100,6 +133,12 @@ class BlockController
         }
     }
 
+    
+    /**
+     * Tell is a user is blocking another one
+     * @param integer $blocker_id User who is blocking
+     * @param integer $blocked_id User who is getting blocked
+     */
     public function isBlocked($blocker_id, $blocked_id)
     {
         if ($this->entryIsOkay($blocker_id, $blocked_id))
