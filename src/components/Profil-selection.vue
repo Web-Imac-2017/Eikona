@@ -65,4 +65,7 @@ export default {
   margin: 5%;
   text-align: center;
 }
+#profile-selection > * {
+  text-align: center;
+}
 </style>

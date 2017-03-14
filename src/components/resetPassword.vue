@@ -33,7 +33,7 @@
         @close="onClose"
         ref="alert">
       </md-dialog-alert>
-      <md-button @click.native="onClose">Annuler<md-button>
+      <md-button @click.native="onClose">Annuler</md-button>
     </form>
   </md-layout>
 </template>
