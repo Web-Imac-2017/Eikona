@@ -1,16 +1,14 @@
 <template lang="html">
 	<md-layout>
-		<span class="notification-counter" value="1">1</span>
 		<md-menu md-direction="bottom left" md-size="7">
-		  <md-button md-menu-trigger>
-		  	<md-avatar class="md-large">
-			  <img src="../../assets/arbre_bleu.jpg" alt="People">
+			<md-avatar class="md-large" md-menu-trigger>
+				<img src="../assets/arbre_bleu.jpg" alt="People">
+				<span id="notification-counter">1</span>
 			</md-avatar>
-		  </md-button>
 
 		  <md-menu-content>
 				<md-list class="md-triple-line">
-					<profile v-for="(item, i) in profiles" :profile="item" :key="item" :index="i" :extended="true" @select="select"></profile>
+					<profile v-for="(item, i) in profiles" :profile="item" :key="item" :index="i" :extended="false" @select="select"></profile>
 					<md-list-item class="md-inset">
 						<span>Ajouter un profil</span>
 						<md-button id="profilCreation-button" @click.native="createProfile('dialog')" class="md-icon-button md-list-action">
@@ -20,6 +18,13 @@
 				</md-list>
 		  </md-menu-content>
 		</md-menu>
+
+    <md-dialog md-open-from="profilCreation-button" md-close-to="profilCreation-button" ref="dialog">
+      <md-dialog-title>Nouveau profil</md-dialog-title>
+      <md-dialog-content>
+        <profileCreation @close="closeCreation('dialog')"></profileCreation>
+      </md-dialog-content>
+    </md-dialog>
 	</md-layout>
 </template>
 
@@ -32,17 +37,17 @@ import profileCreation from './Profile-creation.vue'
 
 export default {
   name: 'profileSwitch',
-  store: store,
+	store: store,
   components: {
-		profile,
+    profile,
     profileCreation
   },
-	computed: {
-		...Vuex.magGetters([
+  computed: {
+    ...Vuex.mapGetters([
       'getUser',
       'profiles'
-		])
-	},
+    ])
+  },
   methods: {
     ...Vuex.mapActions([
       'selectProfile'
@@ -55,7 +60,7 @@ export default {
     },
     select (profileId) {
       this.selectProfile(profileId)
-      this.$router.push('/user')
+      this.$emit('change')
     }
   }
 }
@@ -68,7 +73,7 @@ export default {
 .md-button {
 	height: 100px;
 }
-.notification-counter {
+#notification-counter {
     position: absolute;
     top: 15px;
     right: 22px;

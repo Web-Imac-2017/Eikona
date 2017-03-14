@@ -53,7 +53,7 @@ export default {
     },
     select (profileId) {
       this.selectProfile(profileId)
-      this.$router.push('/user')
+      this.$router.replace('/user')
     }
   }
 }
