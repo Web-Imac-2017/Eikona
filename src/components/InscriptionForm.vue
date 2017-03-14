@@ -66,8 +66,12 @@ export default {
 						this.verif_name(this.name, 'inscription-name') &&
 						this.verif_password(this.password, 'inscription-password') &&
 						this.verif_confirm(this.password, this.confirmation, 'inscription-confirm'))) return
-			this.banned_mail(this.email).catch(() => {this.email = ' -Email Banni- ' + this.email})
-			this.banned_word(this.name).catch(() => {this.name = ' -Mot Banni- ' + this.name})
+			var ban = false
+			this.banned_word(this.name).catch(() => {
+				this.name = ' -Mot Banni- ' + this.name
+				ban = true
+			})
+			if(ban) return
 			this.$http.post(apiRoot + 'auth/register/', {
 				user_name: this.name,
 				user_email: this.email,
@@ -88,6 +92,9 @@ export default {
             console.log('Forbidden')
 						document.getElementById('inscription-mail').classList.add('md-input-invalid')
             break
+					case 406:
+						this.email = ' -Email Banni- ' + this.email
+						break
           case 409:
             console.log('Conflict')
 						document.getElementById('inscription-confirm').classList.add('md-input-invalid')
