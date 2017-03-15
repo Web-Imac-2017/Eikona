@@ -56,6 +56,7 @@
 <script>
 import VueX from 'vuex'
 import store from './connectionStore.js'
+import apiRoot from './../config.js'
 
 export default{
 	name:'PostSettings',
