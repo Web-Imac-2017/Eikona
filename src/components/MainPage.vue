@@ -2,22 +2,18 @@
 	<md-layout>
 		<profileSwitch class="switchButton"></profileSwitch>
 		<md-tabs md-fixed class="md-transparent" @change="onChange">
-			<md-tab md-label="Tendances">
-				<div id="thread-popular" class="threads"></div>
+			<md-tab md-label="Tendances" id="thread-popular" class="threads">
 				<thread :eventDatas="popPostsStore" :isEvents="false" @more="nextPopPosts"></thread>
 			</md-tab>
 
-			<md-tab md-label="Suggestions">
-				<div id="thread-suggests" class="threads"></div>
+			<md-tab md-label="Suggestions" id="thread-suggests" class="threads">
 			</md-tab>
 
-			<md-tab md-label="Abonnements">
-				<div id="thread-feed" class="threads"></div>
+			<md-tab md-label="Abonnements" id="thread-feed" class="threads">
 				<thread :eventDatas="feedStore" :isEvents="true" @more="nextFeedEvents"></thread>
 			</md-tab>
 
-			<md-tab md-label="Mon profil">
-				<div id="thread-profile" class="threads"></div>
+			<md-tab md-label="Mon profil" id="thread-profile" class="threads">
 			</md-tab>
 		</md-tabs>
 	</md-layout>
@@ -73,14 +69,10 @@ export default{
 .threads {
 	background-size: cover;
 	background-attachment: fixed;
-	background-position: center;
+	background-position: top right;
 	background-color: transparent;
 	width: 100vw;
-	height: 100%;
 	min-height: 100vh;
-	position: absolute;
-	top: 0;
-	right: 0;
 }
 #thread-popular {
 	background-image: url("./../assets/bg.jpg");
