@@ -8,6 +8,9 @@
         <connection id="connect" class="home-top-element"></connection>
       </md-layout>
     </md-layout>
+
+      <md-button @click.native="redirect">Redirection</md-button>
+
     <md-whiteframe md-elevation="8" id="register">
       <inscription></inscription>
     </md-whiteframe>
@@ -27,6 +30,11 @@ export default {
     connection,
     inscription,
     description
+  },
+  methods: {
+    redirect () {
+      this.$router.push('/p/' + 1 )
+    }
   }
 }
 </script>

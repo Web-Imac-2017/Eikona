@@ -7,7 +7,7 @@
 				</md-avatar>
 
 				<md-layout md-flex="50" md-column>
-					<p class="profile-name">{{ user.profileName }}</p>
+					<p class="profile-name">{{ currentProfile.profileName }}</p>
 
 					<md-layout v-if="!abonne" md-gutter>
 						<md-button  class="md-raised md-primary" @click.native="sabonner">S'abonner</md-button>
@@ -30,8 +30,8 @@
 			</md-layout>
 
 			<md-layout md-column class="cls_2">
-				<p class="infoNumber"><span>{{ user.nmb_posts }}</span> posts <span>{{ user.nmb_abonnements }}</span> abonnnements <span>{{ user.nmb_abonnés }}</span> abonnés</p>
-				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
+				<p class="infoNumber"><span>{{ nmbPosts.nbrPosts }}</span> posts <span>{{ listFollowings.nbrFollowings }}</span> abonnnements <span>{{ listFollowers.nbrFollowers }}</span> abonnés</p>
+				<p class="description"><span>Description</span><br>{{ currentProfile.profileDesc }}</p>
 			</md-layout>
 		</md-whiteframe>
 	</md-layout>
@@ -39,42 +39,62 @@
 
 <script>
 import connection from './Connection.vue'
+import apiRoot from './../config.js'
 
 export default {
 	name: 'informationsProfilAutre',
 
 	data () {
 		return {
-			abonne: follower(),
-			notif: false
+			abonne: false,
+			notif: false,
+			connected: false,
+
+			currentProfile: {type:Object},
+			nmbPosts: {type:Object},
+			listFollowers: {type:Object},
+			listFollowings: {type:Object},
+
+			follow: null
 		}
 	},
-	computed :{
-		user () {
+	computed: {
+		/*user () {
 			return{
 				nmb_posts: 30,
 				nmb_abonnements: 300,
 				nmb_abonnés: 6000,
 				profileName: 'nom_du_profil',
-				profileDesc: 'Lorem ipsum dolor sit amet. Blablibla blou blabli bloublou.'
+				profileDesc: 'Lorem ipsum dolor sit amet. Blablibla blou blabli bloublou.',
 			}
-		}
+		},*/
 	},
-	props:{
-		profile: Object,
-		currentP: Object
-	},
-	created: {
+	/*props:{
+		profile: {type:Object},
+		currentProfile: {type:Object},
+		nmbPosts: {type:Object},
+		listFollowers: {type:Object},
+		listFollowings: {type:Object}
+	},*/
+	methods: {
 		connection () {
-			if(currentP.id = '') {connected = false;}
-			else {connected = true;}
-		}
+			if(this.currentProfile.profileID = '') {this.connected = false;}
+			else {this.connected = true;}
+		},
 		follower () {
-			this.$http.get(apiRoot + '/profile/follow/' + this.currentP.profileID).then((response) => {
+			this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
 					{
-					 	isFollowing : //1 si le followed est suivant par le profil follower, 0 sinon.
-    					isSubscribed : //1 si le follower est abonné au profil followed, 0 sinon.
-    					isConfirmed : //1 si l abonnement est confirmé, 0 sinon   
+						console.log(response);
+						this.follow = response.data.data
+						if(this.follow.isFollowing === 1 && this.follow.isConfirmed === 1){
+							this.abonne = true
+						}
+						else if(this.follow.isConfirmed === 0){
+							//this.$ref.open()
+						}
+						else if(this.follow.isSubscribed === 1){
+							this.notif = true
+						}
 					}
 				},(response)=>{
 					switch (response.status) {
@@ -87,30 +107,23 @@ export default {
 						case 409:
 							console.log('Vous suivez déjà ce profil')
 							break
-						default
+						default:
+							console.log('Unknown error')
 					}
 				})
-
-			if(isFollowing === 1){
-				return true;
-			}
-		}
-		//faire requete nmb posts
-		//faire requete nmb followers
-		//faire requete npm followings
-	},
-	methods: {
+		},
 		sabonner () {
 
 			if(!this.connected){
 				console.log("Retour page connexion");
-				this.$router.push('');
+				this.$router.push('/');
 			}
 			else{
 				this.abonne=!this.abonne;
 				this.notif=true;
+
 				//requete abonnement
-				this.$http.get(apiRoot + '/profile/follow/' + this.currentP.profileID).then((response) => {
+				this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
 					{
 					    
 					}
@@ -125,7 +138,8 @@ export default {
 						case 409:
 							console.log('Vous suivez déjà ce profil')
 							break
-						default
+						default:
+							console.log('Unknown error')
 					}
 				})				
 			}
@@ -134,7 +148,7 @@ export default {
 			this.abonne=!this.abonne;
 			this.notif=false;
 
-			this.$http.get(apiRoot + '/profile/follow/' + this.currentP.profileID).then((response) => {
+			this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
 					{
 					    
 					}
@@ -149,12 +163,13 @@ export default {
 						case 409:
 							console.log('Vous suivez déjà ce profil')
 							break
-						default
+						default:
+							console.log('Unknown error')
 					}
 				})
 		},
 		notifier () {
-			this.$http.get(apiRoot + '/profile/subscribe/' + this.currentP.profileID).then((response) => {
+			this.$http.get(apiRoot + 'profile/subscribe/' + this.currentProfile.profileID).then((response) => {
 					{
 					    
 					}
@@ -169,11 +184,16 @@ export default {
 						case 409:
 							console.log('Vous suivez déjà ce profil')
 							break
-						default
+						default:
+							console.log('Unknown error')
 					}
 				})
-			this.notif=!this.notif;
+			this.notif=!this.notif
 		}
+	},
+	mounted () {
+		this.connection ();
+		//this.follower ();
 	}
 }
 

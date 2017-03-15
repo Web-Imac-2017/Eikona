@@ -1,23 +1,32 @@
 <template>
 	<md-layout md-gutter>
-		<infosEditable v-if="current" :profile="visitedProfile" :currentP="currentProfile"></infosEditable>
-		<informationsProfilAutre v-else-if="!current" :profile="visitedProfile"></informationsProfilAutre>
+		<!-- infos du profil actif -->
+		<infosEditable v-if="current" :currentProfile="currentProfile" :nmbPosts="nmpPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></infosEditable>
+		<!-- infos du profil qu'on visite -->
+		<informationsProfilAutre v-else-if="!current" :currentProfile="currentProfile" :nmbPosts="nmbPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></informationsProfilAutre>
 
-		<previewsPosts v-if="!current"></previewsPosts>
-		<previewsPostsPerso v-else-if="current" :profile="profile"></previewsPostsPerso>
+		<!-- posts du profil actif -->
+		<previewsPostsPerso v-if="current" :currentProfile="currentProfile"></previewsPostsPerso>
+		<!-- posts du profil qu'on visite -->
+		<previewsPosts v-else-if="!current" :currentProfile="currentProfile" :profile="profile"></previewsPosts>
+		
 	</md-layout>	
 </template>
 
 <script type="text/javascript">
+// components
 import infosEditable from './infosProfileEditable.vue'
 import informationsProfilAutre from './Informations-profil.vue'
 import previewsPosts from './previewsPosts.vue'
 import previewsPostsPerso from './previewsPostsPerso.vue'
+// imports autres
 import Vuex from 'vuex'
 import store from './connectionStore.js'
+import apiRoot from './../config.js'
 
 export default{
 	name: 'pageProfile',
+	store: store,
 	components: {
 		infosEditable,
 		informationsProfilAutre,
@@ -27,43 +36,127 @@ export default{
 	data () {
 		return {
 			current: false,
-			visitedProfile
+			nmbPosts: null,
+			ListFollowers: null,
+			listFollowings: null,
+			profile: null
 		}
 	},
-	computed: {	
+	props: {
+		ID: Number
+	},
+	computed: {
+		// recuperation des informations sur le profil courant
 		...Vuex.mapGetters([
 	      	'currentProfile'
-	   	]),
-	    activeProfile () {
-	    	if(this.currentProfile.profileID === this.$route.params.profileID) {this.current = true;}
-	    }
+	   	])
 	},
-	created () {
-		this.$http.get(apiRoot + '/profile/get/' + this.$route.params.profileID).then((response) => {
-					{
-					    profil.id: //profileID,
-					    ownerID: //ID du user propriétaire du profil,
-					    profileName: //Nom du profil,
-					    profileDesc: //Description du profil,
-					    profileCreateTime: //Timestamp de la création du profil,
-					    profileViews: //Nombre de vues du profil,
-					    profileIsPrivate: //Confidentialité du profil
-					}
-				},(response)=>{
+	methods: {
+
+		// test si le profil visite est le meme que le profil courant
+		activeProfile () {
+			console.log(this.currentProfile)
+			if (store.currentProfile.profileID === this.ID) { this.current = true }
+	    },
+
+		// Recuperation du profil de la page
+		getProfile () {
+			console.log(this.ID)
+			this.$http.get(apiRoot + 'profile/get/' + this.ID).then( response => {
+						console.log('SUCESS getProfile : ', response)
+						//console.log(response)
+					    this.profile = response.data.data
+					    /* onsole.log(this.profile) */
+	
+				}, response => {
+					console.error('ERROR getProfile : ', response)
 					switch (response.status) {
 						case 400:
-							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							console.log('La variable GET ' + this.ID + ' n\est pas un ID')
 							break
 						case 404:
 							console.log('Le profil spécifié n\'existe pas')
 							break
-						default
+						default:
+							console.log('Unknown error')
 					}
 				})
+		},
+
+		// Recuperation du nombre de posts
+		getNmbPosts () {
+			this.$http.get(apiRoot + 'profile/nbrposts/' + this.ID).then((response) => {
+					console.log('SUCESS getNmbPosts : ', response)
+					this.nmbPosts = response.data.data
+				 	/* profileID : ID du profil, 
+    				nbrPosts : Nombre de posts  */
+				}, (response) => {
+					console.error('ERROR getNmbPosts : ', response)
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.ID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Le profil courant n\'est pas autorisé a voir les posts de ce profil')
+							break
+						case 404:
+							console.log('Le profil spécifié n\'existe pas')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})
+		},
+
+		// recuperation de la iste des abonnes
+		getListFollowers () {
+			this.$http.get(apiRoot + 'profile/followers/' + this.ID).then((response) => {
+						console.log('SUCESS getListFollowers : ', response)
+						this.ListFollowers = response.data.data
+				}, (response) => {
+					console.log('ERROR getListFollowers : ', response)
+					switch (response.status) {
+						case 401:
+							console.log(' Vous n\'avez pas le droit de voir cette liste')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})
+		},
+
+		// recuperation de la liste des abonnements
+		getListFollowings () {
+			this.$http.get(apiRoot + 'profile/followings/' + this.ID).then((response) => {
+						console.log('SUCESS getListFollowings : ', response)
+						this.ListFollowings = response.data.data
+				}, (response) => {
+					console.log('ERROR getListFollowings : ', response)
+					switch (response.status) {
+						case 401:
+							console.log(' Vous n\'avez pas le droit de voir cette liste')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})
+		}
+
+		// Ajouter une vue au profil
+		/*addView () {
+			this.$http.get(apiRoot + '/profile/ddView/' + this.ID).then((response)
+				=> {
+
+				})
+		}*/
 	},
 	mounted () {
-
-		console.log(this.$route.params.profileID);
+		this.getProfile ()
+		this.getNmbPosts ()
+		this.getListFollowers ()
+		this.getListFollowings ()
+		this.activeProfile ()
+		// Requete ajout d'une vue
 	}
 }
 	

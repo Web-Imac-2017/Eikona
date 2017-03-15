@@ -17,14 +17,13 @@
 			</md-layout>
 		</md-whiteframe>	
 		
-		<md-whiteframe type="form" class="edition" md-elevation="8" v-else @submit.stop.prevent="submit">
-			<md-layout>
-				<md-radio v-model="radio0" class="md-primary" md-value="1">Privé</md-radio>
-				<md-radio v-model="radio0" class="md-warn" md-value="2">Public</md-radio>
+		<md-whiteframe type="form" class="edition" md-elevation="8" v-else @submit.stop.prevent="save">
+			<md-layout md-align="end">
+				<md-switch v-model="checked" id="my-test1" name="my-test1" class="md-primary" @change="changeStatut">{{ statut }}</md-switch>
 			</md-layout>
 			<md-input-container>
 		    	<label>Nom du profil</label>
-		    	<md-input v-model="user.profileName"></md-input> <!-- mettre un moyen de vérifier la validite du champs -->
+		    	<md-input v-model="newName" placeholder="user.profileName"></md-input>
 			</md-input-container>
 			<md-layout class="profile_pic">
 				<md-avatar class="md-large">
@@ -39,10 +38,11 @@
 
 			<md-input-container>
 				<label>Description</label>
-				<md-textarea v-model="user.profileDesc"></md-textarea>
+				<md-textarea v-model="newDesc" placeholder="user.profileDesc"></md-textarea>
 			</md-input-container>
-			<md-layout class="buttons">
-				<md-button class="md-primary md-raised" type="submit" @click.native="save">Enregistrer</md-button>
+
+			<md-layout class="buttons" md-align="end">
+				<md-button class="md-primary md-raised" type="submit">Enregistrer</md-button>
 				<md-button class="md-raised">Annuler</md-button>
 			</md-layout>
 		</md-whiteframe>
@@ -57,13 +57,15 @@ export default{
 			modification: false,
 			nameProfile: '',
 			descProfile: '',
-			statusProfile:'',
-			avatarProfile:'',
-			radio0: 1
+			statusProfile: '',
+			avatarProfile: '',
+			checked: false,
+			statut: 'Privé'
+			//currentProfile: Object
 		}
 	},
-	computed :{
-		user(){
+	computed: {
+		user () {
 			return {
 				nmb_posts: 30,
 				nmb_abonnements: 300,
@@ -74,17 +76,110 @@ export default{
 		}
 	},
 	methods: {
-		submit () {
-			console.log('submit');
-			
-		},
 		save () {
-			console.log('save');
-			this.modification = !this.modification;
+			console.log('save')
+			this.modification = !this.modification
 
+			if(this.user.profileDesc !== newDesc) {
+				this.$http.post(apiRoot + '/profile/update/DESCRIPTION' + this.ID, {
+					newValue: newDesc
+				}).then( response => {
+					console.log('MODIFICATION DESC SUCCESS', response)
+					profileDesc = newDesc
+				}, (response) => {
+					console.log('MODIFICATION DESC ERROR', response)
+					switch (response.status) {
+			          case 200:
+			            console.log('Desc modifiee')
+			            break
+			          case 400:
+			            this.error_message = ' La variable GET profileID n\'est pas un ID OU La variable POST newValue est absente'
+			            break
+			          case 401:
+			            this.error_message = 'Vous n\'êtes pas autorisé à mettre à jour ce profil'
+			            break
+			          case 404:
+			            this.error_message = ' Le profil spécifié n\'existe pas'
+			            break
+			          case 405:
+			            this.error_message = ' Le field spécifié n\'est pas supporté'
+			            break
+			          default:
+			            console.log('Unknown error')
+        			}
+				})
+			}
+
+			if(this.user.profileName !== newName) {
+				this.$http.post(apiRoot + '/profile/update/NAME' + this.ID, {
+					newValue: newName
+				}).then( response => {
+					console.log('MODIFICATION NAME SUCCESS', response)
+					profileName = newName
+				}, (response) => {
+					console.log('MODIFICATION NAME ERROR', response)
+					switch (response.status) {
+			          case 200:
+			            console.log('Nom modifiee')
+			            break
+			          case 400:
+			            this.error_message = ' La variable GET profileID n\'est pas un ID OU La variable POST newValue est absente'
+			            break
+			          case 401:
+			            this.error_message = 'Vous n\'êtes pas autorisé à mettre à jour ce profil'
+			            break
+			          case 404:
+			            this.error_message = ' Le profil spécifié n\'existe pas'
+			            break
+			          case 405:
+			            this.error_message = ' Le field spécifié n\'est pas supporté'
+			            break
+			          default:
+			            console.log('Unknown error')
+        			}
+				})
+			}
+
+			if(this.user.profileStatut !== this.currentProfile.profileStatut) {
+				this.$http.post(apiRoot + '/profile/update/SETPRIVATE' + this.ID, {
+					newValue: checked
+				}).then( response => {
+					console.log('MODIFICATION NAME SUCCESS', response)
+					profileIsPrivate = checked
+				}, (response) => {
+					console.log('MODIFICATION NAME ERROR', response)
+					switch (response.status) {
+			          case 200:
+			            console.log('Nom modifiee')
+			            break
+			          case 400:
+			            this.error_message = ' La variable GET profileID n\'est pas un ID OU La variable POST newValue est absente'
+			            break
+			          case 401:
+			            this.error_message = 'Vous n\'êtes pas autorisé à mettre à jour ce profil'
+			            break
+			          case 404:
+			            this.error_message = ' Le profil spécifié n\'existe pas'
+			            break
+			          case 405:
+			            this.error_message = ' Le field spécifié n\'est pas supporté'
+			            break
+			          default:
+			            console.log('Unknown error')
+        			}
+				})
+			}
+
+			// faire changement de la photo de profil			
 		},
 		modifier () {
 			this.modification = !this.modification;	
+		},
+		changeStatut () {
+			console.log(this.checked)
+			if (!this.checked){
+				this.statut='Public'
+			}else{this.statut='Privé'}
 		}
 
 	}
