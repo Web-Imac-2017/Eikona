@@ -1,6 +1,7 @@
 <template lang="html">
   <div id="home">
     <div class="angled_container angled_container--open-right">
+    <profileSwitch class="switchButton"></profileSwitch>
       <md-layout :md-gutter="8" md-align="center">
         <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
           <md-whiteframe md-elevation="5" id="connect"><connection></connection></md-whiteframe>
@@ -14,18 +15,23 @@
         <a href="#formulaire"><md-icon>keyboard_arrow_down</md-icon></a>
       </div>
     </div>
+    <md-whiteframe md-elevation="5" id="formulaire"><inscription></inscription></md-whiteframe>
   </div>
 </template>
 
 <script>
 import connection from './Connection.vue'
 import description from './Home-description.vue'
+import inscription from './Inscription.vue'
+import profileSwitch from './ProfileSwitch.vue'
 
 export default {
   name: 'home',
   components: {
     connection,
-    description
+    description,
+    inscription,
+    profileSwitch
   }
 }
 </script>
@@ -64,6 +70,19 @@ export default {
 .firstInscription {
   position: relative;
   top: 25%;
+}
+
+#formulaire {
+	width: 500px;
+	padding: 40px 40px;
+	margin: 50px auto;
+}
+
+.switchButton {
+	position: fixed;
+	top: 25%;
+	right: 10%;
+  	z-index: 1;
 }
 
 

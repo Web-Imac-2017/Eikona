@@ -1,9 +1,9 @@
 <template lang="html">
 	<md-layout>
+    <span id="notification-counter">1</span>
 		<md-menu md-direction="bottom left" md-size="7">
 			<md-avatar class="md-large" md-menu-trigger>
 				<img src="../assets/arbre_bleu.jpg" alt="People">
-				<span id="notification-counter">1</span>
 			</md-avatar>
 
 		  <md-menu-content>
@@ -42,6 +42,9 @@ export default {
     profile,
     profileCreation
   },
+  /*data () {
+    notif []
+  }*/
   computed: {
     ...Vuex.mapGetters([
       'getUser',
@@ -62,6 +65,13 @@ export default {
       this.selectProfile(profileId)
       this.$emit('change')
     }
+
+    /*this.$http.get('/Eikona/do/profile/notifications').then((response) => {
+       // gérer le succes, toutes les infos renvoyer sont dans response.data          
+     }, (response) => {
+       // gérer les erreurs
+       }
+     })*/
   }
 }
 </script>
@@ -69,14 +79,15 @@ export default {
 <style lang="css" scoped>
 .md-large {
 	box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  cursor: pointer;
 }
 .md-button {
 	height: 100px;
 }
 #notification-counter {
     position: absolute;
-    top: 15px;
-    right: 22px;
+    top: -3px;
+    right: -2px;
     z-index: 2;
     background-color: #f0f3bd;
     color: #000;
