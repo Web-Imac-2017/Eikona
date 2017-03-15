@@ -51,5 +51,4 @@ export default {
 .profile-subtitles {
   font-size: 1vw;
 }
-
 </style>
