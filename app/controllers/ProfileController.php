@@ -1143,7 +1143,7 @@ class ProfileController implements ProfileControllerInterface
     {
         $profileID = Session::read("profileID");
 
-        $resp = new Response();
+        $rsp = new Response();
 
         if(!$profileID)
         {
@@ -1157,16 +1157,16 @@ class ProfileController implements ProfileControllerInterface
         
         if($notif == null)
         {
-            $resp->setFailure(404, "You do not have notifications.")
-                 ->send();
+            $rsp->setFailure(404, "You do not have notifications.")
+                ->send();
             
             return;
         }
 
-        $resp->setSuccess(200, "notifications returned")
-             ->bindValue("profileID", $profileID)
-             ->bindValue("notif", $notif)
-             ->send();
+        $rsp->setSuccess(200, "notifications returned")
+            ->bindValue("profileID", $profileID)
+            ->bindValue("notif", $notif)
+            ->send();
    }
 
     /********* FEED ***********/

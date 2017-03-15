@@ -10,7 +10,6 @@ interface ParamControllerInterface
     
     public function update($paramName);
 }
-}
 
 class ParamController implements ParamControllerInterface
 {

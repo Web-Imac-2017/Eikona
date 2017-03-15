@@ -9,10 +9,9 @@ interface BlockControllerInterface
     public function isBlocked($blocker_id, $blocked_id);
 }
 
-class BlockController extends BlockControllerInterface
+class BlockController implements BlockControllerInterface
 {
     private $model;
-    private $view;
 
     public function __construct()
     {

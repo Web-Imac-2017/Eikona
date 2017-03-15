@@ -33,7 +33,7 @@ interface PostControllerInterface
     public function popular($limit = 30);
 }
 
-class PostController interface PostControllerInterface
+class PostController implements PostControllerInterface
 {
 	private $model;
 	private $tagModel;
@@ -700,7 +700,6 @@ class PostController interface PostControllerInterface
 		$rsp = new Response();
 
 		//get ID
-		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
         //Are we logged in ?
@@ -878,42 +877,39 @@ class PostController interface PostControllerInterface
 	/************************************/
 
 	/**
-	 * Research all the posts with this tagName
+	 * Research all the rags with this postID
 	 * @param string $tagName Tag to use
 	 */
 	public function tags($postID)
 	{		
-
 		$rsp = new Response();
 
 		if(!$this->setPost($postID))
 			return;
 		
-		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
+        {
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
+            
 			return;
 		}
 
 		$tags = $this->tagModel->postTags($postID);
 
-		if($tags == false){
-			$rsp->setFailure(404, "no tag for this post");
-		}else {
-			$rsp->setSuccess(200, "tags returned")
-				->bindValue("nbOfTag", count($tags))
-				->bindValue("tags", $tags);
+		if($tags == false)
+        {
+			$rsp->setFailure(404, "no tag for this post")
+                ->send();
+            
+            return;
 		}
         
         $rsp->setSuccess(200, "tags returned")
-			->bindValue("tagName", $tagName)
+			->bindValue("postID", $postID)
 			->bindValue("nbOfTag", count($tags))
 			->bindValue("tags", $tags)
             ->send();
-        
-        ///////////////////////
-        ///////// NOT WORKING
-        ////////////////////
 	}
 
 
