@@ -49,6 +49,16 @@ Data:
 
   OU
 
+* **Code:** 409 CONFLICT <br />
+  **Explication** Le mail fourni n'est pas valide.
+
+  OU
+
+* **Code:** 406 CONFLICT <br />
+  **Explication** Le mail fourni est banni.
+
+  OU
+
 * **Code:** 403 FORBIDDEN <br />
   **Explication** L'utilisateur exite déjà. Son mail est déjà présent dans la base de données.
 
@@ -145,6 +155,11 @@ Enregistrement dans une variable de session l'id de l'utilisateur.
 
   OU
 
+* **Code:** 409 CONFLICT <br />
+  **Explication** Le cookie reçu ne correpsond à aucun compte enregistré.
+
+  OU
+
 * **Code:** 404 NOT FOUND <br />
   **Explication** L'utilisateur (adresse email) est inconnu(e).
 
@@ -205,7 +220,7 @@ Ici est détaillée la première étape.
 Data: 
 ```json
 {
-  userEmail: Email du user,
+  userEmail: Email du user
 }
 ```
 
@@ -259,7 +274,7 @@ Data:
 * **Code:** 404 NOT FOUND <br />
   **Explication** L'email ne correspond à aucun utilisateur
 
-    OU 
+  OU 
 
 * **Code:** 409 CONFLICT <br />
   **Explication** Le code pour redéfinir un mot de passe est incorrect
