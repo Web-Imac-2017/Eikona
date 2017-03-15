@@ -66,7 +66,7 @@ Retire un mot et un email à la liste des entités bannies
 
 ### Variables GET
 
-  * **word|email** : Type d'élément à suprimmer (word ou email)
+  * **word|email** : Type d'élément à supprimer (word ou email)
   
 ### Variable POST
   
@@ -84,7 +84,7 @@ Retire un mot et un email à la liste des entités bannies
 
   OU
 
-  * **Code:** 401 NOT AUTHOROZED <br />
+  * **Code:** 401 NOT AUTHORIZED <br />
     **Explication** Vous ne pouvez pas ajouter d'élément (Vous n'êtes pas administrateur)
 
 
