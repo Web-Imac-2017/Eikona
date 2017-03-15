@@ -1,68 +1,57 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import apiRoot from './../config.js'
+
 Vue.use(Vuex);
 
-const maxPosts = 10
-
-// 3 days in millisecondes
-const timestampStep = 259200000
-
 const state = {
-	followings: [],
-	subscriptionsPosts: [],
-	subsPostOffset: 0,
-	timestampOffset: 0
+	feedEvents: [],
+	feedLastEventTimestamp: false,
+
+	popularPosts: []
 }
 
 const mutations = {
-	ADD_FOLLOWING: (state, profileId) => state.followings.push(profileId),
-	DELETE_FOLLOWING: (state, profileId) => state.followings.filter(i => i.profile_id !== profileId),
-	ADD_POST_SUBCRIPTION: (state, post) => state.subscriptionsPosts.push(post),
-	DELETE_POST_SUBSCRIPTION: (state, post) => state.subscriptionsPosts.filter(i => i !== post),
-	LOADED_POST: (state, increment) => state.subsPostOffset += increment
+	ADD_POPULAR_POST: (state, post) => state.popularPosts.push(post),
+	DELETE_POPULAR_POST: (state, post) => state.popularPosts.filter(i => i !== post),
+
+	ADD_FEED_EVENT: (state, post) => state.feedEvents.push(post),
+	DELETE_FEED_EVENT: (state, post) => state.feedEvents.filter(i => i !== post),
+
+	SET_LAST_EVENT_TIMESTAMP: (state, timestamp) => state.feedLastEventTimestamp = timestamp
 }
 
 const getters = {
-	followings: state => state.followings,
-	subscriptionsPosts: state => state.subscriptionsPosts,
-	subsPostsLoaded: state => state.subscriptionsPosts.length
+	feedEvents: state => state.feedEvents,
+	feedPosts: state => state.feedEvents.filter(e => e.type === 'post'),
+	feedComments: state => state.feedEvents.filter(e => e.type === 'comment'),
+	feedLikes: state => state.feedEvents.filter(e => e.type === 'like'),
+	feedFollows: state => state.feedEvents.filter(e => e.type === 'follow'),
+	feedLastEventTimestamp: state => state.feedLastEventTimestamp,
+	popularPosts: state => state.popularPosts
 }
 
 const actions = {
-	initSubscriptions (store, profileId) {
-		Vue.http.get('/Eikona/do/profile/followings/' + profileId).then(
-			(response) => {
-				response.data.data.followings.forEach(profile => store.commit('ADD_FOLLOWING', profile.profile_id))
-			},
-			(response) => {
-				console.error('ERR: load subscriptions', response)
-			})
+	nextPopularPosts (store, number, exclude) {
+		Vue.http.post(apiRoot + 'post/popular/' + number, {
+			exclude: exclude
+		}).then(response => {
+			response.data.data.posts.forEach(item => store.commit('ADD_POPULAR_POST', item))
+		}, response => {
+			console.error('ERR: chargement posts populaires')
+		})
 	},
-	subscribe (store, profileId, subscribe = 1) {
-		Vue.http.get('/Eikona/do/follow/' + profileId + '/' + subscribe).then(
+	nextFeedEvents (store, number) {
+		var before = '/' + (getters.feedLastEventTimestamp!==false?getters.feedLastEventTimestamp:'')
+		Vue.http.get(apiRoot + 'profile/feed/' + number + before).then(
 			(response) => {
-				store.commit('ADD_FOLLOWING', profileId)
+				response.data.data.feed.forEach(e => store.commit('ADD_FEED_EVENT', e))
+				if (response.data.data.feed.length > 0)
+					store.commit('SET_LAST_EVENT_TIMESTAMP', response.data.data.feed[response.data.data.feed.length - 1].time)
 			},
 			(response) => {
-				console.error('ERR: Can\'t subscribe t this.')
-			})
-	},
-	unsubscribe (store, profileId) {
-		Vue.http.get().then(
-			(response) => {
-				store.commit('DELETE_FOLLOWING', profileId)
-			},
-			(response) => {
-				console.error('ERR: Can\'t unsubscribe to this');
-			})
-	},
-	loadSubsPosts (store) {
-		Vue.http.get('/Eikona/do/').then((response) => {
-
-			},
-			(response) => {
-
+				console.error('ERR: load feed events', response)
 			})
 	}
 }

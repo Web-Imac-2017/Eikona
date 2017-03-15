@@ -18,7 +18,7 @@ class Cookie
         if(!isset($_COOKIE[$name]))
             return false;
 
-        return unserialize($_COOKIE[$name]);
+        return @unserialize($_COOKIE[$name]);
     }
 
     public static function delete($name)

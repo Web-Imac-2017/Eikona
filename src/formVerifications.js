@@ -1,5 +1,37 @@
+import apiRoot from './config.js'
+import Vue from 'vue'
+
 export default {
   methods: {
+    banned_mail (mail) {
+      if (mail === null) return
+      return Vue.http.post(apiRoot + 'ban/is/email', {email: mail}).then(response => {
+        if(response.status == 404) console.log("Not banned.")
+        else {
+          console.log('ban mail : ', response)
+          resolve()
+        }
+      }, response => {
+        if(response.status == 404) console.log("Not banned.")
+        else {
+          console.log('ban word : ', response)
+          reject()
+        }
+      })
+    },
+    banned_word (word) {
+      if (word === null) return
+      return Vue.http.post(apiRoot + 'ban/is/word', {word: word}).then(response => {
+        console.log('ban word : ', response)
+        resolve()
+      }, response => {
+        if(response.status == 404) console.log("Not banned.")
+        else {
+          console.log('ban word : ', response)
+          reject()
+        }
+      })
+    },
     verif_mail (value, inputContainerId) {
 			  var regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 			  if(!regex.test(value)){

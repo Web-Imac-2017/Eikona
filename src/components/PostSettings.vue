@@ -1,9 +1,9 @@
 <template>
 	<div>
-		<md-menu md-direction="bottom right" md-size="5" v-if="posteurID == user.userId">
+		<md-menu md-direction="bottom right" md-size="5" v-if="post.profilID == user.userId">
 			<md-button md-menu-trigger class="md-icon-button"><md-icon>more_horiz</md-icon></md-button>
 			<md-menu-content>			   
-			   <md-menu-item>Modifier</md-menu-item>
+			   <md-menu-item @click.native="openDialog('dialog4')">Modifier</md-menu-item>
 			   <md-menu-item @click.native="openDialog('dialog3')">Supprimer</md-menu-item>
 			</md-menu-content>
 		</md-menu>
@@ -44,9 +44,12 @@
 				  <md-dialog-content>Souhaitez vous vraiment supprimer ce post ?</md-dialog-content>
 
 				  <md-dialog-actions>
-				    <md-button class="md-primary" @click.native="close('dialog3')">Non</md-button>
+				    <md-button class="md-primary" @click.native="closeDialog('dialog3')">Non</md-button>
 				    <md-button class="md-primary" @click.native="supprime('dialog3')">Oui</md-button>
 				  </md-dialog-actions>
+		</md-dialog>
+		<md-dialog ref="dialog4">
+			<ModificationPost :post="this.post" @close="closeDialog"><ModificationPost>
 		</md-dialog>
 		
 	</div>
@@ -61,15 +64,8 @@ import apiRoot from './../config.js'
 export default{
 	name:'PostSettings',
 	store: store,
-	props:{
-		postID:{
-			type: Number
-		},
-		posteurID:{
-			type: Number
-		}	
-
-	},
+	props: [post], 
+		
 	computed:{
 		...VueX.mapGetters({
 			user: 'getUser'
@@ -85,12 +81,12 @@ export default{
     	},
     	abonne(ref, subscribe){
     		
-    		this.$http.get(apiRoot + 'profile/follow/' + this.posteurID + '/' + subscribe).then((response) =>{
+    		this.$http.get(apiRoot + 'profile/follow/' + this.post.profilID + '/' + subscribe).then((response) =>{
     			closeDialog(ref)
     		},(response)=>{
     			switch (response.status) {
 	    			case 400 :
-	    				console.log('La variable GET' + posteurID + 'n\'est pas un ID')
+	    				console.log('La variable GET' + post.profilID + 'n\'est pas un ID')
 	    				break
 	    			case 401 :
 	    				console.log('Il n\'y a pas de profile connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
@@ -103,13 +99,13 @@ export default{
 
     	},
     	bloque(ref){
-    		this.$http.post(apiRoot + 'block/' + this.userID +'/' + this.posteurID).then((response)=>{
+    		this.$http.post(apiRoot + 'block/' + this.userID +'/' + this.post.profilID).then((response)=>{
     			closeDialog(ref)
     		},(response)=>{
     		})
     	},
     	supprime(ref){
-    		this.$http.get(apiRoot +'post/delete/' + this.postID).then((response)=>{
+    		this.$http.get(apiRoot +'post/delete/' + this.post.postID).then((response)=>{
     			closeDialog(ref)
     		},(response)=>{
     			console.log('Le post spécifié n\'existe pas')

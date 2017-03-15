@@ -1,6 +1,6 @@
 <template lang="html">
   <md-layout>
-    <form v-show="!forgetPassword" id="connectionForm" @submit.stop.prevent="send">
+    <form id="connectionForm" @submit.stop.prevent="send">
       <h2>Connectez vous</h2>
       <div v-if="error_message != ''" class="md-warn">{{ error_message }}</div>
       <md-input-container id="connection-id">
@@ -15,9 +15,14 @@
       </md-input-container>
       <p>Les champs marqués d'un * sont obligatoires.</p>
       <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
+      <md-button id="forgetPassword" class="md-dense md-accent" @click.native="forgetPassword(true)">Mot de passe oublié ?</md-button>
     </form>
-    <md-button v-show="!forgetPassword" class="md-dense md-accent" @click.native="forgetPassword = !forgetPassword">Mot de passe oublié ?</md-button>
-    <resetPassword v-show="forgetPassword" @close="forgetPassword = false"></resetPassword>
+    <md-dialog md-open-from="#forgetPassword" md-close-to="#forgetPassword" ref="frgtPsswd">
+      <md-dialog-title>Oubli de mot de passe</md-dialog-title>
+      <md-dialog-content>
+        <resetPassword @close="forgetPassword(false)"></resetPassword>
+      </md-dialog-content>
+    </md-dialog>
   </md-layout>
 </template>
 
@@ -38,26 +43,39 @@ export default {
     return {
       email: '',
       password: '',
-      error_message: '',
-      forgetPassword: false
+      error_message: ''
     }
   },
   mixins: [formVerifications],
+  computed: {
+    ...Vuex.mapGetters([
+      'profiles'
+    ])
+  },
   methods: {
     ...Vuex.mapActions({
       initUserStore: 'initUser',
       initProfilesStore: 'initProfiles',
       clearUserStore: 'clearUser'
     }),
+    forgetPassword (bool) {
+      if(bool){
+        this.$refs['frgtPsswd'].open()
+        return
+      }
+      this.$refs['frgtPsswd'].close()
+    },
     send () {
-      if (!(this.verif_mail(this.email, 'connection-id') && this.verif_password(this.password, 'connection-password'))) return
+      if (!(this.verif_mail(this.email, 'connection-id') &&
+            this.verif_password(this.password, 'connection-password'))) return
       this.$http.post(apiRoot + 'auth/signIn', {
         user_email: this.email,
         user_passwd: this.password
       }).then((response) => {
+        this.clearUserStore()
         this.initUserStore()
         this.initProfilesStore()
-        this.$router.push('/Eikona/user/profile')
+        this.$router.push('/user/profile')
       }, (response) => {
         this.clearUserStore()
         switch (response.status) {
@@ -90,8 +108,10 @@ export default {
   color: red;
   font-weight: bold;
 }
+
 #connectionForm p {
   font-size: x-small;
   color: darkgray;
+  text-align: center;
 }
 </style>

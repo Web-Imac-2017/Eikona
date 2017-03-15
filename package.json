@@ -1,8 +1,8 @@
 {
   "name": "eikona",
   "version": "0.1.0",
-  "description": "WebImac",
-  "author": "Groupe1 webImac2017",
+  "description": "Imac's project",
+  "author": "WebImac2017 - Groupe1",
   "license": "ISC",
   "main": "index.js",
   "scripts": {
