@@ -1,5 +1,66 @@
 <?php
 
+interface ProfileControllerInterface
+{
+    public function create();
+    
+    public function exists($profileID);
+    
+    public function setCurrent($profileID);
+    
+    public function get($profileID);
+    
+    public function name($profileID);
+    
+    public function description($profileID);
+    
+    public function picture($profileID);
+    
+    public function views($profileID);
+    
+    public function isPrivate($profileID);
+    
+    public function owner($profileID);
+    
+    public function nbrPosts($profileID);
+    
+    public function posts($profileID, ...$args);
+
+    public function drafts();
+    
+    public function update($field, $profileID);
+    
+    public function setPicture($profileID);
+    
+    public function addView($profileID, $nbr = 1);
+    
+    public function delete($profileID);
+    
+    public function nbrFollowers($profileID);
+    
+    public function nbrFollowings($profileID);
+    
+    public function follow($profileID, $subscribe = 0);
+    
+    public function unfollow($profileID);
+    
+    public function followers($profileID);
+    
+    public function followings($profileID);
+    
+    public function subscribe($profileID);
+    
+    public function unsubscribe($profileID);
+    
+    public function isFollowing($followed, $follower = -1);
+    
+    public function confirmFollow($follower);
+
+    public function notifications();
+
+    public function feed($limit = 30, $before = 0);
+}
+
 class ProfileController
 {
     private $model;
@@ -29,12 +90,14 @@ class ProfileController
         $rsp = new Response();
 
         $uID = Session::read("userID"); //Get current user ID
-
-        /**
-         * TODO: Verify if user is connected and can add a new profile
-         */
         
+        //Are we logged in
+        if(!isAuthorized::isUser())
+        {
+            $rsp->setFailure(401, "You must be connected to do this")
+        }
         
+        //Have we reached the profile number limit
         if($this->model->tooMuchProfiles($uID))
         {
             $rsp->setFailure(400, "Too Much profiles")
@@ -42,6 +105,7 @@ class ProfileController
             return; 
         }
 
+        //Do we have all we need
         if (empty($_POST['profileName']))
         {
             $rsp->setFailure(400);
@@ -53,12 +117,11 @@ class ProfileController
         $desc = isset($_POST['profileDesc']) ? $_POST['profileDesc'] : "";
         $isPrivate = isset($_POST['profilePrivate']) ? true : false;
 
-        
-
         $result = $this->model->create($uID, $name, $desc, $isPrivate);
 
         $rsp = new Response();
 
+        //Handle insert errors
         if($result == "badUserID")
         {
             $rsp->setFailure(400, "Given user ID is not valid.")
@@ -97,23 +160,23 @@ class ProfileController
 
         if($result != "success")
         {
-            $rsp = new Response();
+            return true;
+        }
+        
+        $rsp = new Response();
 
-            if($result == "wrongFormat")
-            {
-                $rsp->setFailure(400, "Wrong format. This is not a profile ID.");
-            }
-            else if($result == "notFound")
-            {
-                $rsp->setFailure(404, "Given profile ID does not exist.");
-            }
-
-            $rsp->send();
-
-            return false;
+        if($result == "wrongFormat")
+        {
+            $rsp->setFailure(400, "Wrong format. This is not a profile ID.");
+        }
+        else if($result == "notFound")
+        {
+            $rsp->setFailure(404, "Given profile ID does not exist.");
         }
 
-        return true;
+        $rsp->send();
+
+        return false;
     }
 
 
@@ -145,7 +208,8 @@ class ProfileController
         $userID = Session::read("userID");
 
         $rsp = new Response();
-
+        
+        //Are we logged in ?
         if(!$userID)
         {
             $rsp->setFailure(400, "You must be connected to do this action.")
@@ -153,7 +217,8 @@ class ProfileController
 
             return;
         }
-
+        
+        //Do we own this profile ?
         if(!isAuthorized::ownProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to use this profile.")
@@ -202,7 +267,6 @@ class ProfileController
 
     /**
      * Return the description of the specified profile
-     *
      * @param $profileID ID of the profile
      */
     public function name($profileID)
@@ -222,7 +286,6 @@ class ProfileController
 
     /**
      * Return the description of the specified profile
-     *
      * @param $profileID ID of the profile
      */
     public function description($profileID)
@@ -242,7 +305,6 @@ class ProfileController
 
     /**
      * Return the link to the profile picture of the specified profile
-     *
      * @param $profileID ID of the profile
      */
     public function picture($profileID)
@@ -264,7 +326,6 @@ class ProfileController
 
     /**
      * Return the number of views of the specified profile
-     *
      * @param $profileID ID of the profile
      */
     public function views($profileID)
@@ -284,7 +345,6 @@ class ProfileController
 
     /**
      * Return the number of views of the specified profile
-     *
      * @param $profileID ID of the profile
      */
     public function isPrivate($profileID)
@@ -420,7 +480,9 @@ class ProfileController
 
 
 
-
+    /**
+     * Get all drafts for the current profile
+     */
     public function drafts()
     {
         $rsp = new Response();
@@ -453,12 +515,8 @@ class ProfileController
 
 
 
-
-
-
     /**
      * Update the specified element of the profile
-     *
      * @param $field Field to be updated
      * @param $profileID ID of the profile
      */
@@ -554,6 +612,7 @@ class ProfileController
     {
         $rsp = new Response();
 
+        //Can we edit this profile
         if(!isAuthorized::editProfile($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
@@ -561,7 +620,8 @@ class ProfileController
 
             return;
         }
-
+        
+        //Do we have all we need
         if(!is_uploaded_file($_FILES['profilePicture']['tmp_name']))
 		{
             $rsp->setFailure(400, "Missing profilePicture file")

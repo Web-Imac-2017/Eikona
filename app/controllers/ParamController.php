@@ -1,5 +1,17 @@
 <?php
 
+interface ParamControllerInterface
+{
+    public function __get($param);
+    
+    public function init();
+    
+    public function getAll();
+    
+    public function update($paramName);
+}
+}
+
 class ParamController
 {
     private $model;

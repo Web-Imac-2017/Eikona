@@ -320,15 +320,6 @@ class AuthController implements AuthControllerInterface
 	 */
 	public function signOut($silence = false)
 	{
-        Cookie::set("stayConnected", "", -1);
-
-		Session::renewKey();
-		Session::remove("userID");
-		Session::remove("profileID");
-
-		if($silence)
-            return;
-
         $rsp = new Response();
 
         //Are we logged in?
@@ -339,6 +330,16 @@ class AuthController implements AuthControllerInterface
 
             return;
         }
+        
+        
+        Cookie::set("stayConnected", "", -1);
+
+		Session::renewKey();
+		Session::remove("userID");
+		Session::remove("profileID");
+
+		if($silence)
+            return;
 
         $rsp->setSuccess(200, "user deconnected")
             ->bindValue("id", Session::read("userID"));
