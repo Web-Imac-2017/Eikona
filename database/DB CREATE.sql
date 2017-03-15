@@ -33,8 +33,7 @@ CREATE TABLE IF NOT EXISTS `Roger`.`users` (
   `user_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `user_activated` TINYINT(1) NOT NULL DEFAULT 0,
   `user_code` VARCHAR(20) NULL,
-  `user_key` VARCHAR(45) NULL,
-  `userscol` VARCHAR(45) NULL DEFAULT NULL COMMENT '« UUID() »',
+  `user_key` VARCHAR(45) NULL DEFAULT NULL COMMENT '« UUID() »',
   PRIMARY KEY (`user_id`),
   UNIQUE INDEX `user_email_UNIQUE` (`user_email` ASC),
   UNIQUE INDEX `userscol_UNIQUE` (`userscol` ASC))

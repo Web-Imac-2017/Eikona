@@ -161,14 +161,14 @@ class ProfileController implements ProfileControllerInterface
     private function setProfile($profileID)
     {
         $result = $this->model->setProfile($profileID);
-
-        if($result != "success")
+        
+        if($result == "success")
         {
             return true;
         }
         
         $rsp = new Response();
-
+        
         if($result == "wrongFormat")
         {
             $rsp->setFailure(400, "Wrong format. This is not a profile ID.");

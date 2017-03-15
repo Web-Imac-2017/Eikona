@@ -73,9 +73,19 @@ class FrontController
         $controller .= "Controller";
 
         if(class_exists($controller))
+        {
             $this->controller = $controller;
-        else throw new InvalidArgumentException("The controller ".$controller." could not be found.");
-
+        }
+        else
+        { 
+            //throw new InvalidArgumentException("The controller ".$controller." could not be found.");
+            $rsp = new Response();
+            $rsp->setFailure("404", "The controller `".$controller."` could not be found.")
+                ->send();
+            
+            exit;
+        }
+            
         return $this;
     }
     
@@ -87,8 +97,18 @@ class FrontController
         $reflector = new reflectionclass($this->controller);
 
         if($reflector->hasMethod($action))
+        {
             $this->action = $action;
-        else throw new InvalidArgumentException("The action ".$action." is not a method of the ".$this->controller.".");
+        }
+        else
+        { 
+            //throw new InvalidArgumentException("The action ".$action." is not a method of the ".$this->controller.".");
+            $rsp = new Response();
+            $rsp->setFailure("404", "The method `".$action."` of `".$this->controller."` could not be found.")
+                ->send();
+            
+            exit;
+        } 
 
         return $this;
     }

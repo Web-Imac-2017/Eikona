@@ -8,7 +8,7 @@ interface PostControllerInterface
     
 	public function delete($postID);
     
-	public function display($postID, $silence = true);
+	public function display($postID);
     
 	public function update($field, $postID);
     
@@ -23,14 +23,14 @@ interface PostControllerInterface
 	public function likes($postID);
 
 	public function comments($postID);
-    
-	public function tag($tagName);
 
 	public function view($postID);
 
 	public function nbView();
     
     public function popular($limit = 30);
+    
+    public function tags($postID);
 }
 
 class PostController implements PostControllerInterface
@@ -285,6 +285,7 @@ class PostController implements PostControllerInterface
 			->bindValue("allowComments", $data['post_allow_comments'])
 			->bindValue("approved", $data['post_approved'])
 			->bindValue("state", $data['post_state'])
+			->bindValue("filter", $data['post_filter'])
 			->bindValue("geo", ['lat' => $data['post_geo_lat'],
 				                'lng' => $data['post_geo_lng'],
 							    'name' => $data['post_geo_name']
@@ -982,7 +983,7 @@ class PostController implements PostControllerInterface
 
         foreach($postsBasics as $postBasics)
         {
-            $postInfos = Response::read("post", "display", $postBasics['post_id']);
+            $postInfos = Response::read("post", "display", $postBasics['post_id'])['data'] ;
             
             //remove posts the user cannot see.
             if($postBasics ['profile_private'] == 1)

@@ -154,7 +154,7 @@ class UserController implements UserControllerInterface
 		}
 
 		$profilesID = $this->profileModel->getUserProfiles($userID);
-
+        
         $profiles = array();
 
         foreach($profilesID as $profileID)
