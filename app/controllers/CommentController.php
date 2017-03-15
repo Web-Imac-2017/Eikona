@@ -83,7 +83,8 @@ class CommentController implements CommentControllerInterface
             return;
         }
         
-        $this->model->create($profileID, $postID, $_POST['commentText']);
+        $commentID = $this->model->create($profileID, $postID, $_POST['commentText']);
+
         $notif = Response::read("notification", "create", "newComment", $profileID, $this->postModel->getProfileID(), $postID);
         
         if($notif['code'] != 200)
@@ -97,6 +98,7 @@ class CommentController implements CommentControllerInterface
         $rsp->setSuccess(200, "Comment posted and notification sent")
             ->bindValue("profileID", $profileID)
             ->bindValue("postID", $postID)
+            ->bindValue("commentID", $commentID)
             ->bindValue("comment", $_POST['commentText'])
             ->bindValue("notif", $notif['data'])
             ->send();
