@@ -95,6 +95,9 @@ class ProfileController
         if(!isAuthorized::isUser())
         {
             $rsp->setFailure(401, "You must be connected to do this")
+                ->send();
+            
+            return;
         }
         
         //Have we reached the profile number limit
@@ -102,6 +105,7 @@ class ProfileController
         {
             $rsp->setFailure(400, "Too Much profiles")
                 ->send();
+            
             return; 
         }
 
@@ -203,8 +207,9 @@ class ProfileController
      */
     public function setCurrent($profileID)
     {
-        $result = $this->model->setProfile($profileID);
-
+        if(!$this->model->setProfile($profileID))
+           return;
+           
         $userID = Session::read("userID");
 
         $rsp = new Response();
@@ -311,8 +316,6 @@ class ProfileController
     {
         if(!$this->setProfile($profileID))
             return;
-
-        $path = "/app/medias/profilesPictures/";
 
         $pic = $this->model->getPict();
 
@@ -630,7 +633,6 @@ class ProfileController
             return;
         }
 
-
         /*enregistrement de l'image*/
         saveTo($_FILES['profilePicture']['tmp_name'], 'medias/profilesPictures/'.$profileID.'.jpg');
 
@@ -661,13 +663,15 @@ class ProfileController
 
         if($this->model->addView($nbr))
         {
-            $rsp->setSuccess(200)
-                ->bindValue("profileViews", $this->model->getViews());
+            $rsp->setFailure(400)
+                ->send();
+            
+            return;
         }
-        else
-        {
-            $rsp->setFailure(400);
-        }
+        
+        $rsp->setSuccess(200)
+            ->bindValue("profileViews", $this->model->getViews())
+            ->send();
 
         $rsp->send();
     }
@@ -723,7 +727,10 @@ class ProfileController
 
         if($profileID < 1)
         {
-            $rsp->setFailure(400, "The given parameter is not a profile ID");
+            $rsp->setFailure(400, "The given parameter is not a profile ID")
+                ->send();
+            
+            return;
         }
 
         $nbrFollower = $this->followModel->nbrFollowers($profileID);
@@ -747,7 +754,10 @@ class ProfileController
 
         if($profileID < 1)
         {
-            $rsp->setFailure(400, "The given parameter is not a profile ID");
+            $rsp->setFailure(400, "The given parameter is not a profile ID")
+                ->send();
+            
+            return;
         }
 
         $nbrFollowing = $this->followModel->nbrFollowings($profileID);
@@ -769,15 +779,8 @@ class ProfileController
         $rsp = new Response();
 
         $currentUser = Session::read("profileID");
-
-        if(!isAuthorized::editProfile($currentUser))
-        {
-            $rsp->setFailure(401, "You are not authorized to do this action.")
-                ->send();
-
-            return;
-        }
-
+        
+        //Are we logged in ?
         if(!$currentUser)
         {
             $rsp->setFailure(401, "You must be connected to do this.")
@@ -785,7 +788,17 @@ class ProfileController
 
             return;
         }
+        
+        //Can we use this profile ?
+        if(!isAuthorized::editProfile($currentUser))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
 
+            return;
+        }
+        
+        //Are we trying to follow ourself ?
         if($profileID === $currentUser)
         {
             $rsp->setFailure(401, "You cannot follow yourself.")
@@ -796,7 +809,8 @@ class ProfileController
 
         //Do the request
         $result = $this->followModel->follow($profileID, $subscribe);
-
+        
+        //Handle errors
         if($result === "notAProfile")
         {
             $rsp->setFailure(400, "The given parameter is not a valid profile ID.")
@@ -813,22 +827,24 @@ class ProfileController
             return;
         }
 
-        //Si demande à un profil privé
+        //If we are following a private account
         if($result === 0)
         {
             $code = "newFollowAsk";
         }
 
-        //Si abonnement à un profil privé
+        //If we are following a public profile
         if($result === 1){
             $code = "newFollowing";
         }
 
         $notif = Response::read("notification", "create", $code, $currentUser, $profileID, $profileID);
 
-        if($notif['code'] != 200){
-        $rsp->setFailure(400, "error during following")
-            ->send();
+        if($notif['code'] != 200)
+        {
+            $rsp->setFailure(400, "error during following")
+                ->send();
+            
             return;
         }
 
@@ -850,7 +866,17 @@ class ProfileController
         $rsp = new Response();
 
         $currentUser = Session::read("profileID");
+        
+        //Do we have a current profile
+        if(!$currentUser)
+        {
+            $rsp->setFailure(401, "You must be connected to do this.")
+                ->send();
 
+            return;
+        }
+        
+        //Can we use this profile ?
         if(!isAuthorized::editProfile($currentUser))
         {
             $rsp->setFailure(401, "You are not authorized to do this action.")
@@ -859,14 +885,7 @@ class ProfileController
             return;
         }
 
-        if(!$currentUser)
-        {
-            $rsp->setFailure(401, "You must be connected to do this.")
-                ->send();
-
-            return;
-        }
-
+        //Are we trying to unfollow ourselves?
         if($profileID === $currentUser)
         {
             $rsp->setFailure(401, "You cannot unfollow yourself.")
@@ -876,7 +895,8 @@ class ProfileController
         }
 
         $result = $this->followModel->unfollow($profileID);
-
+        
+        //Handle errors
         if($result === "notAProfile")
         {
             $rsp->setFailure(400, "The given parameter is not a valid profile ID.")
@@ -1056,15 +1076,8 @@ class ProfileController
     {
         $followed = Session::read("profileID");
         $rsp = new Response();
-
-        if(!isAuthorized::editProfile($followed))
-        {
-            $rsp->setFailure(401, "You are not authorized to do this action.")
-                ->send();
-
-            return;
-        }
-
+        
+        //Are we logged in ?
         if(!$followed)
         {
             $rsp->setFailure(401, "You must be connected to do this.")
@@ -1072,7 +1085,17 @@ class ProfileController
 
             return;
         }
+        
+        //Can we edit current profile
+        if(!isAuthorized::editProfile($followed))
+        {
+            $rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
 
+            return;
+        }
+        
+        //Are we trying to confirm ourself?
         if($followed === $follower)
         {
             $rsp->setFailure(401, "You cannot do this.")
@@ -1083,6 +1106,7 @@ class ProfileController
 
         $result = $this->followModel->confirmFollow($follower, $followed);
 
+        //Handle errors
         if($result === "notAProfile")
         {
             $rsp->setFailure(400, "The given parameter is not a valid profile ID.")
@@ -1121,17 +1145,21 @@ class ProfileController
 
         $resp = new Response();
 
-        if(!$profileID){
+        if(!$profileID)
+        {
             $rsp->setFailure(401, "You must have profile to do this.")
                 ->send();
+            
             return;
         }
 
         $notif = $this->notifModel->getProfileNotifications($profileID);
         
-        if($notif == null){
+        if($notif == null)
+        {
             $resp->setFailure(404, "You do not have notifications.")
                  ->send();
+            
             return;
         }
 
@@ -1142,13 +1170,19 @@ class ProfileController
    }
 
     /********* FEED ***********/
-
+    
+    /**
+     * Return the feed of the user
+     * @param intefer [$limit       = 30] Number of activities to return
+     * @param integer [$before      = 0] Retrive activity up to
+     */
     public function feed($limit = 30, $before = 0)
     {
         $profileID = Session::read("profileID");
 
         $rsp = new Response();
-
+        
+        //Make sure we are logged in
         if(empty($profileID))
         {
             $rsp->setFailure(401, "You are not authorized to access this.")
@@ -1157,24 +1191,21 @@ class ProfileController
             return;
         }
 
-        //post published by profiles followed
-        //posts liked by profiles followed
-        //profiles followed by profiles followed
-
         //Retrieve aditionnal model:
         $commentModel = new CommentModel();
-
+        
         $events = $this->model->feed($profileID, $limit, $before);
         $nbrEvents = count($events);
 
         $feed = array();
-
+        
+        //Build the return array
         for($i = 0; $i < $nbrEvents; $i++)
         {
             $event = $events[$i];
 
             $eventBlock = array();
-
+            
             if($event['type'] == "post")
             {
                 $eventBlock["type"] = "post";
@@ -1205,7 +1236,8 @@ class ProfileController
                 $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
 
                 $posts = array();
-
+                
+                //If a same user as consecutive likes, merge them is a single group
                 for($j = $i; $j < $nbrEvents; $j++)
                 {
                     if($events[$j]["type"] == "like" && $events[$j]["source"] == $events[$i]["source"])
@@ -1234,6 +1266,7 @@ class ProfileController
 
                 $followed = array();
 
+                //If a same user as consecutive follow, merge them is a single group
                 for($j = $i; $i < $nbrEvents; $j++)
                 {
                     if($events[$j]["type"] == "follow" && $events[$j]["source"] == $events[$i]["source"])
