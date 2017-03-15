@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <topHeader></topHeader>
+   
     <router-view></router-view>
     <mainFooter></mainFooter>
   </div>
@@ -41,6 +42,7 @@ export default {
       'clearProfiles'
     ])
   }
+  
 }
 </script>
 
