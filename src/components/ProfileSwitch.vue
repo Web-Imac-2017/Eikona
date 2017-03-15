@@ -42,9 +42,9 @@ export default {
     profile,
     profileCreation
   },
-  /*data () {
+  data () {
     notif []
-  }*/
+  }
   computed: {
     ...Vuex.mapGetters([
       'getUser',
@@ -64,15 +64,28 @@ export default {
     select (profileId) {
       this.selectProfile(profileId)
       this.$emit('change')
-    }
-
-    /*this.$http.get('/Eikona/do/profile/notifications').then((response) => {
-       // gérer le succes, toutes les infos renvoyer sont dans response.data          
+    },
+    getNotification() {
+      this.$http.get('/Eikona/do/profile/notifications').then((response) => {
+       // gérer le succes, toutes les infos renvoyer sont dans response.data 
+      console.log('SUCCESS: notification recuperee', response)
+      this.notif:response.data.data.notif
      }, (response) => {
-       // gérer les erreurs
+      // gérer les erreurs
+      console.error('ERR: get notification request', response)
+      switch (response.status) {
+        case 401:
+          console.log('Unauthorized')
+          break
+        case 404:
+          console.log('Not foud')
+          break
+        default:
+          console.log('Unknown error')
+      }
        }
-     })*/
-  }
+     }) 
+    }
 }
 </script>
 
