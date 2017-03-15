@@ -65,7 +65,7 @@ const router = new VueRouter({
   },
   {
     name: 'profile_name',
-    path: '/Eikona/:profileID',
+    path: '/:profileID',
     component: require('./components/ProfilePage.vue')
   },
   {
@@ -73,7 +73,6 @@ const router = new VueRouter({
     redirect: ''
   }]
 })
-
 
 // Configuration VueResource
 Vue.http.options.emulateHTTP = true
@@ -85,8 +84,7 @@ Vue.material.registerTheme('default', {
     color: 'cyan',
     hue: 800
   }
-}) 
-
+})
 
 new Vue({ // eslint-disable-line no-new
   el: '#app',

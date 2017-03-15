@@ -1,20 +1,29 @@
 <template lang="html">
-  <form id="connectionForm" @submit.stop.prevent="send">
-    <h3>Vous avez déjà un compte ?</h3>
-    <div v-if="error_message != ''" class="error-msg">{{ error_message }}</div>
-    <md-input-container>
-      <label>Email</label>
-      <md-input id="connection-id" required type="email" v-model="user_email"></md-input>
-      <span v-if="error_mail" class="md-error">Adresse mail inconnue ou incorrecte</span>
-    </md-input-container>
-    <md-input-container md-has-password>
-      <label>Mot de passe</label>
-      <md-input id="connection-password" required type="password" v-model="user_passwd"></md-input>
-      <span v-if="error_password" class="md-error">Mot de passe incorrect</span>
-    </md-input-container>
-    <p>Les champs marqués d'un * sont obligatoires.</p>
-    <md-button  class="md-primary md-raised" type="submit">SE CONNECTER</md-button>
-  </form>
+  <md-layout>
+    <form id="connectionForm" @submit.stop.prevent="send">
+      <h2>Connectez vous</h2>
+      <div v-if="error_message != ''" class="md-warn">{{ error_message }}</div>
+      <md-input-container id="connection-id">
+        <label>E-mail</label>
+        <md-input required type="email" v-model="email"></md-input>
+        <span class="md-error">Adresse mail inconnue ou incorrecte</span>
+      </md-input-container>
+      <md-input-container md-has-password id="connection-password">
+        <label>Mot de passe</label>
+        <md-input required type="password" v-model="password"></md-input>
+        <span class="md-error">Mot de passe incorrect</span>
+      </md-input-container>
+      <p>Les champs marqués d'un * sont obligatoires.</p>
+      <md-button class="md-raised" type="submit">SE CONNECTER</md-button>
+      <md-button id="forgetPassword" class="md-dense md-accent" @click.native="forgetPassword(true)">Mot de passe oublié ?</md-button>
+    </form>
+    <md-dialog md-open-from="#forgetPassword" md-close-to="#forgetPassword" ref="frgtPsswd">
+      <md-dialog-title>Oubli de mot de passe</md-dialog-title>
+      <md-dialog-content>
+        <resetPassword @close="forgetPassword(false)"></resetPassword>
+      </md-dialog-content>
+    </md-dialog>
+  </md-layout>
 </template>
 
 <script>
@@ -34,8 +43,7 @@ export default {
     return {
       email: '',
       password: '',
-      error_message: '',
-      forgetPassword: false
+      error_message: ''
     }
   },
   mixins: [formVerifications],
@@ -50,12 +58,21 @@ export default {
       initProfilesStore: 'initProfiles',
       clearUserStore: 'clearUser'
     }),
+    forgetPassword (bool) {
+      if(bool){
+        this.$refs['frgtPsswd'].open()
+        return
+      }
+      this.$refs['frgtPsswd'].close()
+    },
     send () {
-      if (!(this.verif_mail(this.email, 'connection-id') && this.verif_password(this.password, 'connection-password'))) return
+      if (!(this.verif_mail(this.email, 'connection-id') &&
+            this.verif_password(this.password, 'connection-password'))) return
       this.$http.post(apiRoot + 'auth/signIn', {
         user_email: this.email,
         user_passwd: this.password
       }).then((response) => {
+        this.clearUserStore()
         this.initUserStore()
         this.initProfilesStore()
         this.$router.push('/user/profile')
@@ -97,5 +114,4 @@ export default {
   color: darkgray;
   text-align: center;
 }
-
 </style>

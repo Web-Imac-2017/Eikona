@@ -1,5 +1,5 @@
 <template lang="html">
-  <md-layout md-flex="50" md-flex-small="100" md-align="center">
+  <md-layout id="profile-selection-container" md-flex="50" md-flex-small="100" md-align="center">
     <md-whiteframe md-elevation="8" id="profile-selection">
       <h1>Bonjour {{ getUser.userName }} !</h1>
       <p>Veuillez sélecionner un profil :</p>
@@ -53,16 +53,26 @@ export default {
     },
     select (profileId) {
       this.selectProfile(profileId)
-      this.$router.push('/user')
+      this.$router.replace('/user')
     }
   }
 }
 </script>
 
 <style lang="css">
+#profile-selection-container {
+  min-height: 100vh;
+  padding: 5%;
+  background-image: url('./../assets/bg_compte.jpg');
+  background-size: cover;
+  background-position: center center;
+}
 #profile-selection {
-  padding : 50px;
-  margin: 5%;
+  padding: 50px;
+  background-color: white;
+  text-align: center;
+}
+#profile-selection > * {
   text-align: center;
 }
 </style>

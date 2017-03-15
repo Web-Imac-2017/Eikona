@@ -9,51 +9,44 @@
           <description id="description" class="home-top-element"></description>
         </md-layout>
       </md-layout>
-      <div id="firstInscription" onclick="scrollWin(0, 100)">
+      <div class="firstInscription">
         <h2>Pas encore inscrit(e) ?</h2>
-        <a href="#formulaire"><md-icon>keyboard_arrow_down</md-icon></a>
+        <a href="#inscriptionForm"><md-icon>keyboard_arrow_down</md-icon></a>
       </div>
+      <md-layout md-flex-xsmall="100" md-flex-medium="50" md-flex-xlarge="25" md-align="center">
+        <md-whiteframe id="register">
+          <inscription></inscription>
+        </md-whiteframe>
+      </md-layout>
     </div>
-    <section id="formulaire">
-      <md-whiteframe md-elevation="5" id="register"><inscription></inscription></md-whiteframe>
-    </section>
   </div>
 </template>
 
 <script>
-
 import connection from './Connection.vue'
-import inscription from './Inscription.vue'
 import description from './Home-description.vue'
-
+import inscription from './InscriptionForm.vue'
 
 export default {
   name: 'home',
   components: {
     connection,
-    inscription,
-    description
-  },
-  methods: {
-    redirect () {
-      this.$router.push('/p/' + 1 )
-    }
+    description,
+    inscription
+>>>>>>> front
   }
 }
-
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 #home {
   text-align: center;
 }
 
-
 #register {
- max-width: 40%;
- padding: 40px 80px;
+ padding: 5vw;
  text-align: center;
- margin: 50px auto;
+ margin: 0 auto;
  background-color: white;
 }
 
@@ -75,17 +68,18 @@ export default {
   text-align: center;
 }
 
-#firstInscription {
+.firstInscription {
   position: relative;
   top: 25%;
 }
+
 
 /*********************** ANIMATION CSS ********************/
 
 
   /*background-image: url('../../assets/bg_test.png');
   background-repeat:no-repeat;
-  -webkit-background-size: cover; 
+  -webkit-background-size: cover;
   background-size: cover;*/
 
 
@@ -121,7 +115,7 @@ export default {
 
 .angled_container:after {
   background-color: #226986;
-  background-image: url('../../assets/bg_test.png');  
+  background-image: url('../assets/arbre_bleu.jpg');
   background-size: 100% 100%;
   transform: skewY(-30deg);
   transform-origin: left bottom;

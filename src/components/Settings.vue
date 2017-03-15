@@ -85,9 +85,17 @@ export default {
       (this.infos.password !== null && !this.verif_password(this.infos.password, 'settings-user-password')) ||
       (this.infos.password !== null && (this.infos.confirm === null || !this.verif_confirm(this.infos.password, this.infos.confirm, 'settings-user-confirm')))) return
 
-      editName (this.infos.name)
-      editMail (this.infos.mail)
-      editPassword (this.infos.password, this.infos.confirm)
+      this.banned_mail(this.infos.mail).then(() => {
+        if (this.infos.mail !== null) editMail (this.infos.mail)
+      }, () => {
+        this.infos.mail = '-Email Banni- ' + this.infos.mail
+      })
+      this.banned_word(this.infos.name).then(() => {
+        if (this.infos.name !== null) editMail (this.infos.name)
+      }, () => {
+        this.infos.name = '-Nom Banni- ' + this.infos.name
+      })
+      if (this.infos.password !== null) editPassword (this.infos.password, this.infos.confirm)
     },
     editName (name) {
       this.$http.post(apiRoot + 'user/edit/NAME', {name: name}).then(response => {
@@ -106,10 +114,32 @@ export default {
       })
     },
     editMail (mail) {
-      //this.$http.post(apiRoot + 'user/edit/' + )
+      this.$http.post(apiRoot + 'user/edit/EMAIL', {email: mail}).then(response => {
+        var u = this.getUser
+        u.userEmail = response.data.data.userEmail
+        this.updateUser(u)
+      }, response => {
+        switch (response.status) {
+          case 400:
+            console.error('Bad request', response);
+            break
+          case 409:
+            console.error('Bad mail', response);
+            break
+        }
+      })
     },
     editPassword (password, confirm) {
-      //this.$http.post(apiRoot + 'user/edit/' + )
+      this.$http.post(apiRoot + 'user/edit/PASSWORD', {passwd: password, passwd_confirm: confirm}).then(response => {}, response => {
+        switch (response.status) {
+          case 400:
+            console.error('Bad request', response);
+            break
+          case 409:
+            console.error('Bad password', response);
+            break
+        }
+      })
     }
   }
 }
