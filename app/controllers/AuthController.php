@@ -346,6 +346,5 @@ class AuthController implements AuthControllerInterface
 
         $rsp->send();
     }
-
 }
 
