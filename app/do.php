@@ -12,8 +12,14 @@ require_once "Library/Autoloader.php";
 Autoloader::register();
 Autoloader::staticLoads();
 
+//Collect all parameters and make them accessible everywhere
+$PARAMS = new ParamController();
+
 //Open session using the session handler
 Session::open();
+
+//sleep for 1ms as a  protection against DDoS attack.
+usleep(100000);
 
 //Finally init the frontController use its run method to call the controller.
 $frontController = new FrontController();

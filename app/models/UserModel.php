@@ -46,7 +46,7 @@ class UserModel extends DBInterface{
 		//profile found
 		$stmt = $this->cnx->prepare("
 			SELECT user_id, user_name, user_email, user_passwd, user_register_time,
-			       user_last_activity, user_moderator, user_admin, user_activated
+			       user_last_activity, user_moderator, user_admin, user_activated, user_key
 			FROM users
 			WHERE user_id = :id");
 		$stmt->execute([":id" => $userID]);
@@ -56,6 +56,70 @@ class UserModel extends DBInterface{
 
 		return "success";
 	}
+
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($userID)
+    {
+        $userID = Sanitize::int($userID);
+
+        if($userID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(user_id) FROM users
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
+
+    /**
+     * Tell if the specified user is a moderator
+     * @param integer $userID User ID to verify
+     */
+    public function isModerator($userID)
+    {
+        $userID = Sanitize::int($userID);
+
+        if($userID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT user_moderator FROM users
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
+    /**
+     * Tell if the specified user is an administrator
+     * @param integer $userID User ID to verify
+     */
+    public function isAdmin($userID)
+    {
+        $userID = Sanitize::int($userID);
+
+        if($userID < 1)
+            return false;
+
+		$stmt = $this->cnx->prepare("
+			SELECT user_admin FROM users
+			WHERE user_id = :id");
+		$stmt->execute([":id" => $userID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
+
+
 
 	/*****************/
 	/***** GETTER *****/
@@ -109,6 +173,15 @@ class UserModel extends DBInterface{
 	public function getAdmin()
 	{
 		return $this->u['user_admin'];
+	}
+
+	/**
+	 * Return the unique key of the user
+	 * @return string Key of the user
+	 */
+	public function getKey()
+	{
+		return $this->u['user_key'];
 	}
 
 	/******************/

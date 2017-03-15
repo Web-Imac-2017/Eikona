@@ -47,7 +47,7 @@
 class Response
 {
     private $data       = [];
-    private $status     = "";
+    private $status     = "success";
     private $message    = "";
     private $code       = 200;
 
@@ -65,7 +65,7 @@ class Response
     public function setSuccess($code = 200, $msg = "")
     {
         $this->status = "success";
-        $this->message = Sanitize::string($msg, true);
+        $this->message = Sanitize::string($msg, true, false);
         $this->setCode($code);
 
         return $this;
@@ -79,7 +79,7 @@ class Response
     public function setFailure($code = 404, $msg = "An error occured. Please try again.")
     {
         $this->status = "error";
-        $this->message = Sanitize::string($msg, true);
+        $this->message = Sanitize::string($msg, true, false);
         $this->setCode($code);
 
         return $this;
@@ -120,7 +120,7 @@ class Response
      */
     public function unlinkValue($vName)
     {
-        unset($data);
+        unset($this->data[$vName]);
 
         return $this;
     }
@@ -141,5 +141,30 @@ class Response
         http_response_code($this->code);
 
         echo json_encode($json);
+    }
+
+    public function getCode(){
+        return $this->code;
+    }
+
+    /**
+     * Send the response
+     */
+    public static function read($controller, $method, ...$args)
+    {
+        $controller .= "Controller";
+
+        //Get response
+        ob_start();
+
+        call_user_func_array(array(new $controller, $method), $args);
+
+        $response = str_replace('\\', '', ob_get_clean());
+
+        //Reset header
+        header('Content-Type: text/html');
+        http_response_code(200);
+
+        return json_decode($response, true);
     }
 }

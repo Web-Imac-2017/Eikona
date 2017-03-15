@@ -4,18 +4,15 @@ class ProfileModel extends DBInterface
     /**
      * Internal varibales
      */
-    private $pID = 0;
+    private $pID = -1;
     private $p   = NULL;
-
-
-
 
     /**
      * Class constructor
      *
      * @param $profileID Profile to be used unique ID
      */
-    public function __construct($profileID = 0)
+    public function __construct($profileID = -1)
     {
         parent::__construct();
 
@@ -34,10 +31,15 @@ class ProfileModel extends DBInterface
     {
         $profileID = Sanitize::int($profileID);
 
-        if($profileID < 1 || $profileID == $this->pID)
+        if($profileID == $this->pID)
+        {
+            return;
+        }
+
+        if($profileID < -1)
         {
             $this->p = NULL;
-            $this->pID = 0;
+            $this->pID = -1;
             return "wrongFormat";
         }
 
@@ -49,12 +51,12 @@ class ProfileModel extends DBInterface
         if($stmt->fetchColumn() == 0)
         {
             $this->p = NULL;
-            $this->pID = 0;
+            $this->pID = -1;
             return "notFound";
         }
 
         //profile found
-        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_create_time, profile_views, profile_private FROM profiles WHERE profile_id = :pID");
+        $stmt = $this->cnx->prepare("SELECT user_id, profile_name, profile_desc, profile_picture, profile_create_time, profile_views, profile_private, profile_key FROM profiles WHERE profile_id = :pID");
         $stmt->execute([":pID" => $profileID]);
 
         $this->pID = $profileID;
@@ -63,6 +65,28 @@ class ProfileModel extends DBInterface
         return "success";
     }
 
+
+
+
+    /**
+     * Tell if the specified user exists or not
+     * @param integer $userID User ID to verify
+     */
+    public function exists($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        if($profileID < 1)
+            return false;
+
+
+		$stmt = $this->cnx->prepare("
+			SELECT COUNT(*) FROM profiles
+			WHERE profile_id = :id");
+		$stmt->execute([":id" => $profileID]);
+
+        return $stmt->fetchColumn() == "1" ? true : false;
+    }
 
     /**
      * Create a new profile
@@ -77,7 +101,7 @@ class ProfileModel extends DBInterface
         $uID = Sanitize::int($userID);
         $name = Sanitize::profileName($name, true);
         $desc = Sanitize::string($desc);
-        $private = Sanitize::boolean($private);
+        $private = Sanitize::booleanToInt($private);
 
         if($uID < 1)
             return "badUserID";
@@ -88,12 +112,13 @@ class ProfileModel extends DBInterface
         if($stmt->fetchColumn() != 0)
             return "userNameAlreadyExists";
 
-        $stmt = $this->cnx->prepare("INSERT INTO profiles(user_id, profile_name, profile_desc, profile_private, profile_create_time) VALUES(:uID, :name, :desc, :private, :create)");
-        $stmt->execute([":uID" => $uID,
-                        ":name" => $name,
-                        ":desc" => $desc,
-                        ":private" => $private,
-                        ":create" => time()]);
+        $stmt = $this->cnx->prepare("INSERT INTO profiles (user_id, profile_name, profile_desc, profile_create_time, profile_private, profile_key) VALUES (:uID, :name, :desc, :create, :private, UUID())");
+
+        $stmt->execute([":uID"     => $uID,
+                        ":name"    => $name,
+                        ":desc"    => $desc,
+                        ":create"  => time(),
+                        ":private" => $private]);
 
         $pID = $this->cnx->lastInsertId();
 
@@ -101,9 +126,6 @@ class ProfileModel extends DBInterface
 
         return $pID;
     }
-
-
-
 
     /**
      * Return the ID of the profile
@@ -113,25 +135,41 @@ class ProfileModel extends DBInterface
         return $this->pID;
     }
 
-
-
-
-    function getFullProfile()
+    public function getFullProfile()
     {
         return $this->p;
     }
 
     /**
-     * Return the path to the profile picture
+     * Return infos of all profile of current User
+     * @return [type] [description]
      */
-    public function getPic()
+    public function getUserProfiles($id)
     {
-        if(file_exists("PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg"))
-        {
-            return "PATH/TO/PROFILE/PICTURE/".$this->pID.".jpg";
-        }
+        if($id == 0) return false;
 
-        return "PATH/TO/DEFAULT/PROFILE/PICTURE";
+        $stmt = $this->cnx->prepare("
+            SELECT profile_id
+            FROM profiles
+            WHERE :id = user_id");
+        $stmt->execute([":id" => $id]);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Return if an user have profile(s)
+     * @param  int  $id user_id
+     * @return boolean     true / false
+     */
+    public function hasProfiles($id)
+    {
+        $stmt = $this->cnx->prepare("
+            SELECT COUNT(profile_id) FROM profiles
+            WHERE user_id = :id");
+        $stmt->execute([":id" => $id]);
+
+        return $stmt->fetchColumn() != 0 ? true : false;
     }
 
     /**
@@ -139,7 +177,7 @@ class ProfileModel extends DBInterface
      */
     public function getName()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_name'];
@@ -150,10 +188,19 @@ class ProfileModel extends DBInterface
      */
     public function getDesc()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_desc'];
+    }
+
+
+    public function getPict()
+    {
+        if($this->pID == -1)
+            return;
+
+        return $this->p['profile_picture'];
     }
 
     /**
@@ -161,7 +208,7 @@ class ProfileModel extends DBInterface
      */
     public function getViews()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_views'];
@@ -172,7 +219,7 @@ class ProfileModel extends DBInterface
      */
     public function isPrivate()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
 
         return $this->p['profile_private'];
@@ -181,60 +228,37 @@ class ProfileModel extends DBInterface
     /**
      * Return the ID of the owner of the profile
      */
-    public function getOwner($returnID = false)
+    public function getOwner()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return;
-
-        if($returnID)
-        {
-            return $this->p['user_id'];
-        }
 
         return $this->p['user_id'];
     }
 
     /**
-     * Return the last X posts published by the profile
-     *
-     * @param $limit int Number of posts to return. Defautl 30.
+     * Return the key of the profile
      */
-    public function getPosts($limit = 4096, $offset = 0, $after = 0, $before = 0, $order = "DESC")
+    public function getKey()
     {
-        $limit = Sanitize::int($limit);
-
-        if($this->pID == 0 || $limit == 0)
+        if($this->pID == -1)
             return;
 
-        $where = "";
-        $bindArray = [":pID" => $this->pID];
-
-        //Include only useful parameters for optimization
-        if($after != 0)
-        {
-            $where .= " AND post_publish_time > :after";
-            $bindArray[":after"] = Sanitize::int($after);
-        }
-
-        if($before != 0)
-        {
-            $where .= " AND post_publish_time < :before";
-            $bindArray[":before"] = Sanitize::int($before);
-        }
-
-        $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        $sql = "SELECT post_id FROM posts WHERE profile_id = :pID ".$where." ORDER BY post_publish_time ".$order." LIMIT ".Sanitize::int($limit)." OFFSET ".Sanitize::int($offset);
-
-        //Execute the query
-        $stmt = $this->cnx->prepare($sql);
-        $stmt->execute($bindArray);
-
-        return $stmt->fetchAll(PDO::FETCH_COLUMN, "post_id");
+        return $this->p['profile_key'];
     }
 
 
+    public function tooMuchProfiles($userID)
+    {
+        global $PARAMS;
 
+        $stmt = $this->cnx->prepare("
+            SELECT COUNT(profile_id) FROM profiles
+            WHERE :userID = user_id");
+        $stmt->execute([":userID" => $userID]);
+
+        return $stmt->fetchColumn() >= $PARAMS->USER_MAX_PROFILES ? true : false;
+    }
 
     //updating informations
 
@@ -245,7 +269,7 @@ class ProfileModel extends DBInterface
      */
     public function updateName($newName)
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return false;
 
         $name = Sanitize::profileName($newName);
@@ -266,7 +290,7 @@ class ProfileModel extends DBInterface
      */
     public function updateDesc($newDesc)
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return false;
 
         $desc = Sanitize::string($newDesc);
@@ -276,6 +300,24 @@ class ProfileModel extends DBInterface
                         ":pID" => $this->pID]);
 
         $this->p['profile_desc'] = $desc;
+
+        return true;
+    }
+
+
+
+    public function updatePict($newPictName)
+    {
+        if($this->pID == -1)
+            return false;
+
+        $newPictName = Sanitize::string($newPictName);
+
+        $stmt = $this->cnx->prepare("UPDATE profiles SET profile_picture = :pict WHERE profile_id = :pID");
+        $stmt->execute([":pict" => $newPictName,
+                        ":pID" => $this->pID]);
+
+        $this->p['profile_picture'] = $newPictName;
 
         return true;
     }
@@ -292,7 +334,7 @@ class ProfileModel extends DBInterface
      */
     public function addView($nbr = 1)
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return false;
 
         if(!ctype_digit(strval($nbr)) || $nbr < 1)
@@ -313,7 +355,7 @@ class ProfileModel extends DBInterface
      */
     public function setPrivate()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return false;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 1 WHERE profile_id = :pID");
@@ -329,7 +371,7 @@ class ProfileModel extends DBInterface
      */
     public function setPublic()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return false;
 
         $stmt = $this->cnx->prepare("UPDATE profiles SET profile_private = 0 WHERE profile_id = :pID");
@@ -341,12 +383,178 @@ class ProfileModel extends DBInterface
     }
 
 
+    /******* Followers ********/
+
+    /**
+     * Return a list of the followers of the given profile
+     * @param  integer $profileID Profile to use
+     * @return array   Followers list
+     */
+    public function getFollowers($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, profile_picture, followings.follower_subscribed, followings.follow_confirmed FROM profiles JOIN followings ON followings.follower_id = profiles.profile_id WHERE followings.followed_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Return the list of the profile followed by the given account
+     * @param  integer $profileID Profile to use
+     * @return array   Following list
+     */
+    public function getFollowings($profileID)
+    {
+        $profileID = Sanitize::int($profileID);
+
+        $stmt = $this->cnx->prepare("SELECT profiles.profile_id, profiles.profile_name, profile_picture, followings.follower_subscribed, followings.follow_confirmed FROM profiles JOIN followings ON followings.followed_id = profiles. profile_id WHERE followings.follower_id = :profileID ORDER BY profiles.profile_name");
+        $stmt->execute([":profileID" => $profileID]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getBackOfficeData()
+    {
+        $stmt = $this->cnx->prepare("SELECT * FROM reports");
+        $stmt->execute();
+        $BackODt['reports'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->cnx->prepare("SELECT * FROM blocked");
+        $stmt->execute();
+        $BackODt['blocked'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->cnx->prepare("SELECT * FROM banned_words");
+        $stmt->execute();
+        $BackODt['banned_words'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->cnx->prepare("SELECT * FROM banned_emails");
+        $stmt->execute();
+        $BackODt['banned_emails'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $BackODt;
+    }
+
+
+
+
+
+
+    public function feed($profileID, $limit, $before = 0)
+    {
+        if($before == 0)
+        {
+            $before = time();
+        }
+        else
+        {
+            $before = Sanitize::int($before);
+        }
+
+        $stmt = $this->cnx->prepare("
+            #GET THE FEED
+            SELECT
+                'post' AS type,
+                post_id AS dest,
+                post_publish_time AS time,
+                profile_id AS source
+            FROM
+                posts
+            WHERE
+                post_state = 1 AND
+                post_publish_time < :before AND
+                profile_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            UNION
+            SELECT
+                'like' AS type,
+                post_id AS dest,
+                like_time AS time,
+                profile_id AS source
+            FROM
+                post_likes
+            WHERE
+                like_time < :before AND
+                profile_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            UNION
+            SELECT
+                'follow' AS type,
+                followed_id AS dest,
+                following_time AS time,
+                follower_id AS source
+            FROM
+                followings
+            WHERE
+                follow_confirmed = 1 AND
+                following_time < :before AND
+                follower_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            UNION
+            SELECT
+                'comment' AS type,
+                post_id AS dest,
+                comment_time AS time,
+                comment_id AS source
+            FROM
+                comments
+            WHERE
+                comment_time < :before AND
+                profile_id IN(
+                    SELECT
+                        followed_id
+                    FROM
+                        followings
+                    WHERE
+                        follower_id = :profileID AND
+                        follow_confirmed = 1
+                )
+            ORDER BY time DESC
+            LIMIT ".$limit.";"
+        );
+        $stmt->execute([":profileID" => Sanitize::int($profileID),
+                        ":before" => $before]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+
+
+
+
+
+
+
     /**
      * Delete the profile
      */
     public function delete()
     {
-        if($this->pID == 0)
+        if($this->pID == -1)
             return false;
 
         $stmt = $this->cnx->prepare("DELETE FROM profiles WHERE profile_id = :pID");
