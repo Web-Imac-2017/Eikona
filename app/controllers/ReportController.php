@@ -325,6 +325,8 @@ class ReportController
 
                 $this->model->moderate($reportID, $reportStatus, $reportResult);
 
+                Response::read("notification", "create", "changeReportState", 0, $this->postModel->getProfileID(), $postID);
+                
                 $rsp->setSuccess(200, "Post is now hidden. Notif send.")
                     ->bindValue("ReportID", $reportID)
                     ->bindValue("PostID", $postID)
