@@ -319,14 +319,7 @@ class ProfileController
         $rsp->setSuccess(200)
             ->bindValue("profileID", $profileID)
             ->bindValue("profileOwner", $owner);
-
-        if(isAuthorized::isModerator($owner))
-        {
-            $backOffice = $this->model->getBackOfficeData();
-            $rsp->bindValue("backOfficeData", $backOffice);
-        }
-
-        $rsp->send();
+            ->send();
     }
 
 

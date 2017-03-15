@@ -70,9 +70,18 @@ class UserController{
     {
         $rsp = new Response();
 
+        $mod = $this->model->isModerator($userID);
+
         $rsp->setSuccess(200)
-            ->bindValue("isModerator", $this->model->isModerator($userID))
-            ->send();
+            ->bindValue("isModerator", $mod);
+
+        if($mod)
+        {
+            $backOffice = $this->model->getBackOfficeData();
+            $rsp->bindValue("backOfficeData", $backOffice);
+        }
+
+        $rsp->send();
     }
 
 
