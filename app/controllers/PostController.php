@@ -881,29 +881,28 @@ class PostController interface PostControllerInterface
 	 * Research all the posts with this tagName
 	 * @param string $tagName Tag to use
 	 */
-	public function tag($tagName)
-	{
-        ///////////////////////
-        ///////// NOT WORKING
-        ////////////////////
-        
+	public function tags($postID)
+	{		
+
 		$rsp = new Response();
-        
-		if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
-        {
+
+		if(!$this->setPost($postID))
+			return;
+		
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
 			return;
 		}
 
-		$tags = $this->tagModel->tag($tagName);
+		$tags = $this->tagModel->postTags($postID);
 
-		if($tags == false)
-        {
-			$rsp->setFailure(404)
-                ->send();
-            
-            return;
+		if($tags == false){
+			$rsp->setFailure(404, "no tag for this post");
+		}else {
+			$rsp->setSuccess(200, "tags returned")
+				->bindValue("nbOfTag", count($tags))
+				->bindValue("tags", $tags);
 		}
         
         $rsp->setSuccess(200, "tags returned")
