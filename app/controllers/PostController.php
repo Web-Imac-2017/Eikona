@@ -98,7 +98,7 @@ class PostController implements PostControllerInterface
 
             return;
         }
-			
+
         $desc = !empty($_POST['postDescription']) ? $_POST['postDescription'] : "";
         preg_match_all('/#([^# ]+)/', $desc, $tags);
         $comments = Sanitize::booleanToInt(isset($_POST['disableComments']) ? false : true);
@@ -274,7 +274,7 @@ class PostController implements PostControllerInterface
 		$data = $this->model->getFullPost();
 
         $images = $this->getImages($postID);
-		
+
 		$rsp->setSuccess(200, "get all post informations")
 			->bindValue("postID", $postID)
 			->bindValue("profileID", $data['profile_id'])
@@ -726,7 +726,7 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(406, "You have already liked 200 posts during the last 60 minutes, Calm down Billy Boy !")
 			    ->send();
-	
+
             return;
 		}
 
@@ -960,10 +960,10 @@ class PostController implements PostControllerInterface
 
 		$resp->send();
 	}
-    
-    
+
+
     /********* POPULAR ********/
-    
+
     /**
      * Get popular posts
      * @param integer [$limit       = 30] Number of posts to return
@@ -971,14 +971,14 @@ class PostController implements PostControllerInterface
     public function popular($limit = 30)
     {
         $exclude = [];
-        
+
         if(isset($_POST['exclude']))
         {
             $exclude = explode(",", $_POST['exclude']);
         }
-        
+
         $postsBasics = $this->model->popular($exclude, $limit);
-        
+
         $posts = array();
 
         foreach($postsBasics as $postBasics)
@@ -993,10 +993,10 @@ class PostController implements PostControllerInterface
                     continue;
                 }
             }
-            
+
             array_push($posts, $postInfos);
         }
-        
+
         $rsp = new Response();
 
         $rsp->setSuccess(200)
@@ -1005,5 +1005,3 @@ class PostController implements PostControllerInterface
             ->send();
     }
 }
-
-
