@@ -415,27 +415,6 @@ class ProfileModel extends DBInterface
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getBackOfficeData()
-    {
-        $stmt = $this->cnx->prepare("SELECT * FROM reports");
-        $stmt->execute();
-        $BackODt['reports'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmt = $this->cnx->prepare("SELECT * FROM blocked");
-        $stmt->execute();
-        $BackODt['blocked'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmt = $this->cnx->prepare("SELECT * FROM banned_words");
-        $stmt->execute();
-        $BackODt['banned_words'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmt = $this->cnx->prepare("SELECT * FROM banned_emails");
-        $stmt->execute();
-        $BackODt['banned_emails'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return $BackODt;
-    }
-
 
 
 

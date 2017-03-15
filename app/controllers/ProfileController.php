@@ -347,6 +347,22 @@ class ProfileController
 
 
     /**
+     * Return the number of posts from the profile
+     * @param integer $profileID ID of the profile
+     */
+    public function nbrPosts($profileID)
+    {
+        $rsp = new Response();
+
+        $nbrPosts = $this->postModel->nbrPosts($profileID);
+
+        $rsp->setSuccess(200)
+            ->bindValue("nbrPosts", $nbrPosts)
+            ->send();
+    }
+
+
+    /**
      * Return the posts of the specified profile
      * @param  integer $profileID ID of the profile
      * @param  integer $limit     Number of posts to return

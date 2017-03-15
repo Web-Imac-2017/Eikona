@@ -235,30 +235,30 @@ class AuthController{
 	 */
 	public function signOut($silence = false)
 	{
+        $rsp = new Response();
+
+        //Are we logged in?
+        if(!Session::read("userID"))
+        {
+            $rsp->setFailure(400, "User not connected")
+                ->send();
+
+            return;
+        }
+        
+        
         Cookie::set("stayConnected", "", -1);
 
 		Session::renewKey();
 		Session::remove("userID");
 		Session::remove("profileID");
 
-		if(!$silence)
-        {
-			$resp = new Response();
+		if($silence)
+            return;
 
-			if(!Session::read("userID"))
-            {
-				$resp->setFailure(400, "User not connected");
-			}
-            else
-            {
-				$resp->setSuccess(200, "user deconnected")
-				     ->bindValue("id", Session::read("userID"));
-			}
+        $rsp->setSuccess(200, "user deconnected")
+            ->bindValue("id", Session::read("userID"));
 
-			$resp->send();
-		}
-
-        return;
-	}
-
+        $rsp->send();
+    }
 }
