@@ -66,14 +66,14 @@ export default {
           ban = true
       })
       if(ban) return
-      var value = {
-        profileName: this.profile.name
-      }
-      if (this.profile.desc != '') value = {...value, profileDesc: this.profile.desc}
-      if (this.profile.isPrivate) value = {...value, profilePrivate: 0}
+      var priv = 0
+      if (this.profile.isPrivate) priv = 1;
 
-      console.log('Profile creation : ', value)
-      this.$http.post(apiRoot + 'profile/create/', value).then((response) => {
+      this.$http.post(apiRoot + 'profile/create/', {
+          profileName: this.profile.name,
+          profileDesc: this.profile.desc,
+          profilePrivate: this.profile.isPrivate
+        }).then((response) => {
         console.log('SUCCESS: profile creation', response)
         this.addProfileStore(response.data.data.profileID)
         this.addAvatar(response.data.data.profileID)
