@@ -1,33 +1,33 @@
 <template>
 	<md-layout>
-	<md-layout class="ModificationPost" md-flex="25">
-		<img :src="imageLink" alt="Photo post">
-		<span>Choisir un filtre : </span>
-		<md-layout  md-align="start">
-			<md-input-container class="choiceFilter">
-				<label>Filtre</label>
-				<md-select name="filtre" v-model="filter.currentFiltre">
-					<md-option :value="none">Pas de filtre</md-option>
-					<md-option v-for="filtre in filter.filtres" :value="filtre">{{filtre}}</md-option>
-				</md-select>
-				<md-button @click.native="applyFilter	">Appliquer<md-button>
+		<md-layout class="ModificationPost" md-flex="25">
+			<img :src="imageLink" alt="Photo post">
+			<span>Choisir un filtre : </span>
+			<md-layout  md-align="start">
+				<md-input-container class="choiceFilter">
+					<label>Filtre</label>
+					<md-select name="filtre" v-model="filter.currentFiltre">
+						<md-option :value="none">Pas de filtre</md-option>
+						<md-option v-for="filtre in filter.filtres" :value="filtre">{{filtre}}</md-option>
+					</md-select>
+					<md-button @click.native="applyFilter	">Appliquer<md-button>
+				</md-input-container>
+				<img :src="this.post.contactPicture" alt="filtresImage">
+			</md-layout>
+
+			<md-input-container>
+				<label>Description</label>
+				<md-textarea v-model="this.post.post_description"></md-textarea>
 			</md-input-container>
-			<img :src="this.post.contactPicture" alt="filtresImage">
+			
+			<md-chips v-model="tags" md-input-placeholder="ajouter un tag"	@change="addTag"  :md-max="15">
+			  		<template scope="chip" @delete="deleteTag(chip.value)">{{ chip.value }}</template>	
+			</md-chips>
+			
+	 		<md-layout md-flex="100"><md-layout  md-align="end"><md-switch v-model="comment"  name="allowComment" class="md-primary">Autoriser les commentaires</md-switch></md-layout></md-layout>
+			<md-layout  md-align="end"><md-button @click.native="saveChanges" class="md-raised md-primary">Enregistrer</md-button></md-layout>
+
 		</md-layout>
-
-		<md-input-container>
-			<label>Description</label>
-			<md-textarea v-model="this.post.post_description"></md-textarea>
-		</md-input-container>
-		
-		<md-chips v-model="tags" md-input-placeholder="ajouter un tag"	@change="addTag"  :md-max="15">
-		  		<template scope="chip" @delete="deleteTag(chip.value)">{{ chip.value }}</template>	
-		</md-chips>
-		
- 		<md-layout md-flex="100"><md-layout  md-align="end"><md-switch v-model="comment"  name="allowComment" class="md-primary">Autoriser les commentaires</md-switch></md-layout></md-layout>
-		<md-layout  md-align="end"><md-button @click.native="saveChanges" class="md-raised md-primary">Enregistrer</md-button></md-layout>
-
-	</md-layout>
 	</md-layout>	
 </template>
 
@@ -129,10 +129,11 @@ export default{
 				this.$http.post(apiRoot + 'post/update/ALLOWCOMMENTS/' + this.post.post_id,{
 					 allowComments : this.allowComment
 				}).then((response)=>{
-
+					this.$emit('close', 'dialog4')
 				},(response)=>{
 					switch (response.status) {
-						case 400 :
+						case 400 :						
+
 							console.log('La variable GET' + this.post.post_id + 'n\'est pas un ID OU une variable POST est absente')
 							break
 						case 405 : 

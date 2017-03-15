@@ -41,7 +41,7 @@
 					<md-icon v-if="displayComs">expand_less</md-icon>
 					<md-icon v-else>expand_more</md-icon>
 				</md-button>
-				<sectionComments v-show="displayComs" :comments="comments" :errorMessage="errorMessage" :postID="post.postID"></sectionComments>
+				<sectionComments v-show="displayComs" :comments="comments" :post="post" :commentsLike="commentsLike" :errorMessage="errorMessage" :post="this.post"></sectionComments>
 			</md-card-content>
 			<md-card-content v-else>
 				<p>Commentaires desactivés</p>
@@ -67,49 +67,84 @@
 			PostSettings
 		},
 		data () {
-			return {
-				displayComs: false
+
+			return {			
+				comments: [],
+				imageLink: 'assets/testPhoto.jpg',
+				displayComs: false,
+				commentsLike: []
+
 			}
 		},
 		props: ['post', 'profilePost'],
+		watch : {
+			displayComs: 'getComments'
+		},
 		computed: {
-			comments () {
-				// Recuperer les commentaires du post
-				return [{
-						id: 1,
-						message: 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard de l\'imprimerie depuis les années 1500, quand un peintre anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte. Il n\'a pas fait que survivre cinq siècles, mais s\'est aussi adapté à la bureautique informatique, sans que son contenu n\'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des applications de mise en page de texte, comme Aldus PageMaker.',
-						nbrLike:0
-					},{
-						id: 2,
-						message: 'commentaire de test',
-						nbrLike:0
-					},{
-						id: 3,
-						message: 'commentaire de test',
-						nbrLike:0
-					},{
-						id: 4,
-						message: 'commentaire de test',
-						nbrLike:0
-					}]
-			},
+			
+
 			like () {
 				// Récupérer le nombre de like du post
 
-				return 0
-
+				this.$http.get(apiRoot + 'post/likes/' + this.post.postID).then((response)=>{
+					this.like = response.data.data.nbOfLikes
+				},(response)=>{
+					switch (response.status) {
+						case 401 :
+							console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
+							break
+						case 400 :
+							console.log('Le post n\'a pas été aimé')
+							this.like = 0
+					}
 			},
 			tags () {
 				// Récpérer les tags attachés à ce post
-				return ['chevals', 'ornithorynque']
+
+				this.$http.get(apiRoot + 'post/tags/' + this.post.postID).then((response)=>{
+					this.tags = response.data.data.tags
+					},(response)=>{			
+					
+					console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
+				})
 			}
 		},
 		methods: {
+			getComments () {
+				if (!this.displayComs){
+					this.comments = []
+					this.commentsLike = []
+					return
+				}
+				// Recuperer les commentaires du post
+				this.$http.get(apiRoot + 'post/comments/' + this.post.postID).then((response)=>{
+					this.comments = response.data.data.comments
+					comments.forEach(comment => {
+						this.$http.get(apiRoot + 'comment/likes' + comment.comment_id).then((response)=>{
+							this.commentsLike.push(response.data.data.nbOfLikes)
+						},(response)=>{
+							case 404 :
+								console.log('L\'id du commentaire ne renvoie à aucun commentaire')
+								break
+							case 401 :
+								console.log('Vous ne suivez pas la personne')
+								break
+						})
+					})
+					
+					},(response)=>{			
+					
+					console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
+				})
+						
+			},
+		
 			showComments () {
 				this.displayComs = !this.displayComs
 				if (this.displayComs) {
 
 				}
+
 			},
 			addLike (id) {
 				this.$http.get(apiRoot + 'post/like/'+this.post.postID).then((response) => {

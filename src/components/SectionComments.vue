@@ -3,7 +3,7 @@
 		
 		<md-list >
 						
-			<commentaire v-for="comment in comments" :content="comment.message" :nbrLike="comment.nbrLikeComment" :id="comment.id" @incrementLike="addLikeComment" ></commentaire>
+			<commentaire v-for="comment in comments" :content="comment.comment_texte" :nbrLike="commentsLike[index].nbOfLikes" :id="comment.comment_id" @incrementLike="addLikeComment" ></commentaire>
 						
 			
 		</md-list>
@@ -23,18 +23,10 @@ export default {
 	components: {
 		commentaire
 	},
-	props: {
-		comments: {
-			type: Array
-		},
-		errorMessage: {
-			type: String,
-			default: ''
-		},
-		postID:{
-			type: Number
-		}
-	},
+	props: [comments, errorMessage, post, commentsLike],
+	data(){
+		newComment:''
+	}
 
 	methods:{
 		addLikeComment(id){
@@ -42,8 +34,8 @@ export default {
 
 					var i
 					for (i=0, len=this.comments.length; i < len; i++){
-						if (this.comments[i].id == id){
-							this.comments[i].nbrLike++
+						if (this.comments[i].comment_id == id){
+							this.commentsLike[i]++
 							document.getElementById(id).classList.add('md-primary')
 						}
 
@@ -58,7 +50,7 @@ export default {
 							break
 						case 400:
 							this.$http.get('/Eikona/do/post/unlike/' +id).then((response)=>{
-								comments[i].nbrLike--
+								commentsLike[i]--
 							},(response)=>{
 								this.errorMessage = "On ne peut pas aimer son propre commentaire"
 							})
@@ -72,12 +64,15 @@ export default {
 			addComment(){
 				this.$http.post(apiRoot + 'comment/create/'+this.postID, {
 					commentText: this.newComment
+
 				}).then((response)=>{
 					this.comments.push({
-						message: this.newComment,
-						nbrLikeComment: 0
+						 profile_id : response.data.data.profilID
+						 comment_texte : this.newComment,
+						
 					})
-					this.newComment=""
+					this.commentsLike.push(0)
+					this.newComment=''
 
 				},(response)=>{
 					switch (response.code) {
@@ -100,11 +95,12 @@ export default {
 					var i
 					var len=this.comments.length
 					for (i=0; i < len; i++){
-						if (this.comments[i].id == id){
-							this.comments[i].id=this.comments[len].id
-							this.comments[i].message=this.comments[len].message
-							this.comments[i].nbrLike=this.comments[len].nbrLike
-							this.comments.pop()
+						if (this.comments[i].comment_id == id){
+							this.comments[i].comment_id=this.comments[len].comment_id
+							this.comments[i].comment_texte=this.comments[len].comment_texte
+							this.commentsLikes[i].nbOfLikes=this.commentsLikes[len].nbOfLikes
+							this.comments.pop()	
+							this.commentsLikes.pop()	
 						}
 					}						
 					},(response)=>{
