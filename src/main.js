@@ -40,26 +40,37 @@ const scrollBehavior = (to, from, savedPosition) => {
 
 const router = new VueRouter({
   mode: 'history',
+  base: '/Eikona',
   scrollBehavior,
   routes: [{
-    path: '/Eikona/',
+    path: '',
     component: require('./components/Home.vue')
   },
   {
-    path: '/Eikona/search/:query',
+    path: '/search/:type/:query',
     component: require('./components/Search-page.vue'),
     props: true
   },
   {
-    path: '/Eikona/user/profile',
+    path: '/user',
+    component: require('./components/MainPage.vue')
+  },
+  {
+    path: '/user/profile',
     component: require('./components/Profil-selection.vue')
-  }, {
-    path: '/Eikona/user/settings',
+  },
+  {
+    path: '/user/settings',
     component: require('./components/Settings.vue')
   },
   {
+    name: 'profile_name',
+    path: '/:profileID',
+    component: require('./components/ProfilePage.vue')
+  },
+  {
     path: '*',
-    redirect: '/Eikona/'
+    redirect: ''
   }]
 })
 
@@ -67,8 +78,16 @@ const router = new VueRouter({
 Vue.http.options.emulateHTTP = true
 Vue.http.options.emulateJSON = true
 
+// configuration couleur vue Material
+Vue.material.registerTheme('default', {
+  primary: {
+    color: 'cyan',
+    hue: 800
+  }
+})
+
 new Vue({ // eslint-disable-line no-new
   el: '#app',
-  router,
+  router: router,
   render: (h) => h(require('./App.vue'))
 })

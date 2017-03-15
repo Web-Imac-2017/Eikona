@@ -1,57 +1,51 @@
 <template>
 	<md-layout>
-
 		<md-card class='post'>
 			<md-card-header>
 				<md-layout>
 					<md-layout md-align="start" class="avatar_poster">
-
-					<md-list>
-						<md-list-item>
-							<md-avatar>
-						  		<img :src="profile.profile_picture" alt="Avatar">		  			
-							</md-avatar>
-							<span>{{profile.profile_name}}</span>
-						</md-list-item>
-
+						<md-list>
+							<md-list-item>
+								<md-avatar>
+							  		<img :src="profilePost.profilePict" alt="Avatar">
+								</md-avatar>
+								<span>{{profilePost.profileName}}</span>
+							</md-list-item>
+						</md-list>
 					</md-layout>
-					<md-list>
-
 					<md-layout md-align="end">
-						<PostSettings class="md-list-action" :posteurID="1"	></PostSettings>
+						<PostSettings class="md-list-action" :posteurID="profilePost.profileID"></PostSettings>
 					</md-layout>
 				</md-layout>
 			</md-card-header>
 
 	 		<md-card-media>
-				<img :src="imageLink" alt="Photo post">
+				<img :src="post.originalPicture" alt="Photo test">
   		</md-card-media>
 
-
-	  		<md-layout id="infosPost" >	  			
-	  			<md-layout md-flex="80"><div class="description">{{post.post_description}}</div></md-layout>
-				<md-layout md-align="end" ><md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
-				<span>{{like}}</span> </md-layout> 		
-		  						
-			</md-layout> 
-
-	  		
-	  				
+			<md-layout class="infosPost">
+  			<md-layout md-flex="80"><div class="description">{{post.desc}}</div></md-layout>
+				<md-layout md-align="end" >
+					<md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
+					<span>{{like}}</span>
+				</md-layout>
+			</md-layout>
 
 			<md-layout id="post-tagContainer">
-				<md-chip v-for="tag in tags" class="tag" disabled>{{tag}}</md-chip>	
-			</md-layout> 
-	
-		  	
+				<md-chip v-for="tag in tags" class="tag" disabled>{{tag}}</md-chip>
+			</md-layout>
 
-
-			<md-card-content>
-
+			<md-card-content v-if="post.allowComments == 1">
 				<p>{{comments.length}} commentaires : </p>
-				<md-button class="md-icon-button" id="display-more-comments"><md-icon>expand_more</md-icon></md-button>
-				<sectionComments :comments="comments" :errorMessage="errorMessage" :postID="post.post_id"></sectionComments>
+				<md-button class="md-icon-button display-more-comments" @click.native="showComments">
+					<md-icon v-if="displayComs">expand_less</md-icon>
+					<md-icon v-else>expand_more</md-icon>
+				</md-button>
+				<sectionComments v-show="displayComs" :comments="comments" :errorMessage="errorMessage" :postID="post.postID"></sectionComments>
 			</md-card-content>
-
+			<md-card-content v-else>
+				<p>Commentaires desactivés</p>
+			</md-card-content>
 		</md-card>
 	</md-layout>
 </template>
@@ -62,33 +56,23 @@
 
 	import store from './postStore.js'
 	import apiRoot from './../config.js'
-	import SectionComments from './SectionComments.vue'
+	import sectionComments from './SectionComments.vue'
 	import PostSettings from './PostSettings.vue'
 
 
 	export default{
 		name: 'postFront',
 		components: {
-			SectionComments,
+			sectionComments,
 			PostSettings
 		},
 		data () {
-
-			return {			
-				
-				imageLink: 'assets/testPhoto.jpg',
-
+			return {
+				displayComs: false
 			}
 		},
-		props: ['post'],
+		props: ['post', 'profilePost'],
 		computed: {
-			profile () {
-				// Recuperer le profile du posteur
-				return {
-					profile_name: 'JackieDu29',
-					profile_picture: 'assets/Eiko.png'
-				}
-			},
 			comments () {
 				// Recuperer les commentaires du post
 				return [{
@@ -118,12 +102,17 @@
 			tags () {
 				// Récpérer les tags attachés à ce post
 				return ['chevals', 'ornithorynque']
-
 			}
 		},
 		methods: {
+			showComments () {
+				this.displayComs = !this.displayComs
+				if (this.displayComs) {
+
+				}
+			},
 			addLike (id) {
-				this.$http.get(apiRoot + 'post/like/'+this.post.post_id).then((response) => {
+				this.$http.get(apiRoot + 'post/like/'+this.post.postID).then((response) => {
 					this.nbrLike++
 					document.getElementById(id).classList.add('md-primary')
 				},(response)=>{
@@ -132,7 +121,7 @@
 							console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas la personne')
 							break
 						case 400:
-							this.$http.get(apiRoot + 'post/unlike/'+this.post.post_id).then((response)=>{
+							this.$http.get(apiRoot + 'post/unlike/'+this.post.postID).then((response)=>{
 								this.nbrLike--
 								document.getElementById(id).classList.remove('md-primary')
 							},(response)=>{
@@ -153,7 +142,7 @@
 
 	.tag{
 		margin: 0 4px 5px 0;
-	}	
+	}
 	#post-tagContainer {
 		padding: 0 10px;
 		margin-bottom: 10px;
@@ -164,7 +153,7 @@
 		margin: 10px 0 5px 10px;
 	}
 
-	#display-more-comments{
+	.display-more-comments{
 		left: 45%;
 	}
 	.avatar_poster{

@@ -1,5 +1,5 @@
 <template lang="html">
-  <md-layout>
+  <md-layout md-align="end">
     <div v-if="getUser.userName != false">
       <md-button @click.native="settings" class="md-icon-button"><md-icon>settings</md-icon></md-button>
       <md-button @click.native="disconnect" class="md-icon-button"><md-icon>power_settings_new</md-icon></md-button>
@@ -30,7 +30,8 @@ export default {
   },
   methods: {
     ...Vuex.mapActions([
-      'clearUser'
+      'clearUser',
+      'clearProfiles'
     ]),
     connexion () {
       console.log('connexion')
@@ -43,9 +44,10 @@ export default {
     disconnect () {
       this.$http.post(apiRoot + 'auth/signOut/', {}).then((response) => {
         this.clearUser()
-        this.$router.push('/Eikona/')
+        this.clearProfiles()
+        this.$router.push('/')
       }, (response) => {
-        switch (response.code) {
+        switch (response.status) {
           case 400:
             console.log('Bad request')
             this.$refs.snackbar.open();
@@ -57,7 +59,7 @@ export default {
     },
     settings () {
       console.log('settings')
-      this.$router.push('/Eikona/user/settings')
+      this.$router.push('/user/settings')
     }
   }
 }

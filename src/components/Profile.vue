@@ -1,12 +1,12 @@
 <template lang="html">
     <md-list-item>
       <md-avatar>
-        <img :src="profile.profile_picture" alt="Avatar"/>
+        <img :src="profile.profilePict" alt="Avatar"/>
       </md-avatar>
 
       <div class="md-list-text-container">
-        <span>{{ profile.profile_name }}</span>
-        <p v-show="extended">{{ profile.profile_views }} posts - {{ profile.profile_views }} abonnements - {{ profile.profile_views }} abonnés</p>
+        <span>{{ profile.profileName }}</span>
+        <p v-show="extended">{{ profile.nbrPosts}} posts - {{ profile.nbrFollowings }} abonnements - {{ profile.nbrFollowers }} abonnés</p>
         <p>{{profile.profile_desc}}</p>
       </div>
 
@@ -41,7 +41,7 @@ export default {
   },
   methods: {
     select () {
-      this.$emit('select', this.profile)
+      this.$emit('select', this.profile.profileID)
     }
   }
 }
@@ -51,5 +51,4 @@ export default {
 .profile-subtitles {
   font-size: 1vw;
 }
-
 </style>
