@@ -61,7 +61,7 @@ interface ProfileControllerInterface
     public function feed($limit = 30, $before = 0);
 }
 
-class ProfileController
+class ProfileController implements ProfileControllerInterface
 {
     private $model;
     private $postModel;

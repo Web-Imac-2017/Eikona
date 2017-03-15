@@ -12,7 +12,7 @@ interface ParamControllerInterface
 }
 }
 
-class ParamController
+class ParamController implements ParamControllerInterface
 {
     private $model;
     private $params = null;

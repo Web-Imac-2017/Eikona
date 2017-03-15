@@ -17,7 +17,7 @@ interface ReportControllerInterface
 	public function reports();
 }
 
-class ReportController
+class ReportController interface ReportControllerInterface
 {
 
 	private $model;

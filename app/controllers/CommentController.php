@@ -13,7 +13,7 @@ interface CommentControllerInterface
 	public function likes($commentID);
 }
 
-class CommentController
+class CommentController implements CommentControllerInterface
 {
 	private $model;
 	private $likeModel;

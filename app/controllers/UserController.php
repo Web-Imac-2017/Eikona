@@ -21,7 +21,7 @@ interface UserControllerInterface
 	public function notifications();
 }
 
-class UserController
+class UserController interface UserControllerInterface
 {
 
 	private $model;

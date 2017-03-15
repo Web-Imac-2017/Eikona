@@ -33,7 +33,7 @@ interface PostControllerInterface
     public function popular($limit = 30);
 }
 
-class PostController
+class PostController interface PostControllerInterface
 {
 	private $model;
 	private $tagModel;
