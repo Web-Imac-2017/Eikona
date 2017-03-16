@@ -223,7 +223,7 @@ Data:
     **Explication** Le signalement est déjà fini/signalé. 
 	
  
- ## Recherche tous les signalement qu'un modérateur gère. Uniquement posts qui ont une date de modification supérieur à la date de signalement
+## Recherche tous les signalement qu'un modérateur gère. Uniquement posts qui ont une date de modification supérieur à la date de signalement
 
 Pour récupérer seulement les posts cachés qui ont été modifiés depuis qu'ils ont étaient cachés
 
