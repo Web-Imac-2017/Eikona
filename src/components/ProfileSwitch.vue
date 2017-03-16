@@ -27,6 +27,7 @@
             <md-list-item v-for="notif in notifs">
               <span>{{ notif.profile_id }}</span>
             </md-list-item>
+
           </md-list>
 		  </md-menu-content>
 		</md-menu>
@@ -85,10 +86,35 @@ export default {
       this.selectProfile(profileId)
       this.$emit('change')
     },
+    getNotifMessage(notif) {
+      switch (notif_type.status) {
+        case 1:
+          return 'Un utilisateur aimerait vous suivre !'
+          break
+        case 2:
+          return 'Vous pouvez désormais suivre ce profil'
+          break
+        case 3:
+          return 'Vous avez un nouveau follower'
+          break
+        case 4:
+          return 'Une personne a aimé votre post'
+          break
+        case 5:
+          return 'Une personne a commenté votre post'
+          break
+        case 6:
+          return 'Une personne a aimé votre commentaire'
+          break
+        default:
+          return ' '
+      }
+    },
     getNotification() {
       this.$http.get(apiRoot+'profile/notifications/').then((response) => {
         console.log('SUCCESS: notification recuperee', response)
         this.notifs = response.data.data.notif
+        this.getNotifMessage(notifs)
      }, (response) => {
       console.error('ERR: get notification request', response)
       switch (response.status) {
