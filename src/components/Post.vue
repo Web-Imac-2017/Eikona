@@ -14,7 +14,7 @@
 						</md-list>
 					</md-layout>
 					<md-layout md-align="end">
-						<PostSettings class="md-list-action" :posteurID="profilePost.profileID"></PostSettings>
+						<PostSettings class="md-list-action" :post="this.post"></PostSettings>
 					</md-layout>
 				</md-layout>
 			</md-card-header>
@@ -26,7 +26,7 @@
 			<md-layout class="infosPost">
   			<md-layout md-flex="80"><div class="description">{{post.desc}}</div></md-layout>
 				<md-layout md-align="end" >
-					<md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
+					<md-button  class="md-icon-button" @click.native="addLike(idLike)"><md-icon :id="idLike">favorite</md-icon> </md-button>
 					<span>{{like}}</span>
 				</md-layout>
 			</md-layout>
@@ -36,12 +36,12 @@
 			</md-layout>
 
 			<md-card-content v-if="post.allowComments == 1">
-				<p>{{comments.length}} commentaires : </p>
+				<p>{{this.nbComments}} commentaires : </p>
 				<md-button class="md-icon-button display-more-comments" @click.native="showComments">
 					<md-icon v-if="displayComs">expand_less</md-icon>
 					<md-icon v-else>expand_more</md-icon>
 				</md-button>
-				<sectionComments v-show="displayComs" :comments="comments" :post="post" :commentsLike="commentsLike" :errorMessage="errorMessage" :post="this.post"></sectionComments>
+				<sectionComments v-show="displayComs" :comments="comments" :post="post" :commentsLike="commentsLike" :post="this.post"></sectionComments>
 			</md-card-content>
 			<md-card-content v-else>
 				<p>Commentaires desactivés</p>
@@ -73,13 +73,18 @@
 				displayComs: false,
 				commentsLike: [],
 				like:0,
-				tags:[]
+				tags:[],
+				nbComments: 0,
+
 
 			}
 		},
 		props: ['post', 'profilePost'],
 		watch : {
 			displayComs: 'getComments'
+		},
+		mounted () {
+			console.log(this.post)
 		},
 		computed: {
 			
@@ -88,6 +93,7 @@
 				// Récupérer le nombre de like du post
 
 				this.$http.get(apiRoot + 'post/likes/' + this.post.postID).then((response)=>{
+					console.log(response.data.data)
 					this.like = response.data.data.nbOfLikes
 				},(response)=>{
 					switch (response.status) {
@@ -110,6 +116,23 @@
 					
 					console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
 				})
+			},
+			nbComments(){
+				this.$http.get(apiRoot + 'post/comments/' + this.post.postID).then((response)=>{
+					this.nbComments = response.data.data.nbOfComments
+				},(response)=>{
+					switch (response.status) {
+						case 404 :
+							console.log('L\'id du commentaire ne renvoie à aucun commentaire')
+							break
+						case 401 :
+							console.log('Vous ne suivez pas la personne')
+							break
+					}
+				})
+			},
+			idLike() {
+				return 'postLike' + this.post.postID
 			}
 
 
@@ -123,9 +146,10 @@
 				}
 				// Recuperer les commentaires du post
 				this.$http.get(apiRoot + 'post/comments/' + this.post.postID).then((response)=>{
+					console.log(response.data)
 					this.comments = response.data.data.comments
-					comments.forEach(comment => {
-						this.$http.get(apiRoot + 'comment/likes' + comment.comment_id).then((response)=>{
+					this.comments.forEach(comment => {
+						this.$http.get(apiRoot + 'comment/likes/' + comment.comment_id).then((response)=>{
 							this.commentsLike.push(response.data.data.nbOfLikes)
 						},(response)=>{
 							switch (response.status) {
@@ -143,7 +167,7 @@
 					
 					console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
 				})
-						
+					
 			},
 		
 			showComments () {
@@ -155,8 +179,8 @@
 			},
 			addLike (id) {
 				this.$http.get(apiRoot + 'post/like/'+this.post.postID).then((response) => {
-					this.nbrLike++
-					document.getElementById(id).classList.add('md-primary')
+					this.like++
+					document.getElementById(id).classList.add('md-accent')
 				},(response)=>{
 					switch (response.status) {
 						case 401:
@@ -164,8 +188,8 @@
 							break
 						case 400:
 							this.$http.get(apiRoot + 'post/unlike/'+this.post.postID).then((response)=>{
-								this.nbrLike--
-								document.getElementById(id).classList.remove('md-primary')
+								this.like--
+								document.getElementById(id).classList.remove('md-accent')
 							},(response)=>{
 								console.log('On ne peut pas aimer son propre post')
 							})

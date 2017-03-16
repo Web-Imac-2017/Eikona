@@ -1,6 +1,6 @@
 <template>
-	<md-layout>
-		<md-layout class="ModificationPost" md-flex="25">
+
+		<md-layout class="ModificationPost" >
 			<img :src="imageLink" alt="Photo post">
 			<span>Choisir un filtre : </span>
 			<md-layout  md-align="start">
@@ -17,7 +17,7 @@
 
 			<md-input-container>
 				<label>Description</label>
-				<md-textarea v-model="this.post.post_description"></md-textarea>
+				<md-textarea v-model="post.desc"></md-textarea>
 			</md-input-container>
 			
 			<md-chips v-model="tags" md-input-placeholder="ajouter un tag"	@change="addTag"  :md-max="15">
@@ -28,7 +28,7 @@
 			<md-layout  md-align="end"><md-button @click.native="saveChanges" class="md-raised md-primary">Enregistrer</md-button></md-layout>
 
 		</md-layout>
-	</md-layout>	
+
 </template>
 
 
@@ -45,24 +45,34 @@ export default{
 	data(){
 		return{
 			
-			comment : true
+			allowComment : true,
+			tags: []
+			
 			
 		}
 	},
 	computed: {
+		
 		filter(){
 			return{
 				filtres : ['amaro', 'brannan', 'clarendon', 'earlybird', 'hefe', 'hudson', 'inkwell', 'kelvin', 'lark', 'lofi', 'mayfair', 'moon', 'nashville', 'reyes', 'rise', 'sierra', 'sutro', 'toaster', 'valencia', 'walden', 'willow', 'xproii'],
 				currentFiltre : 'none'
 			}
 		},
-		tags(){
-			return ['chevals', 'ornithorynque']
+		tags () {
+				// Récupérer les tags attachés à ce post
+
+			this.$http.get(apiRoot + 'post/tags/' + this.post.postID).then((response)=>{
+				this.tags = response.data.data.tags
+				},(response)=>{			
+					
+				console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
+			})
 		},
-		allowComment(){
+		/*allowComment(){
 			if(this.comment) return 1
 			return 0
-		},
+		},*/
 		imageLink(){
 			
 			if (this.post.editedPicture != null)	return this.post.editedPicture
@@ -73,8 +83,8 @@ export default{
 	},
 	methods: {
 		applyFilter(){			
-			this.$http.get(apiRoot + 'post/setfilter/' + this.post.post_id + '/' + this.currentFiltre).then((response)=>{
-				if(currentFiltre== 'none'){ this.imageLink = response.data.data.originalPicture}			
+			this.$http.get(apiRoot + 'post/setfilter/' + this.post.postID + '/' + this.filter.currentFiltre).then((response)=>{
+				if(this.filter.currentFiltre== 'none'){ this.imageLink = response.data.data.originalPicture}			
 				else{ this.imageLink = response.data.data.editedPicture}
 				},(response)=>{
 					switch (response.status) {
@@ -88,7 +98,7 @@ export default{
 			})
 		},
 		deleteTag(tag){
-			this.$http.get(apiRoot + 'tag/delete/' + this.post.post_id + '/' + tag).then((response)=>{
+			this.$http.get(apiRoot + 'tag/delete/' + this.post.postID + '/' + tag).then((response)=>{
 				
 			},(response)=>{
 				switch (response.status) {
@@ -106,7 +116,7 @@ export default{
 			var len = tagArray.length
 			var tag = tagArray[len-1]
 			if(this.verif_tag(tag)){
-				this.$http.get(apiRoot + 'tag/add/' + this.post.post_id + '/' + tag).then((response)=>{
+				this.$http.get(apiRoot + 'tag/add/' + this.post.postID + '/' + tag).then((response)=>{
 					
 				},(response)=>{
 					switch (response.status) {
@@ -123,10 +133,10 @@ export default{
 
 		},
 		saveChanges(){
-			this.$http.post(apiRoot + 'post/update/DESCRIPTION/' + this.post.post_id,{
-				desc : post.post_description
+			this.$http.post(apiRoot + 'post/update/description/' + this.post.postID,{
+				desc : this.post.desc
 			}).then((response)=>{				
-				this.$http.post(apiRoot + 'post/update/ALLOWCOMMENTS/' + this.post.post_id,{
+				this.$http.post(apiRoot + 'post/update/allowComments/' + this.post.postID,{
 					 allowComments : this.allowComment
 				}).then((response)=>{
 					this.$emit('close', 'dialog4')
@@ -134,7 +144,7 @@ export default{
 					switch (response.status) {
 						case 400 :						
 
-							console.log('La variable GET' + this.post.post_id + 'n\'est pas un ID OU une variable POST est absente')
+							console.log('La variable GET' + this.post.postID + 'n\'est pas un ID OU une variable POST est absente')
 							break
 						case 405 : 
 							console.log('Le field spécifié n\'est pas supporté.')
@@ -144,7 +154,7 @@ export default{
 			},(response)=>{
 				switch (response.status) {
 					case 400 :
-						console.log('La variable GET' + this.post.post_id + 'n\'est pas un ID OU une variable POST est absente')
+						console.log('La variable GET' + this.post.postID + 'n\'est pas un ID OU une variable POST est absente')
 						break
 					case 405 : 
 						console.log('Le field spécifié n\'est pas supporté.')
