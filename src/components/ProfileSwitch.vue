@@ -1,6 +1,6 @@
 <template lang="html">
 	<md-layout>
-    <span id="notification-counter">1</span>
+    <span id="notification-counter">!</span>
 		<md-menu md-direction="bottom left" md-size="7">
 			<md-avatar class="md-large" md-menu-trigger>
 				<img src="../assets/arbre_bleu.jpg" alt="People">
@@ -25,7 +25,7 @@
           </div>-->
           
             <md-list-item v-for="notif in notifs">
-              <span>{{ notif.profile_id }}</span>
+              <span>{{ getNotifMessage(notif) }}</span>
             </md-list-item>
 
           </md-list>
@@ -87,34 +87,33 @@ export default {
       this.$emit('change')
     },
     getNotifMessage(notif) {
-      switch (notif_type.status) {
-        case 1:
+      switch (notif.notif_type) {
+        case "1":
           return 'Un utilisateur aimerait vous suivre !'
           break
-        case 2:
+        case "2":
           return 'Vous pouvez désormais suivre ce profil'
           break
-        case 3:
-          return 'Vous avez un nouveau follower'
+        case "3":
+          return 'Vous avez un nouveau abonné'
           break
-        case 4:
+        case "4":
           return 'Une personne a aimé votre post'
           break
-        case 5:
+        case "5":
           return 'Une personne a commenté votre post'
           break
-        case 6:
+        case "6":
           return 'Une personne a aimé votre commentaire'
           break
         default:
-          return ' '
+          return 'message '
       }
     },
     getNotification() {
       this.$http.get(apiRoot+'profile/notifications/').then((response) => {
         console.log('SUCCESS: notification recuperee', response)
         this.notifs = response.data.data.notif
-        this.getNotifMessage(notifs)
      }, (response) => {
       console.error('ERR: get notification request', response)
       switch (response.status) {
