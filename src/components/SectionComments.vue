@@ -8,7 +8,7 @@
 			
 		</md-list>
 		<md-input-container>
-				<md-input type="text" class="new-comment" placeholder="Ajouter un commentaire" @keyup.enter="addComment" v-model="newComment"></md-input>
+				<md-input type="text" class="new-comment" placeholder="Ajouter un commentaire" @keyup.enter.native="addComment" v-model="newComment"></md-input>
 				<md-button @click.native="addComment">Commenter</md-button>
 		</md-input-container>
 	</md-layout>

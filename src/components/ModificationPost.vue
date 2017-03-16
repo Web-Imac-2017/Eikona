@@ -136,8 +136,8 @@ export default{
 			this.$http.post(apiRoot + 'post/update/description/' + this.post.postID,{
 				desc : this.post.desc
 			}).then((response)=>{				
-				this.$http.post(apiRoot + 'post/update/allowComments/' + this.post.postID,{
-					 allowComments : this.allowComment
+				this.$http.post(apiRoot + 'post/update/geo/' + this.post.postID,{
+					 geo : 'sfdsqdqsdqs'
 				}).then((response)=>{
 					this.$emit('close', 'dialog4')
 				},(response)=>{
