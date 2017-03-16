@@ -1,6 +1,8 @@
 <template>
 	<md-layout id="main-layout-add" md-flex="100" md-column>
+
 		<form md-column id="form" @submit.stop.prevent="create">
+		
 			<p v-if="error_message != ''" class='md-warn'>{{ error_message }}</p>
 			<md-layout id="Image-input" md-flex="66" md-column>
 				<md-layout class="Image-input__image-wrapper">
