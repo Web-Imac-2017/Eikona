@@ -24,4 +24,3 @@ usleep(100000);
 //Finally init the frontController use its run method to call the controller.
 $frontController = new FrontController();
 $frontController->run();
-

@@ -16,6 +16,7 @@
 
 <script>
 import commentaire from './Comment.vue'
+import apiRoot from './../config.js'
 
 export default {
 	name: 'sectionComments',
@@ -41,7 +42,11 @@ export default {
 
 					var i
 					for (i=0, len=this.comments.length; i < len; i++){
-						if (this.comments[i].id == id){this.comments[i].nbrLike++}
+						if (this.comments[i].id == id){
+							this.comments[i].nbrLike++
+							document.getElementById(id).classList.add('md-primary')
+						}
+
 					}
 				},(response)=>{
 					switch (response.code) {
@@ -96,9 +101,9 @@ export default {
 					var len=this.comments.length
 					for (i=0; i < len; i++){
 						if (this.comments[i].id == id){
-							this.comments[len].id=this.comments[i].id
-							this.comments[len].message=this.comments[i].message
-							this.comments[len].nbrLike=this.comments[i].nbrLike
+							this.comments[i].id=this.comments[len].id
+							this.comments[i].message=this.comments[len].message
+							this.comments[i].nbrLike=this.comments[len].nbrLike
 							this.comments.pop()
 						}
 					}						

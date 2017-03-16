@@ -7,9 +7,9 @@
 						<md-list>
 							<md-list-item>
 								<md-avatar>
-							  		<img :src="profilePost.profilePicture" alt="Avatar">
+							  		<img :src="profilePost.profilePict" alt="Avatar">
 								</md-avatar>
-								<span>{{profilePost.profile_name}}</span>
+								<span>{{profilePost.profileName}}</span>
 							</md-list-item>
 						</md-list>
 					</md-layout>
@@ -37,8 +37,11 @@
 
 			<md-card-content v-if="post.allowComments == 1">
 				<p>{{comments.length}} commentaires : </p>
-				<md-button class="md-icon-button" id="display-more-comments"><md-icon>expand_more</md-icon></md-button>
-				<sectionComments :comments="comments" :errorMessage="errorMessage" :postID="post.post_id"></sectionComments>
+				<md-button class="md-icon-button display-more-comments" @click.native="showComments">
+					<md-icon v-if="displayComs">expand_less</md-icon>
+					<md-icon v-else>expand_more</md-icon>
+				</md-button>
+				<sectionComments v-show="displayComs" :comments="comments" :errorMessage="errorMessage" :postID="post.postID"></sectionComments>
 			</md-card-content>
 			<md-card-content v-else>
 				<p>Commentaires desactivés</p>
@@ -62,6 +65,11 @@
 		components: {
 			sectionComments,
 			PostSettings
+		},
+		data () {
+			return {
+				displayComs: false
+			}
 		},
 		props: ['post', 'profilePost'],
 		computed: {
@@ -97,8 +105,14 @@
 			}
 		},
 		methods: {
+			showComments () {
+				this.displayComs = !this.displayComs
+				if (this.displayComs) {
+
+				}
+			},
 			addLike (id) {
-				this.$http.get(apiRoot + 'post/like/'+this.post.post_id).then((response) => {
+				this.$http.get(apiRoot + 'post/like/'+this.post.postID).then((response) => {
 					this.nbrLike++
 					document.getElementById(id).classList.add('md-primary')
 				},(response)=>{
@@ -107,7 +121,7 @@
 							console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas la personne')
 							break
 						case 400:
-							this.$http.get(apiRoot + 'post/unlike/'+this.post.post_id).then((response)=>{
+							this.$http.get(apiRoot + 'post/unlike/'+this.post.postID).then((response)=>{
 								this.nbrLike--
 								document.getElementById(id).classList.remove('md-primary')
 							},(response)=>{
@@ -139,7 +153,7 @@
 		margin: 10px 0 5px 10px;
 	}
 
-	#display-more-comments{
+	.display-more-comments{
 		left: 45%;
 	}
 	.avatar_poster{

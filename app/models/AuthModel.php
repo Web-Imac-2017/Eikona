@@ -105,7 +105,7 @@ class AuthModel extends DBInterface implements AuthModelInterface
 		//TODO
 		//CHANGER L'ADRESSE D'ENVOI POUR LA MISE EN PROD
 
-		$headers = 'From: donotreply@eikona.com' . "\r\n" .
+		$headers = 'From: eikona2018@gmail.com' . "\r\n" .
                    'MIME-Version: 1.0' . "\r\n" .
                    'Content-type: text/html; charset=utf-8';
 
@@ -192,7 +192,7 @@ class AuthModel extends DBInterface implements AuthModelInterface
 
     	$subject = "RECUPEREZ VOTRE MOT DE PASSE";
 
-    	$headers = 'From: zobeleflorian@gmail.com' . "\r\n".
+    	$headers = 'From: eikona2018@gmail.com' . "\r\n".
                    'MIME-Version: 1.0' . "\r\n".
                    'Content-type: text/html; charset=utf-8';
 

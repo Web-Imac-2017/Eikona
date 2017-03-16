@@ -1,5 +1,5 @@
 <template>
-	<md-layout id="main-layout-add" md-flex="33" md-flex-offset="33" md-column>
+	<md-layout id="main-layout-add" md-flex="100" md-column>
 		<form md-column id="form" @submit.stop.prevent="create">
 			<p v-if="error_message != ''" class='md-warn'>{{ error_message }}</p>
 			<md-layout id="Image-input" md-flex="66" md-column>
@@ -33,7 +33,8 @@
 	import Vuex from 'vuex'
 	import store from './connectionStore.js'
 	import apiRoot from './../config.js'
-	import formVerifications from './formVerification.js'
+	import formVerifications from './../formVerifications.js'
+  
 	export default{
 		name: 'addPost',
 		store: store,
@@ -61,7 +62,6 @@
 			      }).then((response) => {
 			      	console.log(response);
 			      	console.log('Create success', response);
-			        /*this.$router.push('/Eikona/user/profile')*/
 			      }, (response) => {
 			        console.log(response);
 			        switch (response.status) {
@@ -113,8 +113,7 @@
 }
 
 #main-layout-add{
-	padding: 15px;
-	border: 1px solid black;
+	margin: 0;
 }
 
 .Image-input {
@@ -133,6 +132,7 @@
 
 .Image-input__image {
     max-width: 100%;
+    max-height: 100%;
     border-radius: 1px;
 }
 
@@ -163,7 +163,6 @@
     font-size: 0.8em;
     font-weight: 300;
     width: 100%;
-    height: 100%;
     opacity: 0;
     position: absolute;
     right: 0;
