@@ -64,19 +64,21 @@ export default{
 	methods: {
 		save () {
 			if(this.profile.profileDesc !== this.newDesc) {
-				modifDesc ()
+				this.modifDesc (this.newDesc)
 			}
 			if(this.profile.profileName !== this.newName) {
-				modifNom ()
+				this.modifNom (this.newName)
 			}
-			if (this.profile.profileIsPrivate !== this.isPrivate)
+			if (this.profile.profileIsPrivate !== this.isPrivate) {
+				this.modifStatut(this.isPrivate)
+			}
 		},
-		modifNom () {
+		modifNom (nom) {
 			this.$http.post(apiRoot + 'profile/update/NAME' + this.profile.profileID, {
-					newValue: newName
+					newValue: nom
 				}).then( response => {
 					console.log('MODIFICATION NAME SUCCESS', response)
-					profileName = newName
+					this.profile.profileName = nom
 				}, (response) => {
 					console.log('MODIFICATION NAME ERROR', response)
 					switch (response.status) {
@@ -100,12 +102,12 @@ export default{
         			}
 				})
 		},
-		modifDesc () {
+		modifDesc (desc) {
 			this.$http.post(apiRoot + 'profile/update/DESCRIPTION' + this.profile.profileID, {
-					newValue: newDesc
+					newValue: desc
 				}).then( response => {
 					console.log('MODIFICATION DESC SUCCESS', response)
-					profileDesc = newDesc
+					this.profile.profileDesc = desc
 				}, (response) => {
 					console.log('MODIFICATION DESC ERROR', response)
 					switch (response.status) {
@@ -129,12 +131,12 @@ export default{
         			}
 				})
 		},
-		modifStatut () {
+		modifStatut (isPrivate) {
 			this.$http.post(apiRoot + 'profile/update/SETPRIVATE' + this.profile.profileID, {
-					newValue: checked
+					newValue: isPrivate
 				}).then( response => {
 					console.log('MODIFICATION NAME SUCCESS', response)
-					profileIsPrivate = checked
+					this.profile.profile = isPrivate
 				}, (response) => {
 					console.log('MODIFICATION NAME ERROR', response)
 					switch (response.status) {
@@ -157,14 +159,7 @@ export default{
 			            console.log('Unknown error')
         			}
 				})
-		},
-		changeStatut () {
-			console.log(this.checked)
-			if (!this.checked){
-				this.statut='Public'
-			}else{this.statut='Privé'}
 		}
-
 	}
 }
 

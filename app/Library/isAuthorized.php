@@ -1,17 +1,19 @@
 <?php
 
 /**
- * isAuthorized - Functions handling authorizations
+ * isAuthorized - Methods handling authorizations
  */
 class isAuthorized
 {
     /***** Global verifications *****/
 
-    //Confirm the given user is a real user, or tell if we are currently connected if the parameter is ommited
+    /**
+     * Confirm the given user is a real user, or tell if we are currently connected if the parameter is ommited
+     * @param  integer $userID User ID to check with. Current user used if empty
+     * @return boolean True if user exists, false otherwise
+     */
     static public function isUser($userID = null)
     {
-        $checkUser = 0;
-
         if($userID === null)
         {
             $checkWith = Session::read("userID");
@@ -24,11 +26,13 @@ class isAuthorized
         return Response::read("user", "exists", $checkWith)["data"]["exists"];
     }
     
-    //Tell if the current user, or the given one, is a moderator
+    /**
+     * Tell if the current user, or the given one, is a moderator
+     * @param  integer $userID User ID to check with. Current user used if empty
+     * @return boolean True if user is a moderator, false otherwise
+     */
     static public function isModerator($userID = null)
     {
-        $checkUser = 0;
-
         if($userID === null)
         {
             $checkWith = Session::read("userID");
@@ -41,11 +45,13 @@ class isAuthorized
         return Response::read("user", "isModerator", $checkWith)["data"]["isModerator"];
     }
 
-    //Tell if the current user, or the given one, is an admin
+    /**
+     * Tell if the current user, or the given one, is an admin
+     * @param  integer $userID User ID to check with. Current user used if empty
+     * @return boolean True if user is an admin, false otherwise
+     */
     static public function isAdmin($userID = null)
     {
-        $checkUser = 0;
-
         if($userID === null)
         {
             $checkWith = Session::read("userID");
@@ -58,11 +64,13 @@ class isAuthorized
         return Response::read("user", "isAdmin", $checkWith)["data"]["isAdmin"];
     }
 
-    //Confirm the given profile is a real profile, or tell if we have a current profile if the parameter is ommited
+    /**
+     * Confirm the given profile is a real profile, or tell if we have a current profile if the parameter is ommited
+     * @param  integer $profileID Profile ID to check with
+     * @return boolean True if profile is legit, false otherwise
+     */
     static public function isProfile($profileID)
     {
-        $checkUser = 0;
-
         if($profileID === null)
         {
             $checkWith = Session::read("userID");
@@ -75,7 +83,14 @@ class isAuthorized
         return Response::read("profile", "exists", $checkWith);
     }
 
+
+
+
     /***** Profiles verifications *****/
+
+
+
+
 
     //Confirm is current user owns the given profile
     static public function ownProfile($profileID)

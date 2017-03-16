@@ -8,6 +8,17 @@ class NotificationModel extends DBInterface
 		parent::__construct();
 	}
 
+	public function isNotif($notifID)
+	{
+		$stmt = $this->cnx->prepare(
+			"SELECT COUNT(*) FROM notifications
+			WHERE notif_id = :id
+			AND notif_seen = 0");
+		$stmt->execute([":id" => $notifID]);
+
+		return $stmt->fetchColumn() == 0 ? true : false;
+	}
+
 	public function add($code, $profileID, $profileTargetID, $targetID)
 	{
 		$stmt = $this->cnx->prepare("
@@ -62,7 +73,7 @@ class NotificationModel extends DBInterface
 	public function setNotificationSeen($notifID)
 	{
 		$stmt = $this->cnx->prepare("
-			UPDATE notifications SET notif_seen = 0
+			UPDATE notifications SET notif_seen = 1
 			WHERE notif_id = :id");
 		$stmt->execute([":id" => $notifID]);
 	}
