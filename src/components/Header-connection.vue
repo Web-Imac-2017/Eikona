@@ -47,7 +47,7 @@ export default {
         this.clearProfiles()
         this.$router.push('/')
       }, (response) => {
-        switch (response.code) {
+        switch (response.status) {
           case 400:
             console.log('Bad request')
             this.$refs.snackbar.open();

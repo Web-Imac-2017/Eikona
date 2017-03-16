@@ -15,10 +15,10 @@
       <span class="md-error">Votre message comporte des caractères non autorisés.</span>
     </md-input-container>
     <md-switch v-model="profile.isPrivate" id="privateSwitch1" name="privateSwitch" class="md-primary">Visible des autres utilisateurs.</md-switch>
-    <md-button type="submit" @click.native="cancel">
-      {{ step }}
+    <md-button type="reset" @click.native="cancel">
+      Annuler
     </md-button>
-    <md-button v-if="step === 'Annuler'" type="submit" @click.native="addProfile" class="md-raised md-primary">
+    <md-button type="submit" @click.native="addProfile" class="md-raised md-primary">
       Ajouter ce profil
     </md-button>
   </md-layout>
@@ -40,8 +40,7 @@ export default {
         name: '',
         desc: '',
         isPrivate: true
-      },
-      step: 'Annuler'
+      }
     }
   },
   mixins: [formVerifications],
@@ -60,6 +59,12 @@ export default {
     addProfile () {
       if (!(this.verif_name(this.profile.name, 'profile-creation-name') &&
             this.verif_text(this.profile.desc, 'profile-creation-desc'))) return
+      var ban = false
+      this.banned_word(this.profile.name).catch(() => {
+          this.profile.name = 'Mot Banni : ' + this.profile.name
+          ban = true
+      })
+      if(ban) return
       var value = {
         profileName: this.profile.name
       }
@@ -67,11 +72,11 @@ export default {
       if (this.profile.isPrivate) value = {...value, profilePrivate: 0}
 
       console.log('Profile creation : ', value)
-      this.$http.post(apiRoot + 'profile/create', value).then((response) => {
+      this.$http.post(apiRoot + 'profile/create/', value).then((response) => {
         console.log('SUCCESS: profile creation', response)
         this.addProfileStore(response.data.data.profileID)
         this.addAvatar(response.data.data.profileID)
-        this.step = 'Fermer'
+        this.$emit('close')
       }, (response) => {
         console.error('ERR: profile creation request', response)
         switch (response.status) {

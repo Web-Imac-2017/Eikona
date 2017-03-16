@@ -67,6 +67,17 @@ class TagModel extends DBInterface
 		return "success";
 	}
 
+	public function postTags($postID)
+	{
+		$stmt = $this->cnx->prepare("
+			SELECT DISTINCT tag_name, post_id, use_time
+			FROM tags
+			WHERE :postID = post_id
+			ORDER BY use_time DESC");
+		$stmt->execute([":postID" => $postID]);
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
 	
 	/*
 	 * Get all the post with the tagName given

@@ -5,22 +5,31 @@ export default {
   methods: {
     banned_mail (mail) {
       if (mail === null) return
-      return Vue.http.post(apiRoot + '/ban/is/mail/', {email: mail}).then(response => {
-        console.log('ban mail : ', response)
-        resolve()
+      return Vue.http.post(apiRoot + 'ban/is/email', {email: mail}).then(response => {
+        if(response.status == 404) console.log("Not banned.")
+        else {
+          console.log('ban mail : ', response)
+          resolve()
+        }
       }, response => {
-        console.error('ban mail : ', response)
-        reject()
+        if(response.status == 404) console.log("Not banned.")
+        else {
+          console.log('ban word : ', response)
+          reject()
+        }
       })
     },
     banned_word (word) {
       if (word === null) return
-      return Vue.http.post(apiRoot + '/ban/is/word/', {word: word}).then(response => {
+      return Vue.http.post(apiRoot + 'ban/is/word', {word: word}).then(response => {
         console.log('ban word : ', response)
         resolve()
       }, response => {
-        console.error('ban mail : ', response)
-        reject()
+        if(response.status == 404) console.log("Not banned.")
+        else {
+          console.log('ban word : ', response)
+          reject()
+        }
       })
     },
     verif_mail (value, inputContainerId) {
@@ -62,6 +71,13 @@ export default {
 				document.getElementById(inputContainerId).classList.add('md-input-invalid')
 				return false
 			} else document.getElementById(inputContainerId).classList.remove('md-input-invalid')
+			return true
+    },
+    verif_tag(value){
+    	var regex = /^[a-zA-Z0-9_-]{3,20}$/
+			if(!regex.test(value)){				
+				return false
+			} else 
 			return true
     }
   }

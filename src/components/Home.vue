@@ -12,8 +12,13 @@
       </md-layout>
       <div class="firstInscription">
         <h2>Pas encore inscrit(e) ?</h2>
-        <a href="#formulaire"><md-icon>keyboard_arrow_down</md-icon></a>
+        <a href="#inscriptionForm"><md-icon>keyboard_arrow_down</md-icon></a>
       </div>
+      <md-layout md-flex-xsmall="100" md-flex-medium="50" md-flex-xlarge="25" md-align="center">
+        <md-whiteframe id="register">
+          <inscription></inscription>
+        </md-whiteframe>
+      </md-layout>
     </div>
     <md-whiteframe md-elevation="5" id="formulaire"><inscription></inscription></md-whiteframe>
   </div>
@@ -24,6 +29,7 @@ import connection from './Connection.vue'
 import description from './Home-description.vue'
 import inscription from './Inscription.vue'
 import profileSwitch from './ProfileSwitch.vue'
+
 
 export default {
   name: 'home',
@@ -42,10 +48,9 @@ export default {
 }
 
 #register {
- max-width: 40%;
- padding: 40px 80px;
+ padding: 5vw;
  text-align: center;
- margin: 50px auto;
+ margin: 0 auto;
  background-color: white;
 }
 

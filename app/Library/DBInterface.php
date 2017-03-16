@@ -1,12 +1,23 @@
 <?php
 
-class DBInterface{
-
+/**
+ * Handle database connection
+ */
+class DBInterface
+{
 	protected $cnx;
 
-	public function __construct(){
+	/**
+	 * Call at the beginning of every model, initiate the connnection to the database
+	 */
+	public function __construct()
+    {
 		$this->cnx = new PDO("mysql:dbname=roger;host=localhost;charset=utf8", "root", "root") or die("connexion à la bdd impossible");
+
+        //Display PDO errors
         $this->cnx->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
+        //Use UTF-8 char-set to ensure full support of special characters. I'm looking at you, emojis.
         $this->cnx->exec("SET CHARACTER SET utf8");
 	}
 
@@ -14,7 +25,14 @@ class DBInterface{
 
 
     /**
-     * Hnadle call to an undefined method.
+     * Hnadle call to an undefined model method.``
+     *
+     * TODO: Deactivate in production because it exposes internal methods.
+     *
+     * @private
+     * @param  string  $method Method originaly called
+     * @param  array   $args   Args passed to the variable
+     * @return boolean return false to end with an error
      */
     public function __call($method, $args)
     {

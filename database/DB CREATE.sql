@@ -33,11 +33,10 @@ CREATE TABLE IF NOT EXISTS `Roger`.`users` (
   `user_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `user_activated` TINYINT(1) NOT NULL DEFAULT 0,
   `user_code` VARCHAR(20) NULL,
-  `user_key` VARCHAR(45) NULL,
-  `userscol` VARCHAR(45) NULL DEFAULT NULL COMMENT '« UUID() »',
+  `user_key` VARCHAR(45) NULL DEFAULT NULL COMMENT '« UUID() »',
   PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `user_email_UNIQUE` (`user_email` ASC),
-  UNIQUE INDEX `userscol_UNIQUE` (`userscol` ASC))
+  UNIQUE INDEX `user_email_UNIQUE` (`user_email` ASC)
+    )
 ENGINE = InnoDB;
 
 
@@ -54,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `Roger`.`profiles` (
   `profile_create_time` INT NOT NULL,
   `profile_views` INT NOT NULL DEFAULT 0,
   `profile_private` TINYINT(1) NOT NULL DEFAULT 0,
-  `profile_picture` VARCHAR(150) NOT NULL DEFAULT 'default.jpg',
+  `profile_picture` VARCHAR(150) NOT NULL DEFAULT '/eikona/assets/default.jpg',
   `profile_key` VARCHAR(36) NULL COMMENT '« UUID() » ',
   PRIMARY KEY (`profile_id`, `user_id`),
   INDEX `USER_ID` (`user_id` ASC),
