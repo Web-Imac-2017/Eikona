@@ -1,11 +1,11 @@
 <template>
 	<md-layout md-gutter>
 		<md-layout v-if="current">
-			<infosEditable :profile="profile"</infosEditable>
-			<previewsPostsPerso :profile="profile" :followings="followings" :followers="followers"></previewsPostsPerso>
+			<infosEditable :profile="profile" :followings="followings" :followers="followers"></infosEditable>
+			<previewsPostsPerso :profile="profile"></previewsPostsPerso>
 		</md-layout>
 		<md-layout v-else>
-			<informationsProfilAutre :profile="profile"></informationsProfilAutre>
+			<informationsProfilAutre :profile="profile" :followings="followings" :followers="followers"></informationsProfilAutre>
 			<previewsPosts :profile="profile"></previewsPosts>
 		</md-layout>
 	</md-layout>
@@ -33,7 +33,7 @@ export default{
 	},
 	data () {
 		return {
-			profile: null,
+			profile: {profileName:'undefined'},
 			followers: [],
 			followings: []
 		}
@@ -48,18 +48,20 @@ export default{
 	computed: {
 		// recuperation des informations sur le profil courant
 		...Vuex.mapGetters([
-    	'currentProfile'
+    	'currentProfile',
+    	'profiles'
    	])
 	},
 	mounted () {
 		if (this.current) {
-			this.profile = this.currentProfile
+			this.profile = this.profiles[0]
 			this.getNmbPosts (this.profile.profileID)
 			this.getListFollowers (this.profile.profileID)
 			this.getListFollowings (this.profile.profileID)
 		} else {
 			this.getProfile (this.ID)
 		}
+		console.log("profilePageProfil :", this.profile)
 	},
 	methods: {
 		// Recuperation du profil de la page

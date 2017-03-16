@@ -12,7 +12,7 @@
 			<md-dialog md-open-from="#fab" md-close-to="#fab" ref="dialog_see" class="dialog1">
 				<md-layout md-flex="66" md-column>
 					<md-dialog-content>
-				    	<p>Component post</p>
+				    	<Post></Post>
 					</md-dialog-content>
 				</md-layout>
 			</md-dialog>
@@ -27,8 +27,13 @@
 </template>
 
 <script type="text/javascript">
+import Post from './Post.vue'
+
 export default{
 	name: 'previewsPosts',
+	components:{
+		Post
+	},
 	data () {
 		return {
 			images: ['./../../assets/Cameleon/c1.jpg', './../../assets/Cameleon/c2.jpg', './../../assets/Cameleon/c3.jpg', './../../assets/Cameleon/c4.jpg', './../../assets/Cameleon/c5.jpg', './../../assets/Cameleon/c6.jpg', './../../assets/Cameleon/c7.jpg', './../../assets/Cameleon/c8.jpg'],

@@ -11,7 +11,6 @@
 			</md-tab>
 
 			<md-tab md-label="Mon profil" id="thread-profile" class="threads">
-				<div class="threads"></div>
 				<pageProfile :ID="-1" :current="true"></pageProfile>
 			</md-tab>
 		</md-tabs>
