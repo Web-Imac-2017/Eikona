@@ -3,5 +3,4 @@ RewriteBase /Eikona/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-RewriteRule ^do/(.*)$ app/do.php [END]
-RewriteRule ^index\.html$ - [L]
+RewriteRule ^do/(.*)$ app/do.php [L]
