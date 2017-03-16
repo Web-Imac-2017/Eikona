@@ -3,17 +3,17 @@
 interface PostControllerInterface
 {
     public function create();
-    
+
 	public function setPost($postID);
-    
+
 	public function delete($postID);
-    
+
 	public function display($postID);
-    
+
 	public function update($field, $postID);
-    
+
     public function publish($postID);
-    
+
     public function setFilter($postID, $filter);
 
 	public function like($postID);
@@ -27,9 +27,9 @@ interface PostControllerInterface
 	public function view($postID);
 
 	public function nbView();
-    
+
     public function popular($limit = 30);
-    
+
     public function tags($postID);
 }
 
@@ -66,7 +66,7 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
-			
+
             return;
 		}
 
@@ -75,10 +75,10 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
-		
+
             return;
-        }		
-        
+        }
+
         //DO we have an image?
 		if(empty($_FILES['img']))
         {
@@ -129,7 +129,7 @@ class PostController implements PostControllerInterface
         }
 
         //Add the tags
-        while (list(, $tag) = each($tags[1])) 
+        while (list(, $tag) = each($tags[1]))
         {
             $this->tagModel->addTag($postID, $tag);
         }
@@ -160,7 +160,7 @@ class PostController implements PostControllerInterface
 
 		$rsp->send();
 	}
-    
+
 	/**
 	 * Set post to work with
 	 * @param  integer $postID Post ID to use
@@ -174,7 +174,7 @@ class PostController implements PostControllerInterface
 		{
             return true;
         }
-            
+
         $rsp = new Response();
 
         if($result == "wrongFormat")
@@ -261,7 +261,7 @@ class PostController implements PostControllerInterface
 			return;
 
 		$rsp = new Response();
-        
+
         //Can the current profule see this post ?
         if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
         {
@@ -357,66 +357,66 @@ class PostController implements PostControllerInterface
 
 		if(!$this->setPost($postID))
 			return;
-        
+
         //Do we have a current profile?
 		if(!$profileID)
         {
 			$rsp->setFailure(401, "You do not have current profile selected")
 			    ->send();
-			
+
             return;
 		}
-        
+
         //Can this profile edit this post?
 		if(!isAuthorized::editPost($postID))
         {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
-			
+
             return;
 		}
 
 		switch($field)
 		{
 			case "description" :
-				
+
                 //Do we have all we need ?
                 if(empty($_POST['desc']))
 				{
 					$rsp->setFailure(400, "Missing value. Edit aborted.")
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 $desc = $this->model->updateDescription($_POST['desc']);
 
                 if($desc === false)
                 {
                     $rsp->setFailure(400)
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 $rsp->setSuccess(200)
                     ->bindValue("postID", $postID)
                     ->bindValue("updateTime", time())
                     ->bindValue("updateTime", $desc)
                     ->send();
-                
+
 			break;
 			case "geo" :
-				
+
                 //Do we have all we need ?
                 if(empty($_POST['post_geo_lat']) || empty($_POST['post_geo_lng']) || empty($_POST['post_geo_name']))
 				{
 					$rsp->setFailure(400, "Missing value. Edit aborted.")
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 $lat = $this->model->updateLatitude($_POST['post_geo_lat']);
                 $lng = $this->model->updateLongitude($_POST['post_geo_lng']);
                 $name = $this->model->updateGeoName($_POST['post_geo_name']);
@@ -426,10 +426,10 @@ class PostController implements PostControllerInterface
                 {
                     $rsp->setFailure(400)
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 $rsp->setSuccess(200)
                     ->bindValue("postID", $postID)
                     ->bindValue("updateTime", time())
@@ -438,28 +438,28 @@ class PostController implements PostControllerInterface
                                             "name" => $name
                                            ])
                     ->send();
-                
+
 			break;
-			case "allowComments" :
-				
+			case "allowcomments" :
+
                 $allowComments = $this->model->allowComments();
-                
+
                 //Was there an error ?
 				if($allowComments === false)
                 {
 					$rsp->setFailure(400)
                         ->send();
-                    
+
                     return;
-				} 
-				
+				}
+
                 $rsp->setSuccess(200)
 				    ->bindValue("postID", $postID)
 				    ->bindValue("allowComments", $allowComments)
                     ->send();
-                
+
 			break;
-			case "disableComments" :
+			case "disablecomments" :
 				$disableComments = $this->model->disableComments();
 
                 //Was there an error ?
@@ -467,65 +467,65 @@ class PostController implements PostControllerInterface
                 {
 					$rsp->setFailure(400)
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 $rsp->setSuccess(200)
                     ->bindValue("postID", $postID)
                     ->bindValue("disableComments", $disableComments)
                     ->send();
-                
+
 			break;
-			case "postApproved" :
-				
+			case "postapproved" :
+
                 $postApproved = $this->model->updatePostApproved();
-                
+
                 //Was there an error ?
 				if($postApproved === false)
                 {
 					$rsp->setFailure(400)
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 $rsp->setSuccess(200)
                     ->bindValue("postID", $postID)
                     ->bindValue("postApproved", $postApproved)
                     ->bindValue("updateTime", time())
                     ->send();
-                
+
 			break;
             case "state":
-                
+
                 //Do we have all we need?
 				if(empty($_POST['state']))
                 {
                     $rsp->setFailure(400, "Edit aborted. Missing value.")
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 //Are we authorized to update the state this way?
                 if(!isAuthorized::isModerator($userID) && !isAuthorized::isAdmin($userID))
                 {
 					$rsp->setFailure(401, "You are not authorized to do this action.")
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 //Is this a valid state value
 				if($_POST['state'] == 1 || $_POST['state'] == 2)
                 {
                     $rsp->setFailure(400, "Wrong value for state")
                         ->send();
-                    
+
                     return;
                 }
-                
+
                 $newState = $this->model->updateState($_POST['state']);
 
                 //Was there an error?
@@ -533,16 +533,16 @@ class PostController implements PostControllerInterface
                 {
                     $rsp->setFailure(400, "error during request")
                         ->send();
-                    
+
                     return;
 				}
-                
+
                 $rsp->setSuccess(200)
                     ->bindValue("postID", $postID)
                     ->bindValue("state", $newState)
                     ->bindValue("updateTime", time())
                     ->send();
-                
+
 			break;
 			default;
 				$rsp->setFailure(405);
@@ -569,7 +569,7 @@ class PostController implements PostControllerInterface
 			return;
 
         $images = $this->getImages($postID);
-        
+
         //Was the publish done correctly ?
         if($this->model->publish($postID) === false)
         {
@@ -604,7 +604,7 @@ class PostController implements PostControllerInterface
     public function setFilter($postID, $filter)
     {
         $rsp = new Response();
-        
+
         //Can this profile edit this post
 		if(!isAuthorized::editPost($postID))
         {
@@ -612,7 +612,7 @@ class PostController implements PostControllerInterface
 			    ->send();
 			return;
 		}
-        
+
         //Is given filter a supported one
         if(!in_array($filter, FiltR::$availableFilters) && $filter != "none")
         {
@@ -623,7 +623,7 @@ class PostController implements PostControllerInterface
 
 		if(!$this->setPost($postID))
 			return;
-        
+
         //Can we change this post's filter
         if($this->model->getState() != 0)
         {
@@ -708,21 +708,21 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
                 ->send();
-		
+
             return;
 		}
-        
+
         //Do we have a current profile
 		if(!$profileID)
         {
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
-		
+
             return;
 		}
 
         //Have we reached the like per hours limit
-		if($this->likeModel->countLikeFromLastHour($profileID) > 200) 
+		if($this->likeModel->countLikeFromLastHour($profileID) > 200)
         {
 			$rsp->setFailure(406, "You have already liked 200 posts during the last 60 minutes, Calm down Billy Boy !")
 			    ->send();
@@ -735,7 +735,7 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(400, "post already liked")
                 ->send();
-            
+
             return;
         }
 
@@ -744,22 +744,22 @@ class PostController implements PostControllerInterface
         {
             $rsp->setFailure(400, "You can not like your own post")
                 ->send();
-            
+
             return;
         }
-        
+
         //Are we allowed to like this post?
         if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
         {
             $rsp->setFailure(401, "You can not see this post")
                 ->send();
-            
+
             return;
         }
-        
+
         $this->likeModel->like($postID, $profileID);
         Response::read("notification", "create", "newLike", $profileID, $this->model->getProfileID(), $postID);
-        
+
         $rsp->setSuccess(200, "Post liked")
             ->bindValue("postID", $postID)
             ->bindValue("profileID", $profileID)
@@ -781,27 +781,27 @@ class PostController implements PostControllerInterface
 
 		//get ID
 		$profileID = Session::read("profileID");
-        
+
         //Are we logged in ?
 		if(!isAuthorized::isUser())
         {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
-            
+
 			return;
 		}
-        
+
         //Are we liking this post?
 		if(!$this->likeModel->isLiked($postID, $profileID))
         {
 			$rsp->setFailure(400, "post not liked")
                 ->send();
-            
+
             return;
         }
-        
+
         $this->likeModel->unlike($postID, $profileID);
-        
+
         $rsp->setSuccess(200, "post unliked")
             ->bindValue("postID", $postID)
             ->bindValue("profileID", $profileID)
@@ -815,7 +815,7 @@ class PostController implements PostControllerInterface
 	public function likes($postID)
 	{
 		$postID = Sanitize::int($postID);
-        
+
 		if(!$this->setPost($postID))
 			return;
 
@@ -826,7 +826,7 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
-            
+
 			return;
 		}
 
@@ -834,7 +834,7 @@ class PostController implements PostControllerInterface
 
 		$rsp->setSuccess(200, "likes returned")
             ->bindValue("postID", $postID)
-		    ->bindValue("nbOfLikes", count($likes))	
+		    ->bindValue("nbOfLikes", count($likes))
             ->bindValue("like", $likes)
             ->send();
 	}
@@ -842,7 +842,7 @@ class PostController implements PostControllerInterface
 	/************************************/
 	/*********** COMMENTAIRES ***********/
 	/************************************/
-    
+
 	/**
 	 * Retrieve all comments on a post
 	 * @param integer $postID Post to use
@@ -859,7 +859,7 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
-            
+
 			return;
 		}
 
@@ -882,17 +882,17 @@ class PostController implements PostControllerInterface
 	 * @param string $tagName Tag to use
 	 */
 	public function tags($postID)
-	{		
+	{
 		$rsp = new Response();
 
 		if(!$this->setPost($postID))
 			return;
-		
+
 		if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
         {
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
-            
+
 			return;
 		}
 
@@ -902,10 +902,10 @@ class PostController implements PostControllerInterface
         {
 			$rsp->setFailure(404, "no tag for this post")
                 ->send();
-            
+
             return;
 		}
-        
+
         $rsp->setSuccess(200, "tags returned")
 			->bindValue("postID", $postID)
 			->bindValue("nbOfTag", count($tags))
@@ -933,15 +933,15 @@ class PostController implements PostControllerInterface
 		$rsp = new Response();
 
 		$profileID = Session::read("profileID");
-        
+
 		if(!$this->postViewModel->view($profileID, $postID))
 		{
 			$rsp->setFailure(400, "post not set as viewed")
                 ->send();
-            
+
             return;
         }
-			
+
         $rsp->setSuccess(200, "post viewed")
             ->send();
 	}
@@ -952,9 +952,9 @@ class PostController implements PostControllerInterface
 	public function nbView()
 	{
 		$resp = new Response();
-        
+
 		$rslt = $this->postViewModel->mostViewedPosts(10);
-		
+
         $resp->setSuccess(200, "post viewed")
 			 ->bindValue("rslt", $rslt);
 
@@ -984,7 +984,7 @@ class PostController implements PostControllerInterface
         foreach($postsBasics as $postBasics)
         {
             $postInfos = Response::read("post", "display", $postBasics['post_id'])['data'] ;
-            
+
             //remove posts the user cannot see.
             if($postBasics ['profile_private'] == 1)
             {
