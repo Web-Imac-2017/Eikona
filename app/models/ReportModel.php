@@ -104,6 +104,28 @@ class ReportModel extends DBInterface
 
 		return $stmt->fetchAll(PDO::FETCH_COLUMN, "report_id");
 	}
+	/*
+	 * Get all reports reported by the user
+	 * @param $reporterID
+	 * return all reports ID
+	 */
+	public function getReportsFromReporter($reporterID)
+	{
+		$stmt = $this->cnx->prepare("SELECT report_id FROM reports WHERE user_id = :reporterID");
+		$stmt->execute([ ":reporterID" => $reporterID]);
+
+		return $stmt->fetchAll(PDO::FETCH_COLUMN, "report_id");
+	}
+
+	/*
+	 * Set Reporter to 0
+	 * @param $reportID
+	 */
+	public function removeReporter($reportID)
+	{
+		$stmt = $this->cnx->prepare("UPDATE reports SET user_id = 0 WHERE report_id = :reportID");
+		$stmt->execute([ ":reportID" => $reportID]);
+	}
 
 	/*
 	 * Get all my reportsID and postID

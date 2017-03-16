@@ -1,6 +1,39 @@
 <?php
 
-class PostController
+interface PostControllerInterface
+{
+    public function create();
+    
+	public function setPost($postID);
+    
+	public function delete($postID);
+    
+	public function display($postID);
+    
+	public function update($field, $postID);
+    
+    public function publish($postID);
+    
+    public function setFilter($postID, $filter);
+
+	public function like($postID);
+
+	public function unlike($postID);
+
+	public function likes($postID);
+
+	public function comments($postID);
+
+	public function view($postID);
+
+	public function nbView();
+    
+    public function popular($limit = 30);
+    
+    public function tags($postID);
+}
+
+class PostController implements PostControllerInterface
 {
 	private $model;
 	private $tagModel;
@@ -18,32 +51,37 @@ class PostController
 		$this->postViewModel = new PostViewModel();
 	}
 
-	/*
+	/**
 	 * Create a post
-	 *
 	 */
 	public function create()
 	{
-
 		$rsp = new Response();
 
 		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
-
-		if(!isAuthorized::isUser($userID)){
+        //Are we logged in ?
+		if(!isAuthorized::isUser())
+        {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
-			return;
+			
+            return;
 		}
 
-		if(!$profileID){
+        //Do we have a current profile?
+		if(!$profileID)
+        {
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
-			return;
-        }
-
-		if(empty($_FILES['img'])){
+		
+            return;
+        }		
+        
+        //DO we have an image?
+		if(empty($_FILES['img']))
+        {
 			$rsp->setFailure(400, "no file selected")
 			    ->send();
 			return;
@@ -68,7 +106,7 @@ class PostController
 
         $format = getimagesize($source);
 
-        //prevent format is wrong
+        //Prevent format is wrong
         if(!$format)
         {
             $rsp->setFailure(400, "File do not have good extension")
@@ -91,7 +129,8 @@ class PostController
         }
 
         //Add the tags
-        while (list(, $tag) = each($tags[1])) {
+        while (list(, $tag) = each($tags[1])) 
+        {
             $this->tagModel->addTag($postID, $tag);
         }
 
@@ -121,53 +160,59 @@ class PostController
 
 		$rsp->send();
 	}
-
+    
+	/**
+	 * Set post to work with
+	 * @param  integer $postID Post ID to use
+	 * @return boolean true on success, false otherwise
+	 */
 	public function setPost($postID)
 	{
 		$result = $this->model->setPost($postID);
 
-		if($result != "success")
+		if($result == "success")
 		{
-			$rsp = new Response();
+            return true;
+        }
+            
+        $rsp = new Response();
 
-			if($result == "wrongFormat")
-			{
-				$rsp->setFailure(400, "Wrong format. This is not a post ID.");
-			}
-			else if($result == "notFound")
-			{
-				$rsp->setFailure(404, "Given post ID does not exist.");
-			}
+        if($result == "wrongFormat")
+        {
+            $rsp->setFailure(400, "Wrong format. This is not a post ID.");
+        }
+        else if($result == "notFound")
+        {
+            $rsp->setFailure(404, "Given post ID does not exist.");
+        }
 
-			$rsp->send();
+        $rsp->send();
 
-			return false;
-		}
-
-		return true;
+        return false;
 	}
 
-	/*
+	/**
 	 * Delete a post and the image with it
-	 *
-	*/
+	 * @param integer $postID Post to delete
+	 */
 	public function delete($postID)
 	{
 		$rsp = new Response();
 
-		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
 		if(!$this->setPost($postID))
 			return;
 
-		if(!$profileID){
+		if(!$profileID)
+        {
 			$rsp->setFailure(401, "You do not have current profile selected")
 			    ->send();
 			return;
 		}
 
-		if(!isAuthorized::editPost($postID)){
+		if(!isAuthorized::editPost($postID))
+        {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
@@ -186,12 +231,10 @@ class PostController
             unlink($images["editedPicture"]);
         }
 
-
         if(file_exists($images["contactPicture"]))
         {
             unlink($images["contactPicture"]);
         }
-
 
         //Deleting the post
 		if(!$this->model->delete())
@@ -208,23 +251,25 @@ class PostController
 		$rsp->send();
 	}
 
-	/*
-	 * Display all the information of the post with the given ID
+	/**
+	 * Return all the information of the post with the given ID
+	 * @param integer $postID Post to retreive information from
 	 */
-	public function display($postID, $silence = true)
+	public function display($postID)
 	{
 		if(!$this->setPost($postID))
 			return;
 
 		$rsp = new Response();
+        
+        //Can the current profule see this post ?
+        if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
+        {
+            $rsp->setFailure(401, "You can not see this post")
+                ->send();
 
-		if($silence){
-			if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
-				$rsp->setFailure(401, "You can not see this post")
-				    ->send();
-				return;
-			}
-		}
+            return;
+        }
 
 		$data = $this->model->getFullPost();
 
@@ -240,6 +285,7 @@ class PostController
 			->bindValue("allowComments", $data['post_allow_comments'])
 			->bindValue("approved", $data['post_approved'])
 			->bindValue("state", $data['post_state'])
+			->bindValue("filter", $data['post_filter'])
 			->bindValue("geo", ['lat' => $data['post_geo_lat'],
 				                'lng' => $data['post_geo_lng'],
 							    'name' => $data['post_geo_name']
@@ -262,9 +308,7 @@ class PostController
 			return;
 
         $state = $this->model->getState();
-
         $images = [];
-
         $folder = $this->model->getSaveFolder();
 
         $images["originalPicture"] = $folder.$postID.".jpg";
@@ -313,132 +357,196 @@ class PostController
 
 		if(!$this->setPost($postID))
 			return;
-
-		if(!$profileID){
+        
+        //Do we have a current profile?
+		if(!$profileID)
+        {
 			$rsp->setFailure(401, "You do not have current profile selected")
 			    ->send();
-			return;
+			
+            return;
 		}
-
-		if(!isAuthorized::editPost($postID)){
+        
+        //Can this profile edit this post?
+		if(!isAuthorized::editPost($postID))
+        {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
-			return;
+			
+            return;
 		}
 
 		switch($field)
 		{
 			case "description" :
-				if(!empty($_POST['desc']))
+				
+                //Do we have all we need ?
+                if(empty($_POST['desc']))
 				{
-					$desc = $this->model->updateDescription($_POST['desc']);
+					$rsp->setFailure(400, "Missing value. Edit aborted.")
+                        ->send();
+                    
+                    return;
+                }
+                
+                $desc = $this->model->updateDescription($_POST['desc']);
 
-					if($desc === false)
-					{
-						$rsp->setFailure(400);
-					} else {
-						$rsp->setSuccess(200)
-							->bindValue("postID", $postID)
-							->bindValue("postDescription", $_POST['desc']);
-					}
-				} else {
-					$rsp->setFailure(400, "Missing value. Edit aborted.");
-				}
+                if($desc === false)
+                {
+                    $rsp->setFailure(400)
+                        ->send();
+                    
+                    return;
+                }
+                
+                $rsp->setSuccess(200)
+                    ->bindValue("postID", $postID)
+                    ->bindValue("updateTime", time())
+                    ->bindValue("updateTime", $desc)
+                    ->send();
+                
 			break;
-
 			case "geo" :
-				if(!empty($_POST['post_geo_lat']) && !empty($_POST['post_geo_lng']) && !empty($_POST['post_geo_name']) )
+				
+                //Do we have all we need ?
+                if(empty($_POST['post_geo_lat']) || empty($_POST['post_geo_lng']) || empty($_POST['post_geo_name']))
 				{
-					$lat = $this->model->updateLatitude($_POST['post_geo_lat']);
-					$lng = $this->model->updateLongitude($_POST['post_geo_lng']);
-					$name = $this->model->updateGeoName($_POST['post_geo_name']);
+					$rsp->setFailure(400, "Missing value. Edit aborted.")
+                        ->send();
+                    
+                    return;
+                }
+                
+                $lat = $this->model->updateLatitude($_POST['post_geo_lat']);
+                $lng = $this->model->updateLongitude($_POST['post_geo_lng']);
+                $name = $this->model->updateGeoName($_POST['post_geo_name']);
 
-					if($lat === false || $lng === false || $name === false){
-						$rsp->setFailure(400);
-					} else {
-						$rsp->setSuccess(200)
-							->bindValue("postID", $postID)
-							->bindValue("postGeo", ["lat" => $lat,
-								                    "lng" => $lng,
-								                    "name" => $name
-								                   ]);
-					}
-				} else {
-					$rsp->setFailure(400, "Missing value. Edit aborted.");
-				}
+                //Was there an error updating geo
+                if($lat === false || $lng === false || $name === false)
+                {
+                    $rsp->setFailure(400)
+                        ->send();
+                    
+                    return;
+                }
+                
+                $rsp->setSuccess(200)
+                    ->bindValue("postID", $postID)
+                    ->bindValue("updateTime", time())
+                    ->bindValue("postGeo", ["lat" => $lat,
+                                            "lng" => $lng,
+                                            "name" => $name
+                                           ])
+                    ->send();
+                
 			break;
-
 			case "allowComments" :
-				$allowComments = $this->model->allowComments();
-
-				if($allowComments === false ){
-					$rsp->setFailure(400);
-				} else {
-					$rsp->setSuccess(200)
-						->bindValue("postID", $postID)
-						->bindValue("allowComments", $allowComments);
-				}
+				
+                $allowComments = $this->model->allowComments();
+                
+                //Was there an error ?
+				if($allowComments === false)
+                {
+					$rsp->setFailure(400)
+                        ->send();
+                    
+                    return;
+				} 
+				
+                $rsp->setSuccess(200)
+				    ->bindValue("postID", $postID)
+				    ->bindValue("allowComments", $allowComments)
+                    ->send();
+                
 			break;
-
 			case "disableComments" :
 				$disableComments = $this->model->disableComments();
 
-				if($disableComments === false){
-					$rsp->setFailure(400);
-				} else {
-					$rsp->setSuccess(200)
-						->bindValue("postID", $postID)
-						->bindValue("disableComments", $disableComments);
-				}
+                //Was there an error ?
+				if($disableComments === false)
+                {
+					$rsp->setFailure(400)
+                        ->send();
+                    
+                    return;
+                }
+                
+                $rsp->setSuccess(200)
+                    ->bindValue("postID", $postID)
+                    ->bindValue("disableComments", $disableComments)
+                    ->send();
+                
 			break;
-
 			case "postApproved" :
-				$postApproved = $this->model->updatePostApproved();
-
-				if($postApproved === false){
-					$rsp->setFailure(400);
-				} else {
-					$rsp->setSuccess(200)
-						->bindValue("postID", $postID)
-						->bindValue("postApproved", $postApproved);
-				}
+				
+                $postApproved = $this->model->updatePostApproved();
+                
+                //Was there an error ?
+				if($postApproved === false)
+                {
+					$rsp->setFailure(400)
+                        ->send();
+                    
+                    return;
+                }
+                
+                $rsp->setSuccess(200)
+                    ->bindValue("postID", $postID)
+                    ->bindValue("postApproved", $postApproved)
+                    ->bindValue("updateTime", time())
+                    ->send();
+                
 			break;
+            case "state":
+                
+                //Do we have all we need?
+				if(empty($_POST['state']))
+                {
+                    $rsp->setFailure(400, "Edit aborted. Missing value.")
+                        ->send();
+                    
+                    return;
+                }
+                
+                //Are we authorized to update the state this way?
+                if(!isAuthorized::isModerator($userID) && !isAuthorized::isAdmin($userID))
+                {
+					$rsp->setFailure(401, "You are not authorized to do this action.")
+                        ->send();
+                    
+                    return;
+                }
+                
+                //Is this a valid state value
+				if($_POST['state'] == 1 || $_POST['state'] == 2)
+                {
+                    $rsp->setFailure(400, "Wrong value for state")
+                        ->send();
+                    
+                    return;
+                }
+                
+                $newState = $this->model->updateState($_POST['state']);
 
-			case "state":
-				if(isAuthorized::isModerator($userID) || isAuthorized::isAdmin($userID)){
-					if(!empty($_POST['state'])){
-						if($_POST['state'] == 1 || $_POST['state'] == 2){
-							$newState = $this->model->updateState($_POST['state']);
-
-							if($newState === false){
-								$rsp->setFailure(400, "error during request");
-							}else{
-								$rsp->setSuccess(200)
-									->bindValue("postID", $postID)
-									->bindValue("state", $newState);
-							}
-						}else{
-							$rsp->setFailure(400, "Wrong value for state");
-						}
-					}else{
-						$rsp->setFailure(400, "Edit aborted. Missing value.");
-					}
-				}else{
-					$rsp->setFailure(401, "You are not authorized to do this action.");
+                //Was there an error?
+                if($newState === false)
+                {
+                    $rsp->setFailure(400, "error during request")
+                        ->send();
+                    
+                    return;
 				}
+                
+                $rsp->setSuccess(200)
+                    ->bindValue("postID", $postID)
+                    ->bindValue("state", $newState)
+                    ->bindValue("updateTime", time())
+                    ->send();
+                
 			break;
-
 			default;
 				$rsp->setFailure(405);
 		}
-
-		$code = $rsp->getCode();
-		if($code >= 200 && $code <= 210){
-			$date = $this->model->updateTime($postID);
-			$rsp->bindValue("updateTime", $date);
-		}
-
-		$rsp->send();
 	}
 
     /**
@@ -449,6 +557,7 @@ class PostController
     {
         $rsp = new Response();
 
+        //Is current profile allowed to edit post?
 		if(!isAuthorized::editPost($postID))
         {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
@@ -460,14 +569,15 @@ class PostController
 			return;
 
         $images = $this->getImages($postID);
-
+        
+        //Was the publish done correctly ?
         if($this->model->publish($postID) === false)
         {
             $rsp->setFailure(400, "error during request")
                 ->send();
         }
 
-        //clean up pictures
+        //Clean up pictures
         if(!empty($images["editedPicture"]))
         {
             //Remove original picture and replace it with the edited one
@@ -494,14 +604,16 @@ class PostController
     public function setFilter($postID, $filter)
     {
         $rsp = new Response();
-
+        
+        //Can this profile edit this post
 		if(!isAuthorized::editPost($postID))
         {
 			$rsp->setFailure(401, "You are not authorized to do this action.")
 			    ->send();
 			return;
 		}
-
+        
+        //Is given filter a supported one
         if(!in_array($filter, FiltR::$availableFilters) && $filter != "none")
         {
 			$rsp->setFailure(400, "This filter does not exists")
@@ -511,7 +623,8 @@ class PostController
 
 		if(!$this->setPost($postID))
 			return;
-
+        
+        //Can we change this post's filter
         if($this->model->getState() != 0)
         {
 			$rsp->setFailure(401, "You cannot edit the picture of an already published post.")
@@ -523,6 +636,7 @@ class PostController
 
         $currentFilter = $this->model->getFilter();
 
+        //Are we using the same filter as before?
         if($currentFilter === $filter)
         {
             $rsp->setSuccess(200, "Filter unchanged")
@@ -547,6 +661,7 @@ class PostController
 
         $this->model->updateFilter($filter);
 
+        //Are we removing the filter ?
         if($filter == "none")
         {
             $rsp->setSuccess(200)
@@ -573,147 +688,188 @@ class PostController
 	/*************** LIKE ***************/
 	/************************************/
 
+	/**
+	 * Like the post
+	 * @param integer $postID Post to like
+	 */
 	public function like($postID)
 	{
 		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
-		$resp = new Response();
+		$rsp = new Response();
 
 		//get ID
-		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
 
-		if(!isAuthorized::isUser($userID)){
-			$resp->setFailure(401, "You are not authorized to do this action.")
-			     ->send();
-			return;
+        //Are we logged in ?
+		if(!isAuthorized::isUser())
+        {
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
+		
+            return;
 		}
-
-		if(!$profileID){
+        
+        //Do we have a current profile
+		if(!$profileID)
+        {
 			$rsp->setFailure(401, "You don't have current profile selected")
 			    ->send();
-			return;
+		
+            return;
 		}
 
-		if ($this->likeModel->countLikeFromLastHour($profileID) > 200) {
+        //Have we reached the like per hours limit
+		if($this->likeModel->countLikeFromLastHour($profileID) > 200) 
+        {
 			$rsp->setFailure(406, "You have already liked 200 posts during the last 60 minutes, Calm down Billy Boy !")
 			    ->send();
-			return;
+
+            return;
 		}
 
-		//Si le post n'est pas encore like
-		if(!$this->likeModel->isLiked($postID, $profileID)){
-			//Si ce n'est pas son propre post
-			if($this->model->getProfileID() != $profileID){
-				if(isAuthorized::seeFullProfile($this->model->getProfileID())){
-					$this->likeModel->like($postID, $profileID);
-					$resp->setSuccess(200, "post liked")
-				    	 ->bindValue("postID", $postID)
-				     	 ->bindValue("profileID", $profileID);
-					$notif = Response::read("notification", "create", "newLike", $profileID, $this->model->getProfileID(), $postID);
-					if($notif['code'] == 200){
-						$resp->setSuccess(200, "post liked and notification sent")
-				    	     ->bindValue("postID", $postID)
-				     	 	 ->bindValue("profileID", $profileID)
-				     	 	 ->bindValue("notif", $notif['data']);
-					}
-					else{
-						$resp->setFailure(409, "post not liked and notification not sent");
-					}
-				}else{
-					$resp->setFailure(401, "You can not see this post");
-				}
-			}else{
-				$resp->setFailure(400, "You can not like your own post");
-			}
-		}else{
-			$resp->setFailure(400, "post already liked");
-		}
+		//Ar we already liking the post ?
+		if($this->likeModel->isLiked($postID, $profileID))
+        {
+			$rsp->setFailure(400, "post already liked")
+                ->send();
+            
+            return;
+        }
 
-
-		$resp->send();
+        //Are we trying to like our own post ?
+        if($this->model->getProfileID() == $profileID)
+        {
+            $rsp->setFailure(400, "You can not like your own post")
+                ->send();
+            
+            return;
+        }
+        
+        //Are we allowed to like this post?
+        if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
+        {
+            $rsp->setFailure(401, "You can not see this post")
+                ->send();
+            
+            return;
+        }
+        
+        $this->likeModel->like($postID, $profileID);
+        Response::read("notification", "create", "newLike", $profileID, $this->model->getProfileID(), $postID);
+        
+        $rsp->setSuccess(200, "Post liked")
+            ->bindValue("postID", $postID)
+            ->bindValue("profileID", $profileID)
+            ->send();
 
 	}
 
+	/**
+	 * Unlike the post
+	 * @param integer $postID Post to unlink
+	 */
 	public function unlike($postID)
 	{
 		$postID = Sanitize::int($postID);
 		if(!$this->setPost($postID))
 			return;
 
-		$resp = new Response();
+		$rsp = new Response();
 
 		//get ID
-		$userID = Session::read("userID");
 		$profileID = Session::read("profileID");
-
-		if(!isAuthorized::isUser($userID)){
-			$resp->setFailure(401, "You are not authorized to do this action.")
+        
+        //Are we logged in ?
+		if(!isAuthorized::isUser())
+        {
+			$rsp->setFailure(401, "You are not authorized to do this action.")
 			     ->send();
+            
 			return;
 		}
-
-		if($this->likeModel->isLiked($postID, $profileID)){
-			$this->likeModel->unlike($postID, $profileID);
-			$resp->setSuccess(200, "post unliked")
-			     ->bindValue("postID", $postID)
-			     ->bindValue("profileID", $profileID);
-		}else{
-			$resp->setFailure(400, "post not liked");
-		}
-
-		$resp->send();
+        
+        //Are we liking this post?
+		if(!$this->likeModel->isLiked($postID, $profileID))
+        {
+			$rsp->setFailure(400, "post not liked")
+                ->send();
+            
+            return;
+        }
+        
+        $this->likeModel->unlike($postID, $profileID);
+        
+        $rsp->setSuccess(200, "post unliked")
+            ->bindValue("postID", $postID)
+            ->bindValue("profileID", $profileID)
+            ->send();
 	}
 
+	/**
+	 * Get all the likes of a post
+	 * @param integer $postID Post to use
+	 */
 	public function likes($postID)
 	{
 		$postID = Sanitize::int($postID);
+        
 		if(!$this->setPost($postID))
 			return;
 
-		$resp = new Response();
+		$rsp = new Response();
 
-		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
-			$resp->setFailure(401, "You can not see this post")
+        //Are we authorized to see this profile
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
+        {
+			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
+            
 			return;
 		}
 
 		$likes = $this->likeModel->getAllLikes($postID);
 
-		$resp->setSuccess(200, "likes returned")
-		     ->bindValue("postID", $postID)
-		     ->bindValue("nbOfLikes", count($likes))
-		     ->bindValue("like", $likes)
-		     ->send();
+		$rsp->setSuccess(200, "likes returned")
+            ->bindValue("postID", $postID)
+		    ->bindValue("nbOfLikes", count($likes))	
+            ->bindValue("like", $likes)
+            ->send();
 	}
 
 	/************************************/
 	/*********** COMMENTAIRES ***********/
 	/************************************/
-
+    
+	/**
+	 * Retrieve all comments on a post
+	 * @param integer $postID Post to use
+	 */
 	public function comments($postID)
 	{
 		if(!$this->setPost($postID))
 			return;
 
-		$resp = new Response();
+		$rsp = new Response();
 
-		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+        //Are we authorized to see this post ?
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
+        {
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
+            
 			return;
 		}
 
 		$coms = $this->commentModel->getComments($postID);
 
-		$resp->setSuccess(200, "comments returned")
-			 ->bindValue("postID", $postID)
-			 ->bindValue("nbOfComments", count($coms))
-			 ->bindValue("comments", $coms)
-		     ->send();
+		$rsp->setSuccess(200, "comments returned")
+			->bindValue("postID", $postID)
+            ->bindValue("nbOfComments", count($coms))
+            ->bindValue("comments", $coms)
+            ->send();
 	}
 
 
@@ -721,33 +877,40 @@ class PostController
 	/*********** TAGS *******************/
 	/************************************/
 
-	/*
-	 * Research all the posts with this tagName
+	/**
+	 * Research all the rags with this postID
+	 * @param string $tagName Tag to use
 	 */
-	public function tag($tagName)
-	{
-		//Get all the post where tag_name = $tagName;
-
+	public function tags($postID)
+	{		
 		$rsp = new Response();
 
-		if(!isAuthorized::seeFullProfile($this->model->getProfileID())){
+		if(!$this->setPost($postID))
+			return;
+		
+		if(!isAuthorized::seeFullProfile($this->model->getProfileID()))
+        {
 			$rsp->setFailure(401, "You can not see this post")
 			    ->send();
+            
 			return;
 		}
 
-		$tags = $this->tagModel->tag($tagName);
+		$tags = $this->tagModel->postTags($postID);
 
-		if($tags == false){
-			$rsp->setFailure(404);
-		} else {
-			$rsp->setSuccess(200, "tags returned")
-				->bindValue("tagName", $tagName)
-				->bindValue("nbOfTag", count($tags))
-				->bindValue("tags", $tags);
+		if($tags == false)
+        {
+			$rsp->setFailure(404, "no tag for this post")
+                ->send();
+            
+            return;
 		}
-
-		$rsp->send();
+        
+        $rsp->setSuccess(200, "tags returned")
+			->bindValue("postID", $postID)
+			->bindValue("nbOfTag", count($tags))
+			->bindValue("tags", $tags)
+            ->send();
 	}
 
 
@@ -756,6 +919,10 @@ class PostController
 	/*********** VIEW *******************/
 	/************************************/
 
+	/**
+	 * Add a view to this profile
+	 * @param integer $postID Post to view
+	 */
 	public function view($postID)
 	{
 		if(!$this->setPost($postID))
@@ -763,28 +930,32 @@ class PostController
 			return;
 		}
 
-		$resp = new Response();
+		$rsp = new Response();
 
 		$profileID = Session::read("profileID");
-
-        echo $profileID;
-
-		if($this->postViewModel->view($profileID, $postID))
+        
+		if(!$this->postViewModel->view($profileID, $postID))
 		{
-			$resp->setSuccess(200, "post viewed");
-		}
-		else
-		{
-			$resp->setFailure(400, "post not set as viewed");
-		}
-		$resp->send();
+			$rsp->setFailure(400, "post not set as viewed")
+                ->send();
+            
+            return;
+        }
+			
+        $rsp->setSuccess(200, "post viewed")
+            ->send();
 	}
 
+	/**
+	 * Return the number of times a profile has been viewed by a user
+	 */
 	public function nbView()
 	{
 		$resp = new Response();
+        
 		$rslt = $this->postViewModel->mostViewedPosts(10);
-		$resp->setSuccess(200, "post viewed")
+		
+        $resp->setSuccess(200, "post viewed")
 			 ->bindValue("rslt", $rslt);
 
 		$resp->send();
@@ -793,6 +964,10 @@ class PostController
 
     /********* POPULAR ********/
 
+    /**
+     * Get popular posts
+     * @param integer [$limit       = 30] Number of posts to return
+     */
     public function popular($limit = 30)
     {
         $exclude = [];
@@ -808,8 +983,8 @@ class PostController
 
         foreach($postsBasics as $postBasics)
         {
-            $postInfos = Response::read("post", "display", $postBasics['post_id']);
-
+            $postInfos = Response::read("post", "display", $postBasics['post_id'])['data'] ;
+            
             //remove posts the user cannot see.
             if($postBasics ['profile_private'] == 1)
             {

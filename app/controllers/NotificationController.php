@@ -1,15 +1,21 @@
 <?php
 
-class NotificationController
+interface NotificationControllerInterface
+{
+    public function create($code, $profileID, $profileTarget, $target);
+}
+
+class NotificationController implements NotificationControllerInterface
 {
 	private $model;
 	private $allowedCodes = [
-		"newFollowAsk"   => 1, //DONE
-		"followAccepted" => 2, //DONE
-		"newFollowing"   => 3, //DONE
-		"newLike"        => 4, //DONE
-		"newComment"     => 5, //DONE
-		"newCommentLike" => 6, //DONE
+		"newFollowAsk"      => 1,
+		"followAccepted"    => 2,
+		"newFollowing"      => 3,
+		"newLike"           => 4,
+		"newComment"        => 5,
+		"newCommentLike"    => 6,
+		"changeReportState" => 7
 	];
 
 	public function __construct()
@@ -17,31 +23,48 @@ class NotificationController
 		$this->model = new NotificationModel();
 	}
 
+	/**
+	 * Creata new notification with the given arguments
+	 * @param string  $code          TYpe of notification to add
+	 * @param integer $profileID     Profile sending the nitification
+	 * @param integer $profileTarget Profile receiving the notification
+	 * @param integer $target        Id of the item the notification links to
+	 */
 	public function create($code, $profileID, $profileTarget, $target)
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
 		if(!array_key_exists($code, $this->allowedCodes)){
-			$resp->setFailure(400, "wrong code")
-			     ->send();
+			$rsp->setFailure(400, "wrong code")
+			    ->send();
 			return;
 		}
 
 		$notif = $this->allowedCodes[$code];
 		$this->model->add($notif, $profileID, $profileTarget, $target);
 
-		$resp->setSuccess(200, "notif returned")
-			 ->bindValue("type", $code)
-			 ->bindValue("code", $notif)
-			 ->bindValue("profileID", $profileID)
-			 ->bindValue("profileTargetID", $profileTarget)
-			 ->bindValue("targetID", $target)
-		     ->send();
+		$rsp->setSuccess(200, "notif returned")
+            ->bindValue("type", $code)
+            ->bindValue("code", $notif)
+			->bindValue("profileID", $profileID)
+			->bindValue("profileTargetID", $profileTarget)
+			->bindValue("targetID", $target)
+		    ->send();
 	}
 
-	public function delete()
+	public function seen($notifID)
 	{
+		$rsp = new Response();
 
+		if(!$this->model->isNotif($notifID)){
+			$rsp->setFailure(404, "not a notif")
+				->send();
+			return;
+		}
+
+		$this->model->setNotificationSeen($notifID);
+		$rsp->setSuccess(200, "notif seen")
+		    ->bindValue("notifID", $notifID)
+		    ->send();
 	}
-
 }

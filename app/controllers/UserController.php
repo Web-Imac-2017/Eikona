@@ -1,6 +1,28 @@
 <?php
 
-class UserController{
+interface UserControllerInterface
+{
+    public function exists($userID);
+
+    public function isModerator($userID);
+
+    public function isAdmin($userID);
+
+	public function get();
+
+	public function profiles();
+
+	public function edit($field);
+
+	public function rules($field);
+
+	public function delete();
+
+	public function notifications();
+}
+
+class UserController implements UserControllerInterface
+{
 
 	private $model;
 	private $profileModel;
@@ -24,28 +46,33 @@ class UserController{
 	{
 		$result = $this->model->setUser($userID);
 
-		if($result != "success"){
+        if($result == "wrongFormat")
+        {
+            $rsp = new Response();
+            $rsp->setFailure(400, "Wrong format. This is not a user ID")
+                ->send();
 
-			$resp = new Response();
+            return false;
+        }
 
-			if($result == "wrongFormat"){
-				$resp->setFailure(400, "Wrong format. This is not a user ID");
-			}else if($result == "notFound"){
-				$resp->setFailure(404, "Given user ID does not exist");
-			}
-			$resp->send();
+        if($result == "notFound")
+        {
+            $rsp = new Response();
+            $rsp->setFailure(404, "Given user ID does not exist")
+                ->send();
 
-			return false;
-		}
+            return false;
+        }
 
 		return true;
 	}
 
 
+
+
     /*********************/
     /**** Confirm user methods */
     /*********************/
-
 
     /**
      * Tell if the specified user exists or not
@@ -60,8 +87,6 @@ class UserController{
             ->send();
     }
 
-
-
     /**
      * Tell if the specified user is a moderator
      * @param integer $userID User ID to verify
@@ -74,8 +99,6 @@ class UserController{
             ->bindValue("isModerator", $this->model->isModerator($userID))
             ->send();
     }
-
-
 
     /**
      * Tell if the specified user is an administrator
@@ -141,17 +164,19 @@ class UserController{
 
 		$resp = new Response();
 
-		if(count($profiles) > 0){
+		if(count($profiles) > 0)
+        {
 			$resp->setSuccess(200, "user profiles returned")
 			     ->bindValue("userID", $userID)
 			     ->bindValue("nbOfProfiles", count($profiles))
-			     ->bindValue("profiles", $profiles);
-		}else{
-			$resp->setFailure(404, "user profiles not found");
-		}
+			     ->bindValue("profiles", $profiles)
+                 ->send();
 
-		//envoi de la réponse
-		$resp->send();
+            return;
+        }
+
+        $resp->setFailure(404, "user profiles not found")
+             ->send();
 	}
 
 	/**
@@ -161,254 +186,360 @@ class UserController{
 	 */
 	public function edit($field)
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
 		//get userID
 		$userID = Session::read("userID");
 
 		// If userID is wrong
-		if(!$this->setUser($userID)){
+		if(!$this->setUser($userID))
+        {
 			return;
 		}
 
 		//User is authorized ?
-		if(!isAuthorized::isUser($userID)){
-			$resp->setFailure(401, "You are not authorized to do this action.")
-			     ->send();
+		if(!isAuthorized::isUser($userID))
+        {
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
 
 			return;
 		}
+
+        //Do we have the info we need ?
+        if(($field == "name" && empty($_POST['name'])) ||
+           ($field == "email" && empty($_POST['email'])) ||
+           ($field == "password" && empty($_POST['passwd'])))
+        {
+            $rsp->setFailure(400, "Missing value. Edit aborted.")
+                ->send();
+
+            return;
+        }
+
+        $rsp->bindValue("userID", $userID);
+
+        $actions = ["name", "email", "password"];
+
+        if(!in_array($field, $actions))
+        {
+            $rsp->setFailure(405)
+                ->send();
+
+            return;
+        }
 
 		switch($field)
 		{
 			/*---------- USER_NAME ----------*/
 			case "name":
 
-				if(!empty($_POST['name'])){
-					if($this->model->updateName($_POST['name'])){
-						$resp->setSuccess(200, "name changed")
-							 ->bindValue("userID", $userID)
-						     ->bindValue("userName", $this->model->getName());
-					}else{
-						$resp->setFailure(409, "incorrect value");
-					}
-				}else{
-					$resp->setFailure(400, "Missing value. Edit aborted.");
-				}
-				break;
+				if(!$this->model->updateName($_POST['name']))
+                {
+                    $rsp->setFailure(409, "incorrect value")
+                        ->send();
 
+                    return;
+                }
+
+                $rsp->setSuccess(200, "name changed")
+				    ->bindValue("userName", $this->model->getName())
+                    ->send();
+
+            break;
 			/*---------- USER_EMAIL ----------*/
 			case "email":
 
-				if(!empty($_POST['email'])){
-					if($this->model->isUnique($_POST['email'])){
-						if($this->model->updateEmail($_POST['email'])){
-							$ban = new BanController;
-							if (!$ban->model->isEmailBan($_POST['user_email'])){
-								$resp->setSuccess(200, "email changed")
-								->bindValue("userID", $userID)
-								->bindValue("userEmail", $this->model->getEmail());
-								Session::renewKey();
-							}else{
-								$resp->setFailure(406, "Email banned");
-							}
-						}else{
-							$resp->setFailure(409, "Incorrect email");
-						}
-					}else{
-						$resp->setFailure(403, "User already exists");
-					}
-				}else{
-					$resp->setFailure(400, "Missing value. Edit aborted.");
-				}
-				break;
+                if(!$this->model->isUnique($_POST['email']))
+                {
+				    $rsp->setFailure(403, "User already exists")
+                        ->send();
 
+                    return;
+                }
+
+                if(!$this->model->updateEmail($_POST['email']))
+                {
+                    $rsp->setFailure(409, "Incorrect email")
+                        ->send();
+
+                    return;
+                }
+
+                $ban = new BanController;
+
+				if ($ban->model->isEmailBan($_POST['user_email']))
+                {
+                    $rsp->setFailure(406, "Email banned")
+                        ->send();
+
+                    return;
+                }
+
+				Session::renewKey();
+
+                $rsp->setSuccess(200, "email changed")
+				    ->bindValue("userEmail", $this->model->getEmail())
+                    ->send();
+
+            break;
 			/*---------- USER_PASSWORD ----------*/
 			case "password":
 
-				if(!empty($_POST['passwd']) && !empty($_POST['passwd_confirm'])){
-					if($_POST['passwd'] == $_POST['passwd_confirm']){
-						if($this->model->updatePassword($_POST['passwd'])){
-							$resp->setSuccess(200, "password changed");
-							//Pour la sécurité, pas de bind value du passwd
-							Session::renewKey();
-						}else{
-							$resp->setFailure(409, "incorrect password");
-						}
-					}else{
-						$resp->setFailure(409, "password and confirmation do not correspond");
-					}
-				}else{
-					$resp->setFailure(400, "Missing value. Edit aborted.");
-				}
-				break;
+                if($_POST['passwd'] !== $_POST['passwd_confirm'])
+                {
+                    $rsp->setFailure(409, "password and confirmation do not correspond")
+                        ->send();
 
-			default:
-				$resp->setFailure(405);
+                    return;
+                }
+
+                if(!$this->model->updatePassword($_POST['passwd']))
+                {
+                    $rsp->setFailure(409, "incorrect password")
+                        ->send();
+
+                    return;
+                }
+
+                Session::renewKey();
+
+				$rsp->setSuccess(200, "password changed")
+                    ->send();
+
+            break;
 		}
-
-		$resp->bindValue("userID", $userID)
-		     ->send();
 	}
 
+	/**
+	 * Handle user priveleges assignment, or removal.
+	 * @param string $field Action to do
+	 */
 	public function rules($field)
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
 		//get userID
 		$userID = Session::read("userID");
 
 		// If userID is wrong
-		if(!$this->setUser($userID)){
+		if(!$this->setUser($userID))
+        {
 			return;
 		}
+
+        //Do we have all we need
+        if(!empty($_POST['id']))
+        {
+            $rsp->setFailure(400, "Missing value. Edit aborted.")
+                ->send();
+        }
 
 		//User is authorized ?
-		if(!isAuthorized::isAdmin($this->model->getAdmin())){
-			$resp->setFailure(401, "You are not authorized to do this action.")
-			     ->send();
+		if(!isAuthorized::isAdmin())
+        {
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
 
 			return;
 		}
+
+        //Is this a legit user ID ?
+        if($this->model->userExists($_POST['id']))
+        {
+            $rsp->setFailure(404, "Given user ID does not exist")
+                ->send();
+
+            return;
+        }
+
+		$rsp->bindValue("userID", $userID);
+
+        $actions = ["setModerator", "setAdmin", "setUser"];
+
+        //Is this action supported?
+        if(!in_array($field, $actions))
+        {
+            $rsp->setFailure(405)
+                ->send();
+
+            return;
+        }
 
 		switch($field)
 		{
 			/*---------- USER_MODERATOR ----------*/
 			case "setModerator":
 
-				if(!empty($_POST['id'])){
-					if($this->model->userExists($_POST['id'])){
-						if($this->model->setModerator($_POST['id'])){
-							$resp->setSuccess(200, "user is now moderator")
-							 	 ->bindValue("userModeratorID", $_POST['id'])
-							 	 ->bindValue("userModerator", 1);
-							Session::renewKey();
-						}else{
-							$resp->setFailure(409, "incorrect id");
-						}
-					}else{
-						$resp->setFailure(404, "Given user ID does not exist");
-					}
-				}else{
-					$resp->setFailure(400, "Missing value. Edit aborted.");
-				}
-				break;
+				if(!$this->model->setModerator($_POST['id']))
+                {
+                    $rsp->setFailure(409, "incorrect id")
+                        ->send();
 
+                    return;
+                }
+                    Session::renewKey();
+
+                $rsp->setSuccess(200, "user is now moderator")
+                    ->bindValue("userModeratorID", $_POST['id'])
+                    ->bindValue("userModerator", 1)
+                    ->send();
+
+            break;
 			/*---------- USER_ADMIN ----------*/
-			case "setAdmin":
+			case "":
 
-				if(!empty($_POST['id'])){
-					if($this->model->userExists($_POST['id'])){
-						if($this->model->setAdmin($_POST['id'])){
-							$resp->setSuccess(200, "user is now admin")
-							 	 ->bindValue("userAdminID", $_POST['id'])
-							 	 ->bindValue("userModerator", 1)
-							 	 ->bindValue("userAdmin", 1);
-							Session::renewKey();
-						}else{
-							$resp->setFailure(409, "incorrect ID");
-						}
-					}else{
-						$resp->setFailure(404, "Given user admin ID does not exist");
-					}
-				}else{
-					$resp->setFailure(400, "Missing value. Edit aborted");
-				}
-				break;
+				if(!$this->model->setAdmin($_POST['id']))
+                {
+                    $rsp->setFailure(409, "incorrect ID")
+                        ->send();
 
+                    return;
+                }
+
+                Session::renewKey();
+
+                $rsp->setSuccess(200, "user is now admin")
+                    ->bindValue("userAdminID", $_POST['id'])
+                    ->bindValue("userModerator", 1)
+                    ->bindValue("userAdmin", 1)
+                    ->send();
+
+            break;
 			/*---------- USER ----------*/
 			case "setUser":
 
-				if(!empty($_POST['id'])){
-					if($this->model->userExists($_POST['id'])){
-						if($this->model->setToUser($_POST['id'])){
-							$resp->setSuccess(200, "user is now just user")
-							 	 ->bindValue("oldModeratorAdminID", $_POST['id'])
-							 	 ->bindValue("userModerator", 0)
-							 	 ->bindValue("userAdmin", 0);
-							Session::renewKey();
-						}else{
-							$resp->setFailure(409, "incorrect ID");
-						}
-					}else{
-						$resp->setFailure(404, "Given user admin ID does not exist");
-					}
-				}else{
-					$resp->setFailure(400, "Missing value. Edit aborted");
-				}
-				break;
+                if($this->model->setToUser($_POST['id']))
+                {
+                    $rsp->setFailure(409, "incorrect ID")
+                        ->send();
 
-			default:
-				$resp->setFailure(405);
+                    return;
+                }
+
+                Session::renewKey();
+
+                $rsp->setSuccess(200, "user is now just user")
+					->bindValue("oldModeratorAdminID", $_POST['id'])
+					->bindValue("userModerator", 0)
+					->bindValue("userAdmin", 0)
+                    ->send();
+
+            break;
 		}
-
-		$resp->bindValue("userID", $userID)
-		     ->send();
 	}
 
 	/**
-	 * Supprime le compt ede l'user
-	 * @return [type] [description]
+	 * Delete user account
 	 */
-
-	/* TODO : SUPPRIMER LES PROFILS LORS DE LA SUPPRESSION DU COMPTE */
 	public function delete()
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
 		$userID = Session::read("userID");
 
+        //Are we logged in ?
+		if(!$userID)
+        {
+			$rsp->setFailure(401, "You are not authorized to do this action.")
+                ->send();
 
-		if($userID){
-			if(!empty($_POST['user_passwd'])){
-				if($this->authModel->checkDelete($userID, $_POST['user_passwd'])){
-					if($this->authModel->delete($userID)){
-						$resp->setSuccess(200, "account deleted")
-						     ->bindValue("userID", $userID)
-						     ->send();
-						Response::read("auth", "signOut", true);
-						return;
-					}else{
-						$resp->setFailure(403, "fail to delete");
-					}
-				}else{
-					$resp->setFailure(409, "incorrect password");
-				}
-			}else{
-				$resp->setFailure(400, "tous les champs ne sont pas remplis");
-			}
-		}else{
-			$resp->setFailure(401, "You are not authorized to do this action.");
-		}
+            return;
+        }
 
-		$resp->send();
+        //Do we have all we need ?
+        if(empty($_POST['user_passwd']))
+        {
+            $rsp->setFailure(400, "tous les champs ne sont pas remplis")
+                ->send();
+
+            return;
+        }
+
+        //Can we delete this user?
+        if(!$this->authModel->checkDelete($userID, $_POST['user_passwd']))
+        {
+            $rsp->setFailure(409, "incorrect password")
+                ->send();
+
+            return;
+        }
+
+        //Delete the profiles
+        $profilesID = $this->profileModel->getUserProfiles($userID);
+
+        $profiles = array();
+
+        foreach($profilesID as $profileID)
+        {
+            Response::read("profile","delete",$profileID);
+        }
+
+        //Set the userID of a report to 0
+        $reportModel = new reportModel();
+        $reports = $reportModel->getReportsFromReporter($profileID);
+
+        foreach ($reports as $reportID) {
+            $reportModel->removeReporter($reportID);
+        }
+
+        //Delete the user
+        if(!$this->authModel->delete($userID))
+        {
+            $rsp->setFailure(403, "fail to delete")
+                ->send();
+
+             return;
+        }
+
+
+
+        Response::read("auth", "signOut", true);
+
+        $rsp->setSuccess(200, "account deleted")
+            ->bindValue("userID", $userID)
+            ->send();
 	}
 
+	/**
+	 * Return all notifications for the current user
+	 */
 	public function notifications()
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
 		$userID = Session::read("userID");
+
+        //Are we logged in?
+		if($userID)
+        {
+			$rsp->setFailure(401, "you are not connected")
+                ->send();
+
+            return;
+        }
 
 		if(!$this->setUser($userID))
 			return;
 
-		if($userID){
-			if($this->profileModel->hasProfiles($userID)){
-				$notif = $this->notifModel->getUserNotifications($userID);
-				foreach($notif as $n){
-					$tab[$n['profile_id']][] = $n;
-				}
-				$resp->setSuccess(200, "notif returned")
-					 ->bindValue("notif", $tab);
-			}else{
-				$resp->setFailure(401, "You don't have profiles");
-			}
-		}else{
-			$resp->setFailure(401, "you are not connected");
-		}
+        //Do the user has profiles to retreive notifications from ?
+        if(!$this->profileModel->hasProfiles($userID))
+        {
+            $rsp->setFailure(401, "You don't have profiles")
+                ->send();
 
-		$resp->send();
+            return;
+        }
+
+        $notif = $this->notifModel->getUserNotifications($userID);
+
+        foreach($notif as $n)
+        {
+            $tab[$n['profile_id']] = $n;
+        }
+
+        $rsp->setSuccess(200, "notif returned")
+            ->bindValue("notif", $tab)
+		    ->send();
 	}
-
 }

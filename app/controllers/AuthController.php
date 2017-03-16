@@ -1,7 +1,27 @@
 <?php
 
-class AuthController{
+/**
+ * AuthController
+ * Handle register, login, logout and password forgot
+ */
 
+interface AuthControllerInterface
+{
+    public function register();
+
+    public function activate();
+
+    public function forgottenPassword();
+
+    public function regenere();
+
+    public function signIn();
+
+    public function signOut($silence = false);
+}
+
+class AuthController implements AuthControllerInterface
+{
 	private $model;
 
 	public function __construct()
@@ -10,168 +30,220 @@ class AuthController{
 	}
 
 	/**
-	 * Inscription de l'user
-	 * @return Response JSON
+	 * Register a new user
 	 */
 	public function register()
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
-		//Si formulaire rempli
-		if(!empty($_POST['user_name']) &&
-		   !empty($_POST['user_email']) &&
-		   !empty($_POST['user_passwd']) &&
-		   !empty($_POST['user_passwd_confirm'])){
+		//Do we have all the required fields ?
+		if(empty($_POST['user_name'])   ||
+           empty($_POST['user_email'])  ||
+           empty($_POST['user_passwd']) ||
+           empty($_POST['user_passwd_confirm']))
+        {
+			$rsp->setFailure(400, "One or more fields are missing.")
+                ->send();
+        }
 
-			//Si passwd == passwd confirm
-			if($_POST['user_passwd'] == $_POST['user_passwd_confirm']){
-				//Si le mail est valide
-				if(filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)){
-					//si user est unique
-					if($this->model->isUnique($_POST['user_email'])){
-                        $emailIsBan = Response::read("ban", "is", "email", $_POST['user_email']);
-						if ($emailIsBan["code"] == 404){
+        //Is password confirmation correct ?
+        if($_POST['user_passwd'] !== $_POST['user_passwd_confirm'])
+        {
+            $rsp->setFailure(409, "`user_passwd` and `user_passwd_confirm` does not match.")
+                ->send();
 
-						//insertion dans la base de données
-							$user_register_time = time();
-							$id = $this->model->addUser(
-								$_POST['user_name'],
-								$_POST['user_email'],
-								$_POST['user_passwd'],
-								$user_register_time);
-							//envoi d'un mail d'activation
-							if($this->model->sendMail($id, $_POST['user_email'], $user_register_time)){
-								$resp->setSuccess(201, "user added and activation mail sent")
-							         ->bindValue("email", $_POST['user_email'])
-							         ->bindValue("userID", $id);
-							}else{
-								$resp->setFailure(400, "mail not sent");
-							}
-						}else{
-							$resp->setFailure(406, "email banned");
-						}
-					}else{
-						$resp->setFailure(403, "user already exists");
-					}
-				}else{
-					$resp->setFailure(409, "user_email is not an email");
-				}
-			}else{
-				$resp->setFailure(409, "user_passwd et user_passwd_confirm ne sont pas les mêmes");
-			}
-		}else{
-			$resp->setFailure(400, "tous les champs ne sont pas remplis");
-		}
+            return;
+        }
 
-		//envoi de la réponse
-		$resp->send();
+        //Is email valid ?
+        if(!filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL))
+        {
+            $rsp->setFailure(409, "`user_email` is not a valid email.")
+                ->send();
+
+            return;
+        }
+
+        //Is email banned?
+        if(Response::read("ban", "is", "email", $_POST['user_email'])["code"] == 401)
+        {
+            $rsp->setFailure(406, "The email used is banned.")
+                ->send();
+
+            return;
+        }
+
+        //Is user unique?
+        if(!$this->model->isUnique($_POST['user_email']))
+        {
+            $rsp->setFailure(403, "This email is already in use. You might want to log in.")
+                ->send();
+
+            return;
+        }
+
+        //Register the user
+        $userID = $this->model->addUser($_POST['user_name'], $_POST['user_email'], $_POST['user_passwd'], time());
+
+        //Send an activation email
+        if(!$this->model->sendMail($userID, $_POST['user_email'], time()))
+        {
+            $rsp->setFailure(400, "Error while sending the activation email.")
+                ->send();
+
+            return;
+        }
+
+        $rsp->setSuccess(201, "User added and activation mail sent.")
+            ->bindValue("email", $_POST['user_email'])
+            ->bindValue("userID", $userID)
+            ->send();
 	}
 
 	/**
-	 * Activation du compte
-	 * @return Response JSON
+	 * Activating the account
 	 */
 	public function activate()
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
-		if(!empty($_REQUEST['user_id']) && !empty($_REQUEST['user_key'])){
+        //Make sure we have all we need
+		if(empty($_REQUEST['user_id']) || empty($_REQUEST['user_key']))
+        {
+			$rsp->setFailure(400, "One or more fields are missing.")
+                ->send();
 
-			//Activation du compte
-			$res = $this->model->checkActivation($_REQUEST['user_id'], $_REQUEST['user_key']);
-			//Si l'user existe bien
-			if($res){
-				$this->model->updateUserActivated($_REQUEST['user_id']);
-				$resp->setSuccess(200, "Account activated")
-				     ->bindValue("userID", $_REQUEST['user_id']);
-			}else{
-				$resp->setFailure(409, "user_id or and user_key do not exist");
-			}
-		}else{
-			$resp->setFailure(400, "tous les champs ne sont pas remplis");
-		}
+            return;
+        }
 
-		//envoi de la réponse
-		$resp->send();
+        //Confirm activation
+        if(!$this->model->checkActivation($_REQUEST['user_id'], $_REQUEST['user_key']))
+        {
+            $rsp->setFailure(409, "`user_id` or and `user_key` do not exist.")
+                ->send();
+
+            return;
+        }
+
+        //And set the user as activated
+        $this->model->updateUserActivated($_REQUEST['user_id']);
+
+        $rsp->setSuccess(200, "Account activated.")
+            ->bindValue("userID", $_REQUEST['user_id'])
+            ->send();
 	}
 
 
+	/**
+	 * Send a recovery
+	 */
 	public function forgottenPassword()
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
-		//Si un mail a été entré
-		if(!empty($_POST['user_email'])){
-			//Si l'email existe bien
-			if($this->model->checkEmail($_POST['user_email'])){
-				$code = $this->model->addCode($_POST['user_email']);
-				$this->model->sendRecuperationMail($_POST['user_email'], $code);
-				$resp->setSuccess(200, "email sent")
-					 ->bindValue("userEmail", $_POST['user_email']);
-			}else{
-				$resp->setFailure(404, "unknown user");
-			}
-		}else{
-			$resp->setFailure(400, "Tous les champs ne sont pas remplis");
-		}
+		//Make sure we have all we need
+		if(empty($_POST['user_email']))
+        {
+			$rsp->setFailure(400, "One or more fields are missing.")
+                ->send();
 
-		$resp->send();
+            return;
+        }
+
+        //Confirm email
+        if(!$this->model->checkEmail($_POST['user_email']))
+        {
+            $rsp->setFailure(404, "This is not a valid user.")
+                ->send();
+
+            return;
+        }
+
+        //Send recovery email
+        $code = $this->model->addCode($_POST['user_email']);
+
+        $this->model->sendRecuperationMail($_POST['user_email'], $code);
+
+        $rsp->setSuccess(200, "Recovery email sent.")
+            ->bindValue("userEmail", $_POST['user_email'])
+            ->send();
 	}
 
 	public function regenere()
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
-		if(!empty($_POST['user_email']) &&
-		   !empty($_POST['user_passwd']) &&
-		   !empty($_POST['user_passwd_confirm']) &&
-		   !empty($_POST['code'])){
+        //Confirm reception of all the fields
+		if(empty($_POST['user_email'])          ||
+		   empty($_POST['user_passwd'])         ||
+		   empty($_POST['user_passwd_confirm']) ||
+		   empty($_POST['code']))
+        {
+			$rsp->setFailure(400, "One or more fields are missing.")
+                ->send();
 
-			if($this->model->checkEmail($_POST['user_email'])){
-				if($this->model->checkCode($_POST['user_email'], $_POST['code'])){
-					if($_POST['user_passwd'] == $_POST['user_passwd_confirm']){
-						$this->model->updatePassword($_POST['user_email'], $_POST['user_passwd']);
-						$this->model->deleteCode($_POST['user_email']);
-						$resp->setSuccess(200, "password regenerated")
-						     ->bindValue("userEmail", $_POST['user_email']);
-					}else{
-						$resp->setFailure(409, "password and confirmation do not correspond");
-					}
-				}else{
-					$resp->setFailure(409, "invalid reset code");
-				}
-			}else{
-				$resp->setFailure(404, "unknown user");
-			}
-		}else{
-			$resp->setFailure(400, "Tous les champs ne sont pas remplis");
-		}
+            return;
+        }
 
-		$resp->send();
+        //Confirm email
+        if(!$this->model->checkEmail($_POST['user_email']))
+        {
+            $rsp->setFailure(404, "This is not a valid user.")
+                ->send();
+
+            return;
+        }
+
+        //COnfirm code
+        if(!$this->model->checkCode($_POST['user_email'], $_POST['code']))
+        {
+            $rsp->setFailure(409, "Invalid reset code.")
+                ->send();
+
+            return;
+        }
+
+        //Confirm new password
+        if($_POST['user_passwd'] !== $_POST['user_passwd_confirm'])
+        {
+            $rsp->setFailure(409, "Password and confirmation do not match.")
+                ->send();
+
+            return;
+        }
+
+        //Set new password
+        $this->model->updatePassword($_POST['user_email'], $_POST['user_passwd']);
+
+        $this->model->deleteCode($_POST['user_email']);
+
+        $rsp->setSuccess(200, "Password correctly updated")
+            ->bindValue("userEmail", $_POST['user_email'])
+            ->send();
 	}
 
 	/**
 	 * Connexion
-	 * @return Response JSON
 	 */
 	public function signIn()
 	{
-		$resp = new Response();
+		$rsp = new Response();
 
         //Check if user has a "Stay connected" cookie
 		$userKey = Cookie::read("stayConnected");
 
         if($userKey !== false)
         {
+            //There's a cookie in here!
             $user = $this->model->getByKey($userKey);
 
             if($user["nbr"] == 0)
             {
                 //Cookie is not valid
-                $resp->setFailure("409", "The cookie received does not match any registered account.")
-                    ->send();
-
                 Cookie::delete("stayConnected");
+
+                $rsp->setFailure("409", "The cookie received does not match any registered account.")
+                    ->send();
 
                 return;
             }
@@ -180,11 +252,10 @@ class AuthController{
             Session::renewKey();
             Session::write("userID", $user['user_id']);
 
-            $resp->setSuccess(200, "User connected.")
-                 ->bindValue("userID", $user['user_id'])
-                 ->bindValue("userEmail", $user['user_email'])
-                 ->send();
-
+            $rsp->setSuccess(200, "User connected.")
+                ->bindValue("userID", $user['user_id'])
+                ->bindValue("userEmail", $user['user_email'])
+                ->send();
 
             return;
 		}
@@ -193,72 +264,87 @@ class AuthController{
         Cookie::delete("stayConnected");
 
 		//Proceed to connection
-		if(!empty($_POST['user_email']) &&
-		   !empty($_POST['user_passwd'])){
+		if(empty($_POST['user_email']) ||
+		   empty($_POST['user_passwd']))
+        {
+			$rsp->setFailure(400, "One or more fields are missing.")
+                ->send();
 
-			$email = $this->model->checkEmail($_POST['user_email']);
+            return;
+        }
 
-			//Si l'user est inscrit dans la bdd
-			if($email){
-				$user = $this->model->checkConnection($_POST['user_email'], $_POST['user_passwd']);
-				//Si la combinaison email /pwd est correcte
-				if($user->getID() != 0){
-					//Si le compte est activé
-					if($user->getActivated()){
-						$resp->setSuccess(200, "user connected")
-						     ->bindValue("userID", $user->getID())
-						     ->bindValue("userEmail", $_POST['user_email']);
+        $email = $this->model->checkEmail($_POST['user_email']);
 
-						//Session::renewKey();
-						Session::write("userID", $user->getID());
+        //Is this a registered user?
+        if(!$email)
+        {
+            $rsp->setFailure(404, "unknown user")
+                ->send();
 
-						Cookie::set("stayConnected", $user->getKey(), 2*7*24*3600);
-					}else{
-						$resp->setFailure(401, "account not yet activated");
-					}
-				}else{
-					$resp->setFailure(409, "wrong password");
-				}
-			}else{
-				$resp->setFailure(404, "unknown user");
-			}
-		}else{
-			$resp->setFailure(400, "tous les champs ne sont pas remplis");
-		}
-		//envoi de la réponse
-		$resp->send();
+            return;
+        }
+
+        $user = $this->model->checkConnection($_POST['user_email'], $_POST['user_passwd']);
+
+        //Is user/email combo correct?
+        if($user->getID() == 0)
+        {
+            $rsp->setFailure(409, "wrong password")
+                ->send();
+
+            return;
+        }
+
+        //Is the account activated ?
+        if(!$user->getActivated())
+        {
+            $rsp->setFailure(401, "account not yet activated")
+                ->send();
+
+            return;
+        }
+
+        Session::renewKey();
+        Session::write("userID", $user->getID());
+
+        Cookie::set("stayConnected", $user->getKey(), 2*7*24*3600);
+
+        $rsp->setSuccess(200, "user connected")
+            ->bindValue("userID", $user->getID())
+            ->bindValue("userEmail", $_POST['user_email'])
+            ->send();
 	}
 
 	/**
-	 * Deconnexion
-	 * @return Response JSON
+	 * Log out the user and remove the cookie
 	 */
 	public function signOut($silence = false)
 	{
+        $rsp = new Response();
+
+        //Are we logged in?
+        if(!Session::read("userID"))
+        {
+            $rsp->setFailure(400, "User not connected")
+                ->send();
+
+            return;
+        }
+        
+        
         Cookie::set("stayConnected", "", -1);
 
 		Session::renewKey();
 		Session::remove("userID");
 		Session::remove("profileID");
 
-		if(!$silence)
-        {
-			$resp = new Response();
+		if($silence)
+            return;
 
-			if(!Session::read("userID"))
-            {
-				$resp->setFailure(400, "User not connected");
-			}
-            else
-            {
-				$resp->setSuccess(200, "user deconnected")
-				     ->bindValue("id", Session::read("userID"));
-			}
+        $rsp->setSuccess(200, "user deconnected")
+            ->bindValue("id", Session::read("userID"));
 
-			$resp->send();
-		}
-
-        return;
-	}
-
+        $rsp->send();
+    }
 }
+

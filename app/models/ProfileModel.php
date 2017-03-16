@@ -148,11 +148,8 @@ class ProfileModel extends DBInterface
     {
         if($id == 0) return false;
 
-        $stmt = $this->cnx->prepare("
-            SELECT profile_id
-            FROM profiles
-            WHERE :id = user_id");
-        $stmt->execute([":id" => $id]);
+        $stmt = $this->cnx->prepare("SELECT profile_id FROM profiles WHERE :id = user_id");
+        $stmt->execute([":id" => Sanitize::int($id)]);
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
@@ -416,6 +413,30 @@ class ProfileModel extends DBInterface
     }
 
 
+    /**
+     * Return lots of informations for the back office
+     * @return array The informations
+     */
+    public function getBackOfficeData()
+    {
+        $stmt = $this->cnx->prepare("SELECT * FROM reports");
+        $stmt->execute();
+        $BackODt['reports'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->cnx->prepare("SELECT * FROM blocked");
+        $stmt->execute();
+        $BackODt['blocked'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->cnx->prepare("SELECT * FROM banned_words");
+        $stmt->execute();
+        $BackODt['banned_words'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->cnx->prepare("SELECT * FROM banned_emails");
+        $stmt->execute();
+        $BackODt['banned_emails'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $BackODt;
+    }
 
 
 
