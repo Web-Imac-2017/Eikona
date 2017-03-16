@@ -65,7 +65,7 @@ const router = new VueRouter({
   },
   {
     name: 'profile_name',
-    path: '/:ID',
+    path: '/p/:ID',
     component: require('./components/ProfilePage.vue'),
     props: true
   },
