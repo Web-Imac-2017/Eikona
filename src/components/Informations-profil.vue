@@ -7,7 +7,7 @@
 				</md-avatar>
 
 				<md-layout md-flex="50" md-column>
-					<p class="profile-name">{{ user.profileName }}</p>
+					<p class="profile-name">{{ currentProfile.profileName }}</p>
 
 					<md-layout v-if="!abonne" md-gutter>
 						<md-button  class="md-raised md-primary" @click.native="sabonner">S'abonner</md-button>
@@ -30,8 +30,8 @@
 			</md-layout>
 
 			<md-layout md-column class="cls_2">
-				<p class="infoNumber"><span>{{ user.nmb_posts }}</span> posts <span>{{ user.nmb_abonnements }}</span> abonnnements <span>{{ user.nmb_abonnés }}</span> abonnés</p>
-				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
+				<p class="infoNumber"><span>{{ nmbPosts.nbrPosts }}</span> posts <span>{{ listFollowings.nbrFollowings }}</span> abonnnements <span>{{ listFollowers.nbrFollowers }}</span> abonnés</p>
+				<p class="description"><span>Description</span><br>{{ currentProfile.profileDesc }}</p>
 			</md-layout>
 		</md-whiteframe>
 	</md-layout>
@@ -39,53 +39,161 @@
 
 <script>
 import connection from './Connection.vue'
+import apiRoot from './../config.js'
 
 export default {
 	name: 'informationsProfilAutre',
 
 	data () {
 		return {
-			connected: true,
 			abonne: false,
-			notif: false
+			notif: false,
+			connected: false,
+
+			currentProfile: {type:Object},
+			nmbPosts: {type:Object},
+			listFollowers: {type:Object},
+			listFollowings: {type:Object},
+
+			follow: null
 		}
 	},
-	computed :{
-		user () {
+	computed: {
+		/*user () {
 			return{
 				nmb_posts: 30,
 				nmb_abonnements: 300,
 				nmb_abonnés: 6000,
 				profileName: 'nom_du_profil',
-				profileDesc: 'Lorem ipsum dolor sit amet. Blablibla blou blabli bloublou.'
+				profileDesc: 'Lorem ipsum dolor sit amet. Blablibla blou blabli bloublou.',
 			}
-		}
+		},*/
 	},
+	/*props:{
+		profile: {type:Object},
+		currentProfile: {type:Object},
+		nmbPosts: {type:Object},
+		listFollowers: {type:Object},
+		listFollowings: {type:Object}
+	},*/
 	methods: {
+		connection () {
+			if(this.currentProfile.profileID = '') {this.connected = false;}
+			else {this.connected = true;}
+		},
+		follower () {
+			this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
+					{
+						console.log(response);
+						this.follow = response.data.data
+						if(this.follow.isFollowing === 1 && this.follow.isConfirmed === 1){
+							this.abonne = true
+						}
+						else if(this.follow.isConfirmed === 0){
+							//this.$ref.open()
+						}
+						else if(this.follow.isSubscribed === 1){
+							this.notif = true
+						}
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})
+		},
 		sabonner () {
-			if(!this.connected){
-				console.log("Abonnement");
-				/*this.$http.get('/Eikona/do/<profileID>[/<subscribe>]').then((response) => {
-      				// gérer le succes, toutes les infos renvoyer sont dans response.data
 
-    			}, (response) => {
-      				// gérer les erreurs
-      			}
-    		})*/
+			if(!this.connected){
+				console.log("Retour page connexion");
+				this.$router.push('/');
 			}
 			else{
-				console.log("changement");
 				this.abonne=!this.abonne;
 				this.notif=true;
+
+				//requete abonnement
+				this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
+					{
+					    
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})				
 			}
 		},
 		desabonner () {
 			this.abonne=!this.abonne;
 			this.notif=false;
+
+			this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
+					{
+					    
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})
 		},
 		notifier () {
-			this.notif=!this.notif;
+			this.$http.get(apiRoot + 'profile/subscribe/' + this.currentProfile.profileID).then((response) => {
+					{
+					    
+					}
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.$route.params.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})
+			this.notif=!this.notif
 		}
+	},
+	mounted () {
+		this.connection ();
+		//this.follower ();
 	}
 }
 

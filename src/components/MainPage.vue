@@ -6,14 +6,13 @@
 				<thread :eventDatas="popPostsStore" :isEvents="false" @more="nextPopPosts"></thread>
 			</md-tab>
 
-			<md-tab md-label="Suggestions" id="thread-suggests" class="threads">
-			</md-tab>
-
 			<md-tab md-label="Abonnements" id="thread-feed" class="threads">
 				<thread :eventDatas="feedStore" :isEvents="true" @more="nextFeedEvents"></thread>
 			</md-tab>
 
 			<md-tab md-label="Mon profil" id="thread-profile" class="threads">
+				<div class="threads"></div>
+				<pageProfile :ID="profileID"></pageProfile>
 			</md-tab>
 		</md-tabs>
 	</md-layout>
@@ -23,6 +22,7 @@
 <script>
 import thread from './Thread.vue'
 import profileSwitch from './ProfileSwitch.vue'
+import pageProfile from './ProfilePage.vue'
 import store from './PostStore.js'
 import Vuex from 'vuex'
 
@@ -31,7 +31,13 @@ export default{
 	store: store,
 	components: {
 		thread,
-    profileSwitch
+    	profileSwitch,
+    	pageProfile
+	},
+	data () {
+		return {
+			profileID: 258
+		}
 	},
 	computed: {
 		...Vuex.mapGetters({
@@ -77,15 +83,12 @@ export default{
 #thread-popular {
 	background-image: url("./../assets/bg.jpg");
 }
-#thread-suggests{
-	background-image: url("./../assets/bg2.jpg");
-}
 #thread-feed{
 	background-image: url("./../assets/bg3.jpg");
 }
-#thread-profile{
+/*#thread-profile{
 	background-image: url("./../assets/bg4.jpg");
-}
+}*/
 
 
 .switchButton {

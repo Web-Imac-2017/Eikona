@@ -11,12 +11,12 @@
     </md-input-container>
     <md-input-container id="profile-creation-desc">
       <label>Description</label>
-      <md-textarea v-model="profile.desc"></md-textarea>
+      <md-textarea v-model="profile.desc" required></md-textarea>
       <span class="md-error">Votre message comporte des caractères non autorisés.</span>
     </md-input-container>
     <md-switch v-model="profile.isPrivate" id="privateSwitch1" name="privateSwitch" class="md-primary">Visible des autres utilisateurs.</md-switch>
-    <md-button type="submit" @click.native="cancel">
-      {{ step }}
+    <md-button type="reset" @click.native="cancel">
+      Annuler
     </md-button>
     <md-button v-if="step === 'Annuler'" type="submit" @click.native="addProfile" class="md-raised md-primary">
       Ajouter ce profil
