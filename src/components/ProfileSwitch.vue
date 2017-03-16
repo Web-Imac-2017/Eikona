@@ -8,13 +8,27 @@
 
 		  <md-menu-content>
 				<md-list class="md-triple-line">
+          <md-subheader>Profil(s)</md-subheader>
 					<profile v-for="(item, i) in profiles" :profile="item" :key="item" :index="i" :extended="false" @select="select"></profile>
-					<md-list-item class="md-inset">
-						<span>Ajouter un profil</span>
-						<md-button id="profilCreation-button" @click.native="createProfile('dialog')" class="md-icon-button md-list-action">
-							<md-icon class="md-accent">add_circle</md-icon>
-						</md-button>
-					</md-list-item>
+          <md-list-item class="md-inset">
+            <span>Ajouter un profil</span>
+            <md-button id="profilCreation-button" @click.native="createProfile('dialog')" class="md-icon-button md-list-action">
+              <md-icon class="md-accent">add_circle</md-icon>
+            </md-button>
+          </md-list-item>
+          <md-divider></md-divider>
+          <md-subheader>Notification(s) non lue(s)</md-subheader>
+          <!--<div class="md-list-text-container">
+            <span>{{  }}</span>
+            <p v-show="extended">{{  }}</p>
+            <p>{{  }}</p>
+          </div>-->
+          <template v-for="notif in notifs">
+          <md-list-item>
+            
+          </md-list-item>
+          </template>
+					
 				</md-list>
 		  </md-menu-content>
 		</md-menu>
@@ -34,6 +48,9 @@ import Vuex from 'vuex'
 import store from './connectionStore.js'
 import profile from './Profile.vue'
 import profileCreation from './Profile-creation.vue'
+import apiRoot from './../config.js'
+
+
 
 export default {
   name: 'profileSwitch',
@@ -43,8 +60,13 @@ export default {
     profileCreation
   },
   data () {
-    notif []
-  }
+    return {
+      notifs: []
+    }
+  },
+  mounted () {
+    this.getNotification()
+  },
   computed: {
     ...Vuex.mapGetters([
       'getUser',
@@ -66,27 +88,27 @@ export default {
       this.$emit('change')
     },
     getNotification() {
-      this.$http.get('/Eikona/do/profile/notifications').then((response) => {
-       // gérer le succes, toutes les infos renvoyer sont dans response.data 
+      this.$http.get(apiRoot+'profile/notifications/').then((response) => {
       console.log('SUCCESS: notification recuperee', response)
-      this.notif:response.data.data.notif
      }, (response) => {
-      // gérer les erreurs
       console.error('ERR: get notification request', response)
       switch (response.status) {
         case 401:
-          console.log('Unauthorized')
+          console.error('Unauthorized')
           break
         case 404:
           console.log('Not foud')
           break
         default:
           console.log('Unknown error')
-      }
-       }
-     }) 
+        }
+      })
     }
+  }
 }
+
+  
+    
 </script>
 
 <style lang="css" scoped>
