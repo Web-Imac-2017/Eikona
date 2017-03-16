@@ -12,7 +12,7 @@
 			</md-layout>
 
 			<md-layout md-column class="cls_2">
-				<p class="infoNumber"><span>{{ profile.nbPosts }}</span> posts <span>{{ following.length }}</span> abonnnements <span>{{ followers.length }}</span> abonnés</p>
+				<p class="infoNumber"><span>{{ profile.nbPosts }}</span> posts <span>{{ followings.length }}</span> abonnnements <span>{{ followers.length }}</span> abonnés</p>
 				<p class="description"><span>Description</span><br>{{ profile.profileDesc }}</p>
 			</md-layout>
 		</md-whiteframe>
@@ -61,6 +61,9 @@ export default{
 		}
 	},
 	props: ['profile', 'followers', 'followings'],
+	mounted () {
+		console.log("InfosProfilCourant : ", this.profile)
+	},
 	methods: {
 		save () {
 			if(this.profile.profileDesc !== this.newDesc) {
@@ -74,7 +77,7 @@ export default{
 			}
 		},
 		modifNom (nom) {
-			this.$http.post(apiRoot + 'profile/update/NAME' + this.profile.profileID, {
+			this.$http.post(apiRoot + 'profile/update/NAME/' + this.profile.profileID, {
 					newValue: nom
 				}).then( response => {
 					console.log('MODIFICATION NAME SUCCESS', response)
@@ -103,7 +106,7 @@ export default{
 				})
 		},
 		modifDesc (desc) {
-			this.$http.post(apiRoot + 'profile/update/DESCRIPTION' + this.profile.profileID, {
+			this.$http.post(apiRoot + 'profile/update/DESCRIPTION/' + this.profile.profileID, {
 					newValue: desc
 				}).then( response => {
 					console.log('MODIFICATION DESC SUCCESS', response)
@@ -132,7 +135,7 @@ export default{
 				})
 		},
 		modifStatut (isPrivate) {
-			this.$http.post(apiRoot + 'profile/update/SETPRIVATE' + this.profile.profileID, {
+			this.$http.post(apiRoot + 'profile/update/SETPRIVATE/' + this.profile.profileID, {
 					newValue: isPrivate
 				}).then( response => {
 					console.log('MODIFICATION NAME SUCCESS', response)
