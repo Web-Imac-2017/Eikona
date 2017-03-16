@@ -16,7 +16,7 @@
 				<thread :eventDatas="feedStore" :isEvents="true" @more="nextFeedEvents"></thread>
 			</md-tab>
 
-			<md-tab md-label="Mon profil">
+			<md-tab md-label="Mon profil" id="thread-profile">
 				<div class="threads"></div>
 				<pageProfile :ID="profileID"></pageProfile>
 			</md-tab>
@@ -99,9 +99,9 @@ export default{
 #thread-feed{
 	background-image: url("./../assets/bg3.jpg");
 }
-/*#thread-profile{
+#thread-profile{
 	background-image: url("./../assets/bg4.jpg");
-}*/
+}
 
 
 .switchButton {

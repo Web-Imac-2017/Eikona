@@ -1,14 +1,14 @@
 <template>
 	<md-layout md-gutter>
 		<!-- infos du profil actif -->
-		<infosEditable v-if="current" :currentProfile="currentProfile" :nmbPosts="nmbPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></infosEditable>
+		<infosEditable v-if="current" :currentProfileProp="currentP" :nmbPosts="nmbPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></infosEditable>
 		<!-- infos du profil qu'on visite -->
-		<informationsProfilAutre v-else-if="!current" :currentProfile="currentProfile" :nmbPosts="nmbPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></informationsProfilAutre>
+		<informationsProfilAutre v-else-if="!current" :currentProfileProp="currentP" :nmbPosts="nmbPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></informationsProfilAutre>
 
 		<!-- posts du profil actif -->
-		<previewsPostsPerso v-if="current" :currentProfile="currentProfile"></previewsPostsPerso>
+		<previewsPostsPerso v-if="current" :currentProfileProp="currentP"></previewsPostsPerso>
 		<!-- posts du profil qu'on visite -->
-		<previewsPosts v-else-if="!current" :currentProfile="currentProfile" :profile="profile"></previewsPosts>
+		<previewsPosts v-else-if="!current" :currentProfileProp="currentP" :profile="profile"></previewsPosts>
 		
 	</md-layout>	
 </template>
@@ -48,16 +48,16 @@ export default{
 	},
 	computed: {
 		// recuperation des informations sur le profil courant
-		...Vuex.mapGetters([
-	      	'currentProfile'
-	   	])
+		...Vuex.mapGetters({
+	      	currentP: 'currentProfile'
+		})
 	},
 	methods: {
 
 		// test si le profil visite est le meme que le profil courant
 		activeProfile () {
-			console.log(this.currentProfile)
-			if (store.currentProfile.profileID === this.ID) { this.current = true }
+			console.log(this.currentP)
+			if (this.currentP.profileID === this.ID) { this.current = true }
 	    },
 
 		// Recuperation du profil de la page
@@ -66,9 +66,7 @@ export default{
 			this.$http.get(apiRoot + 'profile/get/' + this.ID).then( response => {
 						console.log('SUCESS getProfile : ', response)
 						//console.log(response)
-					    this.profile = response.data.data
-					    /* onsole.log(this.profile) */
-	
+					    this.profile = response.data.data	
 				}, response => {
 					console.error('ERROR getProfile : ', response)
 					switch (response.status) {
@@ -178,6 +176,7 @@ export default{
 		}
 	},
 	mounted () {
+		console.log(this.currentP)
 		this.getProfile ()
 		this.getNmbPosts ()
 		this.getListFollowers ()
