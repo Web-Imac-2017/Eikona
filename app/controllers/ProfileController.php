@@ -3,57 +3,57 @@
 interface ProfileControllerInterface
 {
     public function create();
-    
+
     public function exists($profileID);
-    
+
     public function setCurrent($profileID);
-    
+
     public function get($profileID);
-    
+
     public function name($profileID);
-    
+
     public function description($profileID);
-    
+
     public function picture($profileID);
-    
+
     public function views($profileID);
-    
+
     public function isPrivate($profileID);
-    
+
     public function owner($profileID);
-    
+
     public function nbrPosts($profileID);
-    
+
     public function posts($profileID, ...$args);
 
     public function drafts();
-    
+
     public function update($field, $profileID);
-    
+
     public function setPicture($profileID);
-    
+
     public function addView($profileID, $nbr = 1);
-    
+
     public function delete($profileID);
-    
+
     public function nbrFollowers($profileID);
-    
+
     public function nbrFollowings($profileID);
-    
+
     public function follow($profileID, $subscribe = 0);
-    
+
     public function unfollow($profileID);
-    
+
     public function followers($profileID);
-    
+
     public function followings($profileID);
-    
+
     public function subscribe($profileID);
-    
+
     public function unsubscribe($profileID);
-    
+
     public function isFollowing($followed, $follower = -1);
-    
+
     public function confirmFollow($follower);
 
     public function notifications();
@@ -90,23 +90,23 @@ class ProfileController implements ProfileControllerInterface
         $rsp = new Response();
 
         $uID = Session::read("userID"); //Get current user ID
-        
+
         //Are we logged in
         if(!isAuthorized::isUser())
         {
             $rsp->setFailure(401, "You must be connected to do this")
                 ->send();
-            
+
             return;
         }
-        
+
         //Have we reached the profile number limit
         if($this->model->tooMuchProfiles($uID))
         {
             $rsp->setFailure(400, "Too Much profiles")
                 ->send();
-            
-            return; 
+
+            return;
         }
 
         //Do we have all we need
@@ -161,14 +161,14 @@ class ProfileController implements ProfileControllerInterface
     private function setProfile($profileID)
     {
         $result = $this->model->setProfile($profileID);
-        
+
         if($result == "success")
         {
             return true;
         }
-        
+
         $rsp = new Response();
-        
+
         if($result == "wrongFormat")
         {
             $rsp->setFailure(400, "Wrong format. This is not a profile ID.");
@@ -209,11 +209,11 @@ class ProfileController implements ProfileControllerInterface
     {
         if(!$this->model->setProfile($profileID))
            return;
-           
+
         $userID = Session::read("userID");
 
         $rsp = new Response();
-        
+
         //Are we logged in ?
         if(!$userID)
         {
@@ -222,7 +222,7 @@ class ProfileController implements ProfileControllerInterface
 
             return;
         }
-        
+
         //Do we own this profile ?
         if(!isAuthorized::ownProfile($profileID))
         {
@@ -623,7 +623,7 @@ class ProfileController implements ProfileControllerInterface
 
             return;
         }
-        
+
         //Do we have all we need
         if(!is_uploaded_file($_FILES['profilePicture']['tmp_name']))
 		{
@@ -665,10 +665,10 @@ class ProfileController implements ProfileControllerInterface
         {
             $rsp->setFailure(400)
                 ->send();
-            
+
             return;
         }
-        
+
         $rsp->setSuccess(200)
             ->bindValue("profileViews", $this->model->getViews())
             ->send();
@@ -692,12 +692,28 @@ class ProfileController implements ProfileControllerInterface
             return;
         }
 
-        /*
-         * TODO: Remove dependants data like posts, comments, likes, etc...
-         */
-
         if(!$this->setProfile($profileID))
             return;
+
+        //Delete the posts associated with the profile
+        $postsID = $this->postModel->getPosts($profileID);
+
+        $posts = array();
+
+        foreach($postsID as $postID)
+        {
+            Response::read("post", "delete", $postID);
+        }
+
+        //Delete the posts associated with the profile
+        $postsID = $this->postModel->getPosts($profileID);
+
+        $posts = array();
+
+        foreach($postsID as $postID)
+        {
+            Response::read("post", "delete", $postID);
+        }
 
         $this->model->delete($profileID);
 
@@ -729,7 +745,7 @@ class ProfileController implements ProfileControllerInterface
         {
             $rsp->setFailure(400, "The given parameter is not a profile ID")
                 ->send();
-            
+
             return;
         }
 
@@ -756,7 +772,7 @@ class ProfileController implements ProfileControllerInterface
         {
             $rsp->setFailure(400, "The given parameter is not a profile ID")
                 ->send();
-            
+
             return;
         }
 
@@ -779,7 +795,7 @@ class ProfileController implements ProfileControllerInterface
         $rsp = new Response();
 
         $currentUser = Session::read("profileID");
-        
+
         //Are we logged in ?
         if(!$currentUser)
         {
@@ -788,7 +804,7 @@ class ProfileController implements ProfileControllerInterface
 
             return;
         }
-        
+
         //Can we use this profile ?
         if(!isAuthorized::editProfile($currentUser))
         {
@@ -797,7 +813,7 @@ class ProfileController implements ProfileControllerInterface
 
             return;
         }
-        
+
         //Are we trying to follow ourself ?
         if($profileID === $currentUser)
         {
@@ -809,7 +825,7 @@ class ProfileController implements ProfileControllerInterface
 
         //Do the request
         $result = $this->followModel->follow($profileID, $subscribe);
-        
+
         //Handle errors
         if($result === "notAProfile")
         {
@@ -844,7 +860,7 @@ class ProfileController implements ProfileControllerInterface
         {
             $rsp->setFailure(400, "error during following")
                 ->send();
-            
+
             return;
         }
 
@@ -866,7 +882,7 @@ class ProfileController implements ProfileControllerInterface
         $rsp = new Response();
 
         $currentUser = Session::read("profileID");
-        
+
         //Do we have a current profile
         if(!$currentUser)
         {
@@ -875,7 +891,7 @@ class ProfileController implements ProfileControllerInterface
 
             return;
         }
-        
+
         //Can we use this profile ?
         if(!isAuthorized::editProfile($currentUser))
         {
@@ -895,7 +911,7 @@ class ProfileController implements ProfileControllerInterface
         }
 
         $result = $this->followModel->unfollow($profileID);
-        
+
         //Handle errors
         if($result === "notAProfile")
         {
@@ -1076,7 +1092,7 @@ class ProfileController implements ProfileControllerInterface
     {
         $followed = Session::read("profileID");
         $rsp = new Response();
-        
+
         //Are we logged in ?
         if(!$followed)
         {
@@ -1085,7 +1101,7 @@ class ProfileController implements ProfileControllerInterface
 
             return;
         }
-        
+
         //Can we edit current profile
         if(!isAuthorized::editProfile($followed))
         {
@@ -1094,7 +1110,7 @@ class ProfileController implements ProfileControllerInterface
 
             return;
         }
-        
+
         //Are we trying to confirm ourself?
         if($followed === $follower)
         {
@@ -1149,17 +1165,17 @@ class ProfileController implements ProfileControllerInterface
         {
             $rsp->setFailure(401, "You must have profile to do this.")
                 ->send();
-            
+
             return;
         }
 
         $notif = $this->notifModel->getProfileNotifications($profileID);
-        
+
         if($notif == null)
         {
             $rsp->setFailure(404, "You do not have notifications.")
                 ->send();
-            
+
             return;
         }
 
@@ -1170,7 +1186,7 @@ class ProfileController implements ProfileControllerInterface
    }
 
     /********* FEED ***********/
-    
+
     /**
      * Return the feed of the user
      * @param intefer [$limit       = 30] Number of activities to return
@@ -1181,7 +1197,7 @@ class ProfileController implements ProfileControllerInterface
         $profileID = Session::read("profileID");
 
         $rsp = new Response();
-        
+
         //Make sure we are logged in
         if(empty($profileID))
         {
@@ -1193,19 +1209,19 @@ class ProfileController implements ProfileControllerInterface
 
         //Retrieve aditionnal model:
         $commentModel = new CommentModel();
-        
+
         $events = $this->model->feed($profileID, $limit, $before);
         $nbrEvents = count($events);
 
         $feed = array();
-        
+
         //Build the return array
         for($i = 0; $i < $nbrEvents; $i++)
         {
             $event = $events[$i];
 
             $eventBlock = array();
-            
+
             if($event['type'] == "post")
             {
                 $eventBlock["type"] = "post";
@@ -1236,7 +1252,7 @@ class ProfileController implements ProfileControllerInterface
                 $eventBlock["profileData"] = Response::read("profile", "get", $event["source"])['data'];
 
                 $posts = array();
-                
+
                 //If a same user as consecutive likes, merge them is a single group
                 for($j = $i; $j < $nbrEvents; $j++)
                 {

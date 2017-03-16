@@ -154,7 +154,7 @@ class UserController implements UserControllerInterface
 		}
 
 		$profilesID = $this->profileModel->getUserProfiles($userID);
-        
+
         $profiles = array();
 
         foreach($profilesID as $profileID)
@@ -465,6 +465,24 @@ class UserController implements UserControllerInterface
             return;
         }
 
+        //Delete the profiles
+        $profilesID = $this->profileModel->getUserProfiles($userID);
+
+        $profiles = array();
+
+        foreach($profilesID as $profileID)
+        {
+            Response::read("profile","delete",$profileID);
+        }
+
+        //Set the userID of a report to 0
+        $reportModel = new reportModel();
+        $reports = $reportModel->getReportsFromReporter($profileID);
+
+        foreach ($reports as $reportID) {
+            $reportModel->removeReporter($reportID);
+        }
+
         //Delete the user
         if(!$this->authModel->delete($userID))
         {
@@ -474,7 +492,7 @@ class UserController implements UserControllerInterface
              return;
         }
 
-	    /* TODO : SUPPRIMER LES PROFILS LORS DE LA SUPPRESSION DU COMPTE */
+
 
         Response::read("auth", "signOut", true);
 
