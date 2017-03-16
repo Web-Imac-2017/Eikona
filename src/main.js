@@ -40,7 +40,7 @@ const scrollBehavior = (to, from, savedPosition) => {
 
 const router = new VueRouter({
   mode: 'history',
-  base: '/Eikona',
+  base: '/eikona',
   scrollBehavior,
   routes: [{
     path: '',

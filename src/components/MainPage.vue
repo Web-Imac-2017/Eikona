@@ -6,9 +6,6 @@
 				<thread :eventDatas="popPostsStore" :isEvents="false" @more="nextPopPosts"></thread>
 			</md-tab>
 
-			<md-tab md-label="Suggestions" id="thread-suggests" class="threads">
-			</md-tab>
-
 			<md-tab md-label="Abonnements" id="thread-feed" class="threads">
 				<thread :eventDatas="feedStore" :isEvents="true" @more="nextFeedEvents"></thread>
 			</md-tab>
@@ -76,9 +73,6 @@ export default{
 }
 #thread-popular {
 	background-image: url("./../assets/bg.jpg");
-}
-#thread-suggests{
-	background-image: url("./../assets/bg2.jpg");
 }
 #thread-feed{
 	background-image: url("./../assets/bg3.jpg");
