@@ -266,8 +266,7 @@ Data:
     **Explication** Pas de signalements qui correspondent.
 
 
- ## Recherche tous les signalement non handle par un modérateur OU tous les signalements du modérateur
-
+## Recherche tous les signalement non handle par un modérateur OU tous les signalements du modérateur
 
 
 ### URL
