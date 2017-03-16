@@ -52,7 +52,7 @@ Data:
   OU
 
 * **Code:** 409 CONFLICT <br />
-  **Explication** Le nouveau nom est incorrect. 
+  **Explication** Le nouveau nom est incorrect.
 
 ## Field = email
 
@@ -79,7 +79,7 @@ Data:
   OU
 
 * **Code:** 409 CONFLICT <br />
-  **Explication** Le nouvel email est incorrect. 
+  **Explication** Le nouvel email est incorrect.
 
   OU
 
@@ -106,6 +106,62 @@ Data:
 
 * **Code:** 409 CONFLICT <br />
   **Explication** Le nouveau mot de passe est incorrect OU les mots de passe ne sont pas identiques.
+
+## Vérification du statut de moderateur
+
+### URL
+
+```
+/user/isModerator/<userID>
+```
+
+### Variables GET
+
+* **userID** : ID de l'user à vérifier
+
+### Succès
+
+* **Code:** 200 NOT AUTHORIZED <br />
+Data:
+```json
+{
+  isModerator: true | false,
+  backOfficeData:
+  [
+      reports : [{
+          report_id : ID du report,
+          user_id : ID de l'auteur,
+          post_id : ID du post concerné,
+          reports_comments : commentaire,
+          reports_status : statut du report
+          reports_handler : userID du modérateur aui gère le report
+          reports_result : résultat du report
+          time_state_change : date du changement d'etat
+      }]
+  ],
+  [
+      blocked : [{
+          blocker_id : ID du blockeur,
+          blocked_id : ID du user bloqué,
+          blocked_time : Date du blocage
+      }]
+  ],
+  [
+      banned_emails : [{
+          banned_email : email banni,
+      }]
+  ],
+  [
+      banned_words : [{
+          word : mot banni,
+      }]
+  ]
+}
+
+```
+
+  **Explication** Tableau back Office n'apparait que si *isModerator* est *true*. Il contient l'ensemble des données des tables liées à la modération.
+
 
 ## Edition des droits d'accès de l'utilisateur
 
@@ -156,7 +212,7 @@ Data:
   OU
 
 * **Code:** 409 CONFLICT <br />
-  **Explication** L'id est incorrect. 
+  **Explication** L'id est incorrect.
 
   OU
 
@@ -189,7 +245,7 @@ Data:
   OU
 
 * **Code:** 409 CONFLICT <br />
-  **Explication** L'id est incorrect. 
+  **Explication** L'id est incorrect.
 
   OU
 
@@ -221,7 +277,7 @@ Data:
   OU
 
 * **Code:** 409 CONFLICT <br />
-  **Explication** L'id est incorrect. 
+  **Explication** L'id est incorrect.
 
   OU
 
@@ -232,7 +288,7 @@ Data:
 
 ### Variables POST
 
-* **id** : L'id de l'utilisateur dont on va changer les droits. Il va redevenir un simple utilisateur. 
+* **id** : L'id de l'utilisateur dont on va changer les droits. Il va redevenir un simple utilisateur.
 
 ### Succès
 
@@ -254,7 +310,7 @@ Data:
   OU
 
 * **Code:** 409 CONFLICT <br />
-  **Explication** L'id est incorrect. 
+  **Explication** L'id est incorrect.
 
   OU
 
@@ -290,8 +346,8 @@ Data:
 }
 ```
 
-### Notes : 
-Le mot de passe n'est pas retourné pour la sécurité. Cette fonction récupère les informations de l'utilisateur courant. 
+### Notes :
+Le mot de passe n'est pas retourné pour la sécurité. Cette fonction récupère les informations de l'utilisateur courant.
 
 ## Récupération de tous les profils de l'utilisateur courant
 
@@ -314,7 +370,7 @@ Data:
   userID: ID du user,
   nbOfProfiles: nombre de profils que possède le user,
   profiles: [
-    { 
+    {
       Même format que do/profile/get
     }, {
       même champs pour un autre profil.
@@ -325,7 +381,7 @@ Data:
 
 ## Suppression
 
-Permet à l'utilisateur de supprimer son compte. 
+Permet à l'utilisateur de supprimer son compte.
 
 ### URL
 ```
@@ -342,7 +398,7 @@ Permet à l'utilisateur de supprimer son compte.
 ### Succès
 
   * **Code:** 200 OK
-Data: 
+Data:
 ```json
 {
   userID: ID du user,
@@ -367,4 +423,4 @@ Data:
   OU
 
 * **Code:** 403 FORBIDDEN <br />
-  **Explication** La suppression a échoué. 
+  **Explication** La suppression a échoué.
