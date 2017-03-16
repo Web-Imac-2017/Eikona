@@ -28,7 +28,10 @@ const mutations = {
 const getters = {
   getUser (state) { return state.user },
   profiles (state) { return state.userProfiles },
-  currentProfile (state) { if (state.currentProfile >= 0) return state.userProfiles[state.currentProfile] },
+  currentProfile (state) {
+    if (state.currentProfile >= 0) return state.userProfiles[state.currentProfile]
+    else return false
+  },
   currentProfileIndex (state) { return state.currentProfile },
   getProfile (state, index) { return state.userProfiles[index] }
 }

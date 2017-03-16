@@ -6,30 +6,30 @@
 					<img src="../../assets/Eiko.png"/>
 				</md-avatar>
 				<md-layout md-gutter md-flex="50" md-list>
-					<p class="profile-name">{{ user.profileName }}</p>
-					<md-button class="md-primary md-raised" @click.native="modifier">Modifier</md-button>
+					<p class="profile-name">{{ profile.profileName }}</p>
+					<md-button class="md-primary md-raised" @click.native="modification = !modification">Modifier</md-button>
 				</md-layout>
 			</md-layout>
 
 			<md-layout md-column class="cls_2">
-				<p class="infoNumber"><span>{{ user.nmb_posts }}</span> posts <span>{{ user.nmb_abonnements }}</span> abonnnements <span>{{ user.nmb_abonnés }}</span> abonnés</p>
-				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
+				<p class="infoNumber"><span>{{ profile.nbPosts }}</span> posts <span>{{ following.length }}</span> abonnnements <span>{{ followers.length }}</span> abonnés</p>
+				<p class="description"><span>Description</span><br>{{ profile.profileDesc }}</p>
 			</md-layout>
-		</md-whiteframe>	
-		
+		</md-whiteframe>
+
 		<md-whiteframe type="form" class="edition" md-elevation="8" v-else @submit.stop.prevent="save">
 			<md-layout md-align="end">
-				<md-switch v-model="checked" id="my-test1" name="my-test1" class="md-primary" @change="changeStatut">{{ statut }}</md-switch>
+				<md-switch v-model="isPrivate" id="my-test1" name="my-test1" class="md-primary" @change="changeStatut">Visibilité du profil.</md-switch>
 			</md-layout>
 			<md-input-container>
 		    	<label>Nom du profil</label>
-		    	<md-input v-model="newName" placeholder="user.profileName"></md-input>
+		    	<md-input v-model="newNameModel" placeholder="profile.profileName"></md-input>
 			</md-input-container>
 			<md-layout class="profile_pic">
 				<md-avatar class="md-large">
 					<img src="../../assets/Eiko.png"/>
 				</md-avatar>
-				
+
 				<md-input-container class="cls_file">
 					<label>Photo du profil</label>
 					<md-file v-model="onlyImages" accept="image/*"></md-file>
@@ -38,7 +38,7 @@
 
 			<md-input-container>
 				<label>Description</label>
-				<md-textarea v-model="newDesc" placeholder="user.profileDesc"></md-textarea>
+				<md-textarea v-model="newDescModel" placeholder="profile.profileDesc"></md-textarea>
 			</md-input-container>
 
 			<md-layout class="buttons" md-align="end">
@@ -55,56 +55,30 @@ export default{
 	data () {
 		return {
 			modification: false,
-			nameProfile: '',
-			descProfile: '',
-			statusProfile: '',
-			avatarProfile: '',
-			checked: false,
-			statut: 'Privé'
+			newNameModel: '',
+			newDescModel: '',
+			isPrivate: false
 		}
 	},
-	props: {
-		currentProfile: Object,
-		nmbPosts: Number,
-		ListFollowers: Object,
-		ListFollowings: Object
-	},
-	computed: {
-		user () {
-			return {
-				nmb_posts: 30,
-				nmb_abonnements: 300,
-				nmb_abonnés: 6000,
-				profileName: 'nom_du_profil',
-				profileDesc: 'Lorem ipsum dolor sit amet. Blablibla blou blabli bloublou.'
-			}
-		}
-	},
+	props: ['profile', 'followers', 'followings'],
 	methods: {
 		save () {
-			console.log('save')
-			this.modification = !this.modification
-
-			if(this.user.profileDesc !== newDesc) {
-				modifDesc ()
+			if(this.profile.profileDesc !== this.newDesc) {
+				this.modifDesc (this.newDesc)
 			}
-
-			if(this.user.profileName !== newName) {
-				modifNom ()
+			if(this.profile.profileName !== this.newName) {
+				this.modifNom (this.newName)
 			}
-
-			if(this.user.profileStatut !== this.currentProfile.profileStatut) {
-				
+			if (this.profile.profileIsPrivate !== this.isPrivate) {
+				this.modifStatut(this.isPrivate)
 			}
-
-			// faire changement de la photo de profil			
 		},
-		modifNom () {
-			this.$http.post(apiRoot + 'profile/update/NAME' + this.ID, {
-					newValue: newName
+		modifNom (nom) {
+			this.$http.post(apiRoot + 'profile/update/NAME' + this.profile.profileID, {
+					newValue: nom
 				}).then( response => {
 					console.log('MODIFICATION NAME SUCCESS', response)
-					profileName = newName
+					this.profile.profileName = nom
 				}, (response) => {
 					console.log('MODIFICATION NAME ERROR', response)
 					switch (response.status) {
@@ -128,12 +102,12 @@ export default{
         			}
 				})
 		},
-		modifDesc () {
-			this.$http.post(apiRoot + 'profile/update/DESCRIPTION' + this.ID, {
-					newValue: newDesc
+		modifDesc (desc) {
+			this.$http.post(apiRoot + 'profile/update/DESCRIPTION' + this.profile.profileID, {
+					newValue: desc
 				}).then( response => {
 					console.log('MODIFICATION DESC SUCCESS', response)
-					profileDesc = newDesc
+					this.profile.profileDesc = desc
 				}, (response) => {
 					console.log('MODIFICATION DESC ERROR', response)
 					switch (response.status) {
@@ -157,12 +131,12 @@ export default{
         			}
 				})
 		},
-		modifStatut () {
-			this.$http.post(apiRoot + 'profile/update/SETPRIVATE' + this.ID, {
-					newValue: checked
+		modifStatut (isPrivate) {
+			this.$http.post(apiRoot + 'profile/update/SETPRIVATE' + this.profile.profileID, {
+					newValue: isPrivate
 				}).then( response => {
 					console.log('MODIFICATION NAME SUCCESS', response)
-					profileIsPrivate = checked
+					this.profile.profile = isPrivate
 				}, (response) => {
 					console.log('MODIFICATION NAME ERROR', response)
 					switch (response.status) {
@@ -185,20 +159,10 @@ export default{
 			            console.log('Unknown error')
         			}
 				})
-		},
-		modifier () {
-			this.modification = !this.modification;	
-		},
-		changeStatut () {
-			console.log(this.checked)
-			if (!this.checked){
-				this.statut='Public'
-			}else{this.statut='Privé'}
 		}
-
 	}
 }
-	
+
 </script>
 
 <style scoped>

@@ -1,16 +1,14 @@
 <template>
 	<md-layout md-gutter>
-		<!-- infos du profil actif -->
-		<infosEditable v-if="current" :currentProfile="currentProfile" :nmbPosts="nmbPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></infosEditable>
-		<!-- infos du profil qu'on visite -->
-		<informationsProfilAutre v-else-if="!current" :currentProfile="currentProfile" :nmbPosts="nmbPosts" :listFollowers="listFollowers" :listFollowings="listFollowings"></informationsProfilAutre>
-
-		<!-- posts du profil actif -->
-		<previewsPostsPerso v-if="current" :currentProfile="currentProfile"></previewsPostsPerso>
-		<!-- posts du profil qu'on visite -->
-		<previewsPosts v-else-if="!current" :currentProfile="currentProfile" :profile="profile"></previewsPosts>
-		
-	</md-layout>	
+		<md-layout v-if="current">
+			<infosEditable :profile="profile"</infosEditable>
+			<previewsPostsPerso :profile="profile" :followings="followings" :followers="followers"></previewsPostsPerso>
+		</md-layout>
+		<md-layout v-else>
+			<informationsProfilAutre :profile="profile"></informationsProfilAutre>
+			<previewsPosts :profile="profile"></previewsPosts>
+		</md-layout>
+	</md-layout>
 </template>
 
 <script type="text/javascript">
@@ -35,40 +33,48 @@ export default{
 	},
 	data () {
 		return {
-			current: false,
-			nmbPosts: 0,
-			ListFollowers: null,
-			listFollowings: null,
 			profile: null,
-			views: null
+			followers: [],
+			followings: []
 		}
 	},
 	props: {
-		ID: Number
+		ID: Number,
+		current: {
+			type: Boolean,
+			default: false
+		}
 	},
 	computed: {
 		// recuperation des informations sur le profil courant
 		...Vuex.mapGetters([
-	      	'currentProfile'
-	   	])
+    	'currentProfile'
+   	])
+	},
+	mounted () {
+		if (this.current) {
+			this.profile = this.currentProfile
+			this.getNmbPosts (this.profile.profileID)
+			this.getListFollowers (this.profile.profileID)
+			this.getListFollowings (this.profile.profileID)
+		} else {
+			this.getProfile (this.ID)
+		}
 	},
 	methods: {
-
-		// test si le profil visite est le meme que le profil courant
-		activeProfile () {
-			console.log(this.currentProfile)
-			if (store.currentProfile.profileID === this.ID) { this.current = true }
-	    },
-
 		// Recuperation du profil de la page
-		getProfile () {
-			console.log(this.ID)
-			this.$http.get(apiRoot + 'profile/get/' + this.ID).then( response => {
-						console.log('SUCESS getProfile : ', response)
-						//console.log(response)
-					    this.profile = response.data.data
-					    /* onsole.log(this.profile) */
-	
+		getProfile (id) {
+			console.log('Profile page id prop : ' + id)
+			this.$http.get(apiRoot + 'profile/get/' + id).then( response => {
+				console.log('SUCESS getProfile : ', response)
+		    this.profile = response.data.data
+
+				this.getNmbPosts (id)
+				this.getListFollowers (id)
+				this.getListFollowings (id)
+				// Requete ajout d'une vue
+				this.addView(id)
+
 				}, response => {
 					console.error('ERROR getProfile : ', response)
 					switch (response.status) {
@@ -76,7 +82,7 @@ export default{
 							console.log("OK Data")
 							break
 						case 400:
-							console.log('La variable GET ' + this.ID + ' n\est pas un ID')
+							console.log('La variable GET ' + id + ' n\est pas un ID')
 							break
 						case 404:
 							console.log('Le profil spécifié n\'existe pas')
@@ -88,12 +94,12 @@ export default{
 		},
 
 		// Recuperation du nombre de posts
-		getNmbPosts () {
-			this.$http.get(apiRoot + 'profile/nbrposts/' + this.ID).then((response) => {
+		getNmbPosts (id) {
+			this.$http.get(apiRoot + 'profile/nbrposts/' + id).then((response) => {
 					console.log('SUCESS getNmbPosts : ', response)
-					this.nmbPosts = response.data.data.nbrPosts
-				 	/* profileID : ID du profil, 
-    				nbrPosts : Nombre de posts  */
+					this.profile = {...this.profile,
+						nbPosts: response.data.data.nbrPosts
+					}
 				}, (response) => {
 					console.error('ERROR getNmbPosts : ', response)
 					switch (response.status) {
@@ -101,7 +107,7 @@ export default{
 							console.log("OK Data")
 							break
 						case 400:
-							console.log('La variable GET ' + this.ID + ' n\est pas un ID')
+							console.log('La variable GET ' + id + ' n\est pas un ID')
 							break
 						case 401:
 							console.log('Le profil courant n\'est pas autorisé a voir les posts de ce profil')
@@ -116,10 +122,10 @@ export default{
 		},
 
 		// recuperation de la iste des abonnes
-		getListFollowers () {
-			this.$http.get(apiRoot + 'profile/followers/' + this.ID).then((response) => {
+		getListFollowers (id) {
+			this.$http.get(apiRoot + 'profile/followers/' + id).then((response) => {
 						console.log('SUCESS getListFollowers : ', response)
-						this.ListFollowers = response.data.data
+						this.followers = response.data.data
 				}, (response) => {
 					console.log('ERROR getListFollowers : ', response)
 					switch (response.status) {
@@ -136,10 +142,10 @@ export default{
 		},
 
 		// recuperation de la liste des abonnements
-		getListFollowings () {
-			this.$http.get(apiRoot + 'profile/followings/' + this.ID).then((response) => {
+		getListFollowings (id) {
+			this.$http.get(apiRoot + 'profile/followings/' + id).then((response) => {
 						console.log('SUCESS getListFollowings : ', response)
-						this.ListFollowings = response.data.data
+						this.followings = response.data.data
 				}, (response) => {
 					console.log('ERROR getListFollowings : ', response)
 					switch (response.status) {
@@ -156,10 +162,10 @@ export default{
 		},
 
 		// Ajouter une vue au profil
-		addView () {
-			this.$http.get(apiRoot + 'profile/addView/' + this.ID).then((response) => {
+		addView (id) {
+			this.$http.get(apiRoot + 'profile/addView/' + id).then((response) => {
 					console.log('SUCCESS addView : ', response)
-					this.views = response.data.data
+					this.profile.profileViews = response.data.data
 				}, (response) => {
 					console.log('ERROR getListFollowings : ', response)
 					switch (response.status) {
@@ -176,21 +182,12 @@ export default{
 					}
 				})
 		}
-	},
-	mounted () {
-		this.getProfile ()
-		this.getNmbPosts ()
-		this.getListFollowers ()
-		this.getListFollowings ()
-		this.activeProfile ()
-		this.addView()
-		// Requete ajout d'une vue
 	}
 }
-	
+
 </script>
 
 <style type="text/css" scoped>
 
-	
+
 </style>
