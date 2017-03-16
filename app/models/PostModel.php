@@ -169,6 +169,20 @@ class PostModel extends DBInterface
         return $this->postDatas['post_filter'];
     }
 
+     /*
+     * Get the current state of the post
+     *
+     */
+    public function getState()
+    {
+        if($this->postID == 0)
+        {
+            return 0;
+        }
+
+        return $this->postDatas['post_state'];
+    }
+
     /**
      * Get the saving directory of the current post
      * @param  integer [$profileID      = 0] Profile Id to use if no current post is defines
@@ -486,6 +500,7 @@ class PostModel extends DBInterface
 
 		return $this->postDatas['post_approved'];
     }
+
 
 
     /*

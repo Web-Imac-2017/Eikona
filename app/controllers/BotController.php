@@ -2,9 +2,6 @@
 
 class BotController extends DBInterface
 {   
-    private $currUserID;
-    private $currProfileID;
-    
     private $action;
     private $toPrint;
     
@@ -14,9 +11,8 @@ class BotController extends DBInterface
     }
 
     public function index()
-    {
-        
-        $actions = ["addPost", "addComment", "addLike", "viewPost", "follow"];
+    {   
+        //$actions = ["addPost", "addComment", "addLike", "viewPost", "follow"];
 
         $rand = mt_rand(0, 100);
 

@@ -79,6 +79,8 @@ class CommentModel extends DBInterface
                         ":postID"    => $postID,
                         ":comment"   => $comment,
                         ":time"      => time()]);
+
+        return $this->cnx->lastInsertId();
     }
 
 	/*
