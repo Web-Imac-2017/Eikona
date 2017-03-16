@@ -46,12 +46,32 @@ Data:
   OU 
 
 * **Code:** 400 BAD REQUEST <br />
-  **Explication** Au moins une des variables POST n'a pas été transmise OU Les commentaires sont désactivés pour ce post
+  **Explication** Au moins une des variables POST n'a pas été transmise 
+
+  OU
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Les commentaires sont désactivés pour ce post
 
   OU
 
 * **Code:** 401 UNAUTHORIZED <br />
-  **Explication** Vous ne suivez pas la personne OU pas de profil courant sélectionné OU user pas connecté
+  **Explication** Vous ne suivez pas la personne
+  
+  OU
+
+* **Code:** 401 UNAUTHORIZED <br />
+  **Explication** Pas de profil courant sélectionné
+  
+  OU
+
+* **Code:** 401 UNAUTHORIZED <br />
+  **Explication** User pas connecté  
+  
+  OU
+
+* **Code:** 409 CONFLICT <br />
+  **Explication** Erreur sur la notification. Notification non envoyé - Post non commenté
 
 ## Supprimer un commentaire
 
@@ -88,7 +108,12 @@ Data:
   OU
 
 * **Code:** 401 UNAUTHORIZED <br />
-  **Explication** Pas de profil courant sélectionné OU User pas connecté OU vous ne pouvez pas supprimé un commentaire qui n'est pas le vôtre.
+  **Explication** Pas de profil courant sélectionné
+  
+  OU
+
+* **Code:** 401 UNAUTHORIZED <br />
+  **Explication** User pas connecté OU vous ne pouvez pas supprimer un commentaire qui n'est pas le vôtre.
 
 ## Liker un commentaire
 
@@ -105,7 +130,7 @@ Ajoute un like sur un commentaire
 
 ### Variables GET
 
-* **commentID** : ID du commentaire à like
+* **commentID** : ID du commentaire à liker
 
 ### Succès
 
@@ -114,7 +139,7 @@ Data:
 ```json
 {
     commentID : ID du commentaire,
-    profileID : profil qui vient de mettre un like
+    profileID : ID du profil qui vient de mettre un like
 }
 ```
 
@@ -126,17 +151,37 @@ Data:
   OU
 
 * **Code:** 401 UNAUTHORIZED <br />
-  **Explication** Pas de profil courant sélectionné OU User pas connecté OU vous ne suivez pas la personne
+  **Explication** Pas de profil courant sélectionné
 
   OU
 
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** Vous avez déjà aimé ce commentaire OU vous ne pouvez pas aimer votre propre commentaire
+* **Code:** 401 UNAUTHORIZED <br />
+  **Explication** User pas connecté 
+
+  OU
+
+* **Code:** 401 UNAUTHORIZED <br />
+  **Explication** Vous ne suivez pas la personne
+
+  OU
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Vous ne pouvez pas aimer votre propre commentaire
+
+  OU
+
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Vous avez déjà aimé ce commentaire
+  
+  OU
+  
+* **Code:** 409 CONFLICT <br />
+  **Explication** Erreur sur la notification. Notification non envoyé - Post non liké
 
 ## Dé-liker un commentaire
 
 Supprime un like sur un commentaire
-
+ 
 ### URL
 ```
 /comment/unlike/<commentID>
@@ -148,12 +193,12 @@ Supprime un like sur un commentaire
 
 ### Variables GET
 
-* **commentID** : ID du commentaire à unlike
+* **commentID** : ID du commentaire à unliker
 
 ### Succès
 
   * **Code:** 200
-Data:
+  * **Data:**
 ```json
 {
     commentID : ID du commentaire,
@@ -173,8 +218,8 @@ Data:
 
   OU
 
-  * **Code:** 400 BAD REQUEST <br />
-    **Explication** Vous ne pouvez pas dé-like un post que vous n'avez pas encore like
+* **Code:** 400 BAD REQUEST <br />
+  **Explication** Vous ne pouvez pas dé-like un post que vous n'avez pas encore like
 
 ## Récupérer tous les likes d'un commentaire
 
