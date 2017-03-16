@@ -42,7 +42,7 @@ export default {
       this.$router.push('/#inscriptionForm')
     },
     disconnect () {
-      this.$http.post(apiRoot + 'auth/signOut/', {}).then((response) => {
+      this.$http.post(apiRoot + 'auth/signOut/').then((response) => {
         this.clearUser()
         this.clearProfiles()
         this.$router.push('/')

@@ -14,7 +14,7 @@
 						</md-list>
 					</md-layout>
 					<md-layout md-align="end">
-						<PostSettings class="md-list-action" :posteurID="profilePost.profileID"></PostSettings>
+						<PostSettings class="md-list-action" :post="this.post"></PostSettings>
 					</md-layout>
 				</md-layout>
 			</md-card-header>
@@ -26,7 +26,7 @@
 			<md-layout class="infosPost">
   			<md-layout md-flex="80"><div class="description">{{post.desc}}</div></md-layout>
 				<md-layout md-align="end" >
-					<md-button id='post-Like' class="md-icon-button" @click.native="addLike('post-Like')"><md-icon>favorite</md-icon> </md-button>
+					<md-button  class="md-icon-button" @click.native="addLike(idLike)"><md-icon :id="idLike">favorite</md-icon> </md-button>
 					<span>{{like}}</span>
 				</md-layout>
 			</md-layout>
@@ -34,14 +34,14 @@
 			<md-layout id="post-tagContainer">
 				<md-chip v-for="tag in tags" class="tag" disabled>{{tag}}</md-chip>
 			</md-layout>
-
+			<p>{{nbComments}} commentaires : </p>
 			<md-card-content v-if="post.allowComments == 1">
-				<p>{{comments.length}} commentaires : </p>
+				
 				<md-button class="md-icon-button display-more-comments" @click.native="showComments">
 					<md-icon v-if="displayComs">expand_less</md-icon>
 					<md-icon v-else>expand_more</md-icon>
 				</md-button>
-				<sectionComments v-show="displayComs" :comments="comments" :errorMessage="errorMessage" :postID="post.postID"></sectionComments>
+				<sectionComments v-show="displayComs" :comments="comments" :post="post" :commentsLike="commentsLike" :post="this.post"></sectionComments>
 			</md-card-content>
 			<md-card-content v-else>
 				<p>Commentaires desactivés</p>
@@ -67,54 +67,117 @@
 			PostSettings
 		},
 		data () {
-			return {
-				displayComs: false
+
+			return {			
+				comments: [],
+				displayComs: false,
+				commentsLike: [],
+				like:0,
+				tags:[],
+				nbComments: 0
+
+
 			}
 		},
 		props: ['post', 'profilePost'],
+		watch : {
+			displayComs: 'getComments'
+		},
+		
 		computed: {
-			comments () {
-				// Recuperer les commentaires du post
-				return [{
-						id: 1,
-						message: 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard de l\'imprimerie depuis les années 1500, quand un peintre anonyme assembla ensemble des morceaux de texte pour réaliser un livre spécimen de polices de texte. Il n\'a pas fait que survivre cinq siècles, mais s\'est aussi adapté à la bureautique informatique, sans que son contenu n\'en soit modifié. Il a été popularisé dans les années 1960 grâce à la vente de feuilles Letraset contenant des passages du Lorem Ipsum, et, plus récemment, par son inclusion dans des applications de mise en page de texte, comme Aldus PageMaker.',
-						nbrLike:0
-					},{
-						id: 2,
-						message: 'commentaire de test',
-						nbrLike:0
-					},{
-						id: 3,
-						message: 'commentaire de test',
-						nbrLike:0
-					},{
-						id: 4,
-						message: 'commentaire de test',
-						nbrLike:0
-					}]
-			},
+			
+
 			like () {
 				// Récupérer le nombre de like du post
 
-				return 0
-
+				this.$http.get(apiRoot + 'post/likes/' + this.post.postID).then((response)=>{
+					this.like = response.data.data.nbOfLikes
+				},(response)=>{
+					switch (response.status) {
+						case 401 :
+							console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
+							break
+						case 400 :
+							console.log('Le post n\'a pas été aimé')
+							this.like = 0
+							break
+					}
+				})
 			},
 			tags () {
-				// Récpérer les tags attachés à ce post
-				return ['chevals', 'ornithorynque']
+				// Récupérer les tags attachés à ce post
+
+				this.$http.get(apiRoot + 'post/tags/' + this.post.postID).then((response)=>{
+					this.tags = response.data.data.tags
+					},(response)=>{			
+					
+					console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
+				})
+			},
+			nbComments(){
+				this.$http.get(apiRoot + 'post/comments/' + this.post.postID).then((response)=>{
+					this.nbComments = response.data.data.nbOfComments
+				},(response)=>{
+					switch (response.status) {
+						case 404 :
+							console.log('L\'id du commentaire ne renvoie à aucun commentaire')
+							break
+						case 401 :
+							console.log('Vous ne suivez pas la personne')
+							break
+					}
+				})
+			},
+			idLike() {
+				return 'postLike' + this.post.postID
 			}
+
+
 		},
 		methods: {
+			getComments () {
+				if (!this.displayComs){
+					this.comments = []
+					this.commentsLike = []
+					return
+				}
+				// Recuperer les commentaires du post
+				this.$http.get(apiRoot + 'post/comments/' + this.post.postID).then((response)=>{
+					this.comments = response.data.data.comments
+					this.comments.forEach(comment => {
+						this.$http.get(apiRoot + 'comment/likes/' + comment.comment_id).then((response)=>{
+
+							console.log('nombre de like commentaire', response)
+							this.commentsLike.push(response.data.data.nbOfLikes)
+
+						},(response)=>{
+							switch (response.status) {
+								case 404 :
+									console.log('L\'id du commentaire ne renvoie à aucun commentaire')
+									break
+								case 401 :
+									console.log('Vous ne suivez pas la personne')
+									break
+							}
+						})
+					})
+					
+					},(response)=>{								
+				})
+					
+			},
+		
 			showComments () {
 				this.displayComs = !this.displayComs
 				if (this.displayComs) {
 
 				}
+
 			},
 			addLike (id) {
 				this.$http.get(apiRoot + 'post/like/'+this.post.postID).then((response) => {
-					this.nbrLike++
-					document.getElementById(id).classList.add('md-primary')
+					this.like++
+					document.getElementById(id).classList.add('md-accent')
 				},(response)=>{
 					switch (response.status) {
 						case 401:
@@ -122,8 +185,8 @@
 							break
 						case 400:
 							this.$http.get(apiRoot + 'post/unlike/'+this.post.postID).then((response)=>{
-								this.nbrLike--
-								document.getElementById(id).classList.remove('md-primary')
+								this.like--
+								document.getElementById(id).classList.remove('md-accent')
 							},(response)=>{
 								console.log('On ne peut pas aimer son propre post')
 							})

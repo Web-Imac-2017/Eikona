@@ -11,7 +11,7 @@
     </md-input-container>
     <md-input-container id="profile-creation-desc">
       <label>Description</label>
-      <md-textarea v-model="profile.desc"></md-textarea>
+      <md-textarea v-model="profile.desc" required></md-textarea>
       <span class="md-error">Votre message comporte des caractères non autorisés.</span>
     </md-input-container>
     <md-switch v-model="profile.isPrivate" id="privateSwitch1" name="privateSwitch" class="md-primary">Visible des autres utilisateurs.</md-switch>
@@ -65,14 +65,14 @@ export default {
           ban = true
       })
       if(ban) return
-      var value = {
-        profileName: this.profile.name
-      }
-      if (this.profile.desc != '') value = {...value, profileDesc: this.profile.desc}
-      if (this.profile.isPrivate) value = {...value, profilePrivate: 0}
+      var priv = 0
+      if (this.profile.isPrivate) priv = 1;
 
-      console.log('Profile creation : ', value)
-      this.$http.post(apiRoot + 'profile/create/', value).then((response) => {
+      this.$http.post(apiRoot + 'profile/create/', {
+          profileName: this.profile.name,
+          profileDesc: this.profile.desc,
+          profilePrivate: this.profile.isPrivate
+        }).then((response) => {
         console.log('SUCCESS: profile creation', response)
         this.addProfileStore(response.data.data.profileID)
         this.addAvatar(response.data.data.profileID)

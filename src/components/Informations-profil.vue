@@ -3,26 +3,17 @@
 		<md-whiteframe class="infos" md-elevation="8">
 			<md-layout md-gutter class="cls_1">
 				<md-avatar class="md-large avatar">
-					<img src="../../assets/Eiko.png"/>
+					<img src="./assets/Eiko.png"/>
 				</md-avatar>
 
 				<md-layout md-flex="50" md-column>
-					<p class="profile-name">{{ user.profileName }}</p>
+					<p class="profile-name">{{ profile.profileName }}</p>
 
-					<md-layout v-if="!abonne" md-gutter>
-						<md-button  class="md-raised md-primary" @click.native="sabonner">S'abonner</md-button>
-						<md-button class="md-fab md-raised md-mini" disabled>
-							<md-icon>notifications_none</md-icon>
-						</md-button>
-					</md-layout>
-
-					<md-layout v-else md-gutter>
-						<md-button  class="md-raised" @click.native="desabonner">Abonné(e)</md-button>
-						<md-button v-if="!notif" class="md-fab md-raised md-mini md-clean" @click.native="notifier">
-							<md-icon>notifications_none</md-icon>
-						</md-button>
-						<md-button v-else class="md-fab md-raised md-mini md-primary" @click.native="notifier">
-							<md-icon>notifications</md-icon>
+					<md-layout md-gutter>
+						<md-button  class="md-raised md-primary" @click.native="follow">{{ followButText }}</md-button>
+						<md-button class="md-fab md-raised md-mini md-clean" @click.native="notifier">
+							<md-icon v-if="!notif">notifications_none</md-icon>
+							<md-icon v-else>notifications</md-icon>
 						</md-button>
 					</md-layout>
 				</md-layout>
@@ -30,8 +21,8 @@
 			</md-layout>
 
 			<md-layout md-column class="cls_2">
-				<p class="infoNumber"><span>{{ user.nmb_posts }}</span> posts <span>{{ user.nmb_abonnements }}</span> abonnnements <span>{{ user.nmb_abonnés }}</span> abonnés</p>
-				<p class="description"><span>Description</span><br>{{ user.profileDesc }}</p>
+				<p class="infoNumber"><span>{{ profile.nbPosts }}</span> posts <span>{{ followings.length }}</span> abonnnements <span>{{ followers.length }}</span> abonnés</p>
+				<p class="description"><span>Description</span><br>{{ profile.profileDesc }}</p>
 			</md-layout>
 		</md-whiteframe>
 	</md-layout>
@@ -39,52 +30,87 @@
 
 <script>
 import connection from './Connection.vue'
+import apiRoot from './../config.js'
+import store from './connectionStore.js'
 
 export default {
 	name: 'informationsProfilAutre',
-
 	data () {
 		return {
-			connected: true,
-			abonne: false,
+			follow: false,
 			notif: false
 		}
 	},
-	computed :{
-		user () {
-			return{
-				nmb_posts: 30,
-				nmb_abonnements: 300,
-				nmb_abonnés: 6000,
-				profileName: 'nom_du_profil',
-				profileDesc: 'Lorem ipsum dolor sit amet. Blablibla blou blabli bloublou.'
-			}
+	props:['profile', 'followings', 'followers'],
+	computed: {
+		followButText() {
+			if (this.follow) return 'Abonné'
+			return 'S\'abonner'
 		}
 	},
+	mounted () {
+		this.isFollowing()
+	},
 	methods: {
-		sabonner () {
-			if(!this.connected){
-				console.log("Abonnement");
-				/*this.$http.get('/Eikona/do/<profileID>[/<subscribe>]').then((response) => {
-      				// gérer le succes, toutes les infos renvoyer sont dans response.data
-
-    			}, (response) => {
-      				// gérer les erreurs
-      			}
-    		})*/
-			}
-			else{
-				console.log("changement");
-				this.abonne=!this.abonne;
-				this.notif=true;
-			}
+		isFollowing () {
+			this.$http.get(apiRoot + 'profile/isFollowing/' + this.profile.profileID).then((response) => {
+					console.log('Profile is following : ', response)
+					if (response.data.data.isSubscribed() === 1) this.follow = true
+					else this.follow = false
+				},(response)=>{
+					switch (response.status) {
+						case 400:
+							console.log('La variable GET ' + this.profile.profileID + ' n\est pas un ID')
+							break
+						case 401:
+							console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+							break
+						case 409:
+							console.log('Vous suivez déjà ce profil')
+							break
+						default:
+							console.log('Unknown error')
+					}
+				})
 		},
-		desabonner () {
-			this.abonne=!this.abonne;
-			this.notif=false;
+		follow () {
+			//requete abonnement
+			this.$http.get(apiRoot + 'profile/follow/' + this.profile.profileID).then((response) => {
+				this.follow = !this.follow
+			},(response)=>{
+				switch (response.status) {
+					case 400:
+						console.log('La variable GET ' + this.profile.profileID + ' n\est pas un ID')
+						break
+					case 401:
+						console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+						break
+					case 409:
+						console.log('Vous suivez déjà ce profil')
+						break
+					default:
+						console.log('Unknown error')
+				}
+			})
 		},
 		notifier () {
-			this.notif=!this.notif;
+			this.$http.get(apiRoot + 'profile/subscribe/' + this.profile.profileID).then((response) => {
+					this.notif=!this.notif
+			},(response)=>{
+				switch (response.status) {
+					case 400:
+						console.log('La variable GET ' + this.profile.profileID + ' n\est pas un ID')
+						break
+					case 401:
+						console.log('Il n\'y a pas de profil connecté OU Vous n\'avez pas les droits sur ce profil OU Vous ne pouvez pas vous suivre vous-même')
+						break
+					case 409:
+						console.log('Vous suivez déjà ce profil')
+						break
+					default:
+						console.log('Unknown error')
+				}
+			})
 		}
 	}
 }

@@ -22,13 +22,18 @@ const mutations = {
     state.userProfiles = []
     state.currentProfile = -1
   },
-  SET_CURRENT_PROFILE: (state, profileid) => state.userProfiles.findIndex(el => el.profile_id == profileid)
+  SET_CURRENT_PROFILE: (state, profileid) =>{ 
+    state.currentProfile = state.userProfiles.findIndex(el => el.profileID == profileid)
+  }
 }
 
 const getters = {
   getUser (state) { return state.user },
   profiles (state) { return state.userProfiles },
-  currentProfile (state) { if (state.currentProfile >= 0) return state.userProfiles[state.currentProfile] },
+  currentProfile (state) {
+    if (state.currentProfile >= 0) return state.userProfiles[state.currentProfile]
+    else return false
+  },
   currentProfileIndex (state) { return state.currentProfile },
   getProfile (state, index) { return state.userProfiles[index] }
 }

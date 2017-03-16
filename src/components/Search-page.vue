@@ -1,23 +1,35 @@
 <template lang="html">
-  <md-whiteframe>
+  <md-layout id="search-container" md-align="center">
     <md-spinner id="search-loader" v-if="searching" md-indeterminate></md-spinner>
-    <md-layout v-else>
-      <md-layout v-if="noresult">
-        <p>Nous n'avons trouvé aucun résultat correspondant à la recherche suivante :</p><br/>
-        <p>{{keywords}}</p>
+    <md-layout v-else md-flex="100" md-small="100" md-align="center">
+
+      <md-layout v-if="noresult" md-flex="50" class="no-result-class">
+        <p>Nous n'avons trouvé aucun résultat correspondant à la recherche suivante : <br/></p>
+        <p class="bold">{{ keywords }}</p>
       </md-layout>
-      <md-layout v-else>
-        <md-list v-if="resultProfiles.length > 0">
-          <md-subheader>Profils</md-subheader>
-          <profile v-for="profile in resultProfiles" :profile="getProfileFormat(profile)" :index="-1" :extended="false" @select="profileSelect"></profile>
-        </md-list>
-        <md-whiteframe v-if="resultPosts.length > 0">
-          <md-subheader>Publications</md-subheader>
-          <post v-for="post in resultPosts" :post="getPostFormat(post)" :profilePost="getProfileFormat(post)"></post>
-        </md-whiteframe>
+
+      <md-layout id="search-results" v-else md-gutter md-align="center">
+
+        <md-layout md-flex="25" md-flex-small="90" md-flex-offset="5" md-column class="container-list-profiles">
+          <md-whiteframe md-elevation="8">
+            <md-list v-if="resultProfiles.length > 0" id="search-profile-list">
+              <md-subheader>Profils</md-subheader>
+              <profile v-for="profile in resultProfiles" :profile="getProfileFormat(profile)" :index="-1" :extended="false" @select="profileSelect"></profile>
+            </md-list>
+          </md-whiteframe>
+        </md-layout>
+
+        <md-layout md-flex="25" md-flex-small="90" md-flex-offset="5" md-column>
+          <md-whiteframe v-if="resultPosts.length > 0" id="search-posts-list" md-elevation="8">
+            <md-subheader>Publications</md-subheader>
+            <post class="search-posts" v-for="post in resultPosts" :post="getPostFormat(post)" :profilePost="getProfileFormat(post)"></post>
+          </md-whiteframe>
+        </md-layout>
+
       </md-layout>
+
     </md-layout>
-  </md-whiteframe>
+  </md-layout>
 </template>
 
 <script>
@@ -132,8 +144,43 @@ export default {
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 #search-loader {
   margin: 0 auto;
+}
+#search-results {
+  margin-top: 20px;
+}
+#search-container {
+  width: 100%;
+  min-height: 90vh;
+  background-image: url("./../assets/bg.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+  background-origin: padding-box;
+  background-position: center;
+}
+#search-posts-list{
+  background-color: white;
+}
+.search-posts{
+  margin-top: 10px;
+}
+p{
+  font-family: 'Roboto';
+  font-weight: 100;
+  padding: 5px;
+}
+.bold{
+  font-weight: 500;
+}
+.no-result-class{
+  background-color: white;
+  margin-top: 20px;
+  padding-left: 20px;
+  height: 5vh;
+}
+.container-list-profiles{
+  margin-bottom: 20px;
 }
 </style>

@@ -40,7 +40,7 @@ const scrollBehavior = (to, from, savedPosition) => {
 
 const router = new VueRouter({
   mode: 'history',
-  base: '/Eikona',
+  base: '/eikona',
   scrollBehavior,
   routes: [{
     path: '',
@@ -65,8 +65,9 @@ const router = new VueRouter({
   },
   {
     name: 'profile_name',
-    path: '/:profileID',
-    component: require('./components/ProfilePage.vue')
+    path: '/p/:ID',
+    component: require('./components/ProfilePage.vue'),
+    props: true
   },
   {
     path: '*',

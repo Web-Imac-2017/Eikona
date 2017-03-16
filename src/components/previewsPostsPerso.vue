@@ -15,7 +15,7 @@
 			<md-dialog md-open-from="#fab" md-close-to="#fab" ref="dialog_modif" class="dialog1">
 				<md-layout>
 					<md-dialog-content>
-						<addPost></addPost>  <!-- A changer par component de modification -->
+						<modificationPost></modificationPost>
 					</md-dialog-content>
 				</md-layout>
 			</md-dialog>
@@ -37,6 +37,7 @@
 
 <script type="text/javascript">
 import addPost from './addPost.vue'
+import modificationPost from './ModificationPost.vue'
 
 export default{
 

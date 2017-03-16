@@ -254,7 +254,9 @@ class CommentController implements CommentControllerInterface
 	 */
 	public function likes($commentID)
 	{
-		if(!$this->setComment($commentID))
+        $commentModel = new CommentModel();
+
+		if(!$commentModel->setComment($commentID))
 			return;
 			
 		$rsp = new Response();
