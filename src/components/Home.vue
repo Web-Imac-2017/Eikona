@@ -1,7 +1,6 @@
 <template lang="html">
   <div id="home">
     <div class="angled_container angled_container--open-right">
-    <profileSwitch class="switchButton"></profileSwitch>
       <md-layout :md-gutter="8" md-align="center">
         <md-layout md-flex-xsmall="100" md-flex-small="50" md-flex-medium="33">
           <md-whiteframe md-elevation="5" id="connect"><connection></connection></md-whiteframe>
@@ -14,11 +13,11 @@
         <h2>Pas encore inscrit(e) ?</h2>
         <a href="#inscriptionForm"><md-icon>keyboard_arrow_down</md-icon></a>
       </div>
-      <md-layout md-flex-xsmall="100" md-flex-medium="50" md-flex-xlarge="25" md-align="center">
+      <!--<md-layout md-flex-xsmall="100" md-flex-medium="50" md-flex-xlarge="25" md-align="center">
         <md-whiteframe id="register">
           <inscription></inscription>
         </md-whiteframe>
-      </md-layout>
+      </md-layout>-->
     </div>
     <md-whiteframe md-elevation="5" id="formulaire"><inscription></inscription></md-whiteframe>
   </div>
@@ -28,7 +27,6 @@
 import connection from './Connection.vue'
 import description from './Home-description.vue'
 import inscription from './Inscription.vue'
-import profileSwitch from './ProfileSwitch.vue'
 
 
 export default {
@@ -36,8 +34,7 @@ export default {
   components: {
     connection,
     description,
-    inscription,
-    profileSwitch
+    inscription
   }
 }
 </script>
@@ -83,12 +80,12 @@ export default {
 	margin: 50px auto;
 }
 
-.switchButton {
+/*.switchButton {
 	position: fixed;
 	top: 25%;
 	right: 10%;
   	z-index: 1;
-}
+}*/
 
 
 /*********************** ANIMATION CSS ********************/

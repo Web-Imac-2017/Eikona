@@ -23,13 +23,11 @@
             <p v-show="extended">{{  }}</p>
             <p>{{  }}</p>
           </div>-->
-          <template v-for="notif in notifs">
-          <md-list-item>
-            
-          </md-list-item>
-          </template>
-					
-				</md-list>
+          
+            <md-list-item v-for="notif in notifs">
+              <span>{{ notif.profile_id }}</span>
+            </md-list-item>
+          </md-list>
 		  </md-menu-content>
 		</md-menu>
 
@@ -89,7 +87,8 @@ export default {
     },
     getNotification() {
       this.$http.get(apiRoot+'profile/notifications/').then((response) => {
-      console.log('SUCCESS: notification recuperee', response)
+        console.log('SUCCESS: notification recuperee', response)
+        this.notifs = response.data.data.notif
      }, (response) => {
       console.error('ERR: get notification request', response)
       switch (response.status) {
