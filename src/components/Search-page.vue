@@ -1,23 +1,23 @@
 <template lang="html">
-  <md-whiteframe>
+  <md-layout id="search-container" md-align="center">
     <md-spinner id="search-loader" v-if="searching" md-indeterminate></md-spinner>
-    <md-layout v-else>
-      <md-layout v-if="noresult">
+    <md-layout v-else md-flex="90" md-small="100" md-align="center">
+      <md-layout v-if="noresult" md-flex="50">
         <p>Nous n'avons trouvé aucun résultat correspondant à la recherche suivante :</p><br/>
         <p>{{keywords}}</p>
       </md-layout>
-      <md-layout v-else>
-        <md-list v-if="resultProfiles.length > 0">
+      <md-layout id="search-results" v-else>
+        <md-list v-if="resultProfiles.length > 0" id="search-profile-list">
           <md-subheader>Profils</md-subheader>
           <profile v-for="profile in resultProfiles" :profile="getProfileFormat(profile)" :index="-1" :extended="false" @select="profileSelect"></profile>
         </md-list>
-        <md-whiteframe v-if="resultPosts.length > 0">
+        <md-whiteframe v-if="resultPosts.length > 0" id="search-posts-list">
           <md-subheader>Publications</md-subheader>
-          <post v-for="post in resultPosts" :post="getPostFormat(post)" :profilePost="getProfileFormat(post)"></post>
+          <post class="search-posts" v-for="post in resultPosts" :post="getPostFormat(post)" :profilePost="getProfileFormat(post)"></post>
         </md-whiteframe>
       </md-layout>
     </md-layout>
-  </md-whiteframe>
+  </md-layout>
 </template>
 
 <script>
@@ -135,5 +135,27 @@ export default {
 <style lang="css">
 #search-loader {
   margin: 0 auto;
+}
+#search-results {
+  background-color: white;
+  margin-top: 20px;
+  box-sizing: border-box;
+  padding: 5vh 5vw;
+  text-align: center;
+}
+#search-container {
+  width: 100vw;
+  min-height: 90vh;
+  background-image: url("./../assets/bg.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+  background-origin: padding-box;
+  background-position: center;
+}
+#search-profile-list{
+  margin-right: 20px;
+}
+.search-posts{
+  margin: 20px 0;
 }
 </style>
