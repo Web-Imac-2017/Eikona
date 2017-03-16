@@ -1,6 +1,6 @@
 RewriteEngine on
-RewriteBase /Eikona/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-RewriteRule ^do/(.*)$ app/do.php [L]
+RewriteRule ^do/(.*)$ /eikona/app/do.php
+ErrorDocument 404 /eikona/index.html

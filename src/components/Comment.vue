@@ -15,29 +15,13 @@
 export default {
 	name: "comment",
 	
-	props: {
-		id: {
-			type: Number
-
-		},
-		content: {
-			type: String,
-			default : '',
-			required: true
-		},
-		nbrLike: {
-			type: Number,
-			default: 0,
-			required: true
-		}
-	},
+	props: ['id','content', 'nbrLike'],
 	methods: {
 		addLike(){
 			this.$emit('incrementLike', this.id)
-		},
-		addReponse(){
-
 		}
+			
+		
 	}
 	
 }
