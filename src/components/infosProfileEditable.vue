@@ -61,8 +61,13 @@ export default{
 			avatarProfile: '',
 			checked: false,
 			statut: 'Privé'
-			//currentProfile: Object
 		}
+	},
+	props: {
+		currentProfile: Object,
+		nmbPosts: Number,
+		ListFollowers: Object,
+		ListFollowings: Object
 	},
 	computed: {
 		user () {
@@ -81,37 +86,21 @@ export default{
 			this.modification = !this.modification
 
 			if(this.user.profileDesc !== newDesc) {
-				this.$http.post(apiRoot + '/profile/update/DESCRIPTION' + this.ID, {
-					newValue: newDesc
-				}).then( response => {
-					console.log('MODIFICATION DESC SUCCESS', response)
-					profileDesc = newDesc
-				}, (response) => {
-					console.log('MODIFICATION DESC ERROR', response)
-					switch (response.status) {
-			          case 200:
-			            console.log('Desc modifiee')
-			            break
-			          case 400:
-			            this.error_message = ' La variable GET profileID n\'est pas un ID OU La variable POST newValue est absente'
-			            break
-			          case 401:
-			            this.error_message = 'Vous n\'êtes pas autorisé à mettre à jour ce profil'
-			            break
-			          case 404:
-			            this.error_message = ' Le profil spécifié n\'existe pas'
-			            break
-			          case 405:
-			            this.error_message = ' Le field spécifié n\'est pas supporté'
-			            break
-			          default:
-			            console.log('Unknown error')
-        			}
-				})
+				modifDesc ()
 			}
 
 			if(this.user.profileName !== newName) {
-				this.$http.post(apiRoot + '/profile/update/NAME' + this.ID, {
+				modifNom ()
+			}
+
+			if(this.user.profileStatut !== this.currentProfile.profileStatut) {
+				
+			}
+
+			// faire changement de la photo de profil			
+		},
+		modifNom () {
+			this.$http.post(apiRoot + 'profile/update/NAME' + this.ID, {
 					newValue: newName
 				}).then( response => {
 					console.log('MODIFICATION NAME SUCCESS', response)
@@ -138,19 +127,18 @@ export default{
 			            console.log('Unknown error')
         			}
 				})
-			}
-
-			if(this.user.profileStatut !== this.currentProfile.profileStatut) {
-				this.$http.post(apiRoot + '/profile/update/SETPRIVATE' + this.ID, {
-					newValue: checked
+		},
+		modifDesc () {
+			this.$http.post(apiRoot + 'profile/update/DESCRIPTION' + this.ID, {
+					newValue: newDesc
 				}).then( response => {
-					console.log('MODIFICATION NAME SUCCESS', response)
-					profileIsPrivate = checked
+					console.log('MODIFICATION DESC SUCCESS', response)
+					profileDesc = newDesc
 				}, (response) => {
-					console.log('MODIFICATION NAME ERROR', response)
+					console.log('MODIFICATION DESC ERROR', response)
 					switch (response.status) {
 			          case 200:
-			            console.log('Nom modifiee')
+			            console.log('Desc modifiee')
 			            break
 			          case 400:
 			            this.error_message = ' La variable GET profileID n\'est pas un ID OU La variable POST newValue est absente'
@@ -168,9 +156,35 @@ export default{
 			            console.log('Unknown error')
         			}
 				})
-			}
-
-			// faire changement de la photo de profil			
+		},
+		modifStatut () {
+			this.$http.post(apiRoot + 'profile/update/SETPRIVATE' + this.ID, {
+					newValue: checked
+				}).then( response => {
+					console.log('MODIFICATION NAME SUCCESS', response)
+					profileIsPrivate = checked
+				}, (response) => {
+					console.log('MODIFICATION NAME ERROR', response)
+					switch (response.status) {
+			          case 200:
+			            console.log('Statut modifiee')
+			            break
+			          case 400:
+			            this.error_message = ' La variable GET profileID n\'est pas un ID OU La variable POST newValue est absente'
+			            break
+			          case 401:
+			            this.error_message = 'Vous n\'êtes pas autorisé à mettre à jour ce profil'
+			            break
+			          case 404:
+			            this.error_message = ' Le profil spécifié n\'existe pas'
+			            break
+			          case 405:
+			            this.error_message = ' Le field spécifié n\'est pas supporté'
+			            break
+			          default:
+			            console.log('Unknown error')
+        			}
+				})
 		},
 		modifier () {
 			this.modification = !this.modification;	

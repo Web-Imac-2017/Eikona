@@ -37,7 +37,8 @@ export default{
 	store: store,
 	components: {
 		thread,
-    profileSwitch
+    	profileSwitch,
+    	pageProfile
 	},
 	data () {
 		return {

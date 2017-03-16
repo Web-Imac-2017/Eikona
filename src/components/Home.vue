@@ -33,7 +33,6 @@ export default {
     connection,
     description,
     inscription
->>>>>>> front
   }
 }
 </script>
