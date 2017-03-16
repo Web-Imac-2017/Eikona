@@ -1,6 +1,17 @@
 <?php
 
-class ParamController
+interface ParamControllerInterface
+{
+    public function __get($param);
+    
+    public function init();
+    
+    public function getAll();
+    
+    public function update($paramName);
+}
+
+class ParamController implements ParamControllerInterface
 {
     private $model;
     private $params = null;

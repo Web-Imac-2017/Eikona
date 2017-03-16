@@ -7,6 +7,21 @@
  * TODO : Handle generating new session ID and AJAX
  */
 
+interface SessionInterface
+{
+    public static function open();
+
+    public static function initSession();
+
+    public static function renewKey();
+
+    public static function read($vName);
+
+    public static function write($vName, $value);
+
+    public static function remove($vName);
+}
+
 class Session
 {
     public static $key;
@@ -23,7 +38,7 @@ class Session
 
 
     /**
-     * Init the session
+     * Start the session and ensure it is valid
      */
     public static function open()
     {
@@ -63,6 +78,9 @@ class Session
         self::$key = session_id();
     }
 
+    /**
+     * Fill the session with user informations
+     */
     public static function initSession()
     {
         //The session is not valid. Empty everything stored
@@ -122,7 +140,6 @@ class Session
             if($var == 'USER_INFOS')
             {
                 $newVar = $var;
-                $uncryptedVar = $var;
             }
             else
             {
@@ -187,8 +204,10 @@ class Session
 
     /**
      * Encrypt the given value with the current key
-     *
-     * @param String $value What to encrypt
+     * @param  String  $string           What to encrypt
+     * @param  boolean [$silent          = false] display errors
+     * @param  string  [$key             = false]    Key to use when encrypting
+     * @return mixed   The encrypted value on success, false otherwise
      */
     public static function encrypt($string, $silent = false, $key = false)
     {
@@ -224,8 +243,10 @@ class Session
 
     /**
      * Decrypt the given value with the current key
-     *
-     * @param String $vName What to decrypt
+     * @param  string  $string           The string to decrypt
+     * @param  boolean [$silent          = false] Display errors or not
+     * @param  boolean [$key             = false]    Key to use when decrypting
+     * @return boolean The decrypted key on success, false otherwose
      */
     public static function decrypt($string, $silent = false, $key = false)
     {
@@ -273,8 +294,8 @@ class Session
 
     /**
      * Read a value from the session
-     *
-     * @param String $vName Name of the value to read
+     * @param  String $vName Name of the value to read
+     * @return string The stored value decrypted
      */
     public static function read($vName)
     {
@@ -294,9 +315,8 @@ class Session
 
     /**
      * Write to the session
-     *
      * @param String $vName Name of the value to write to
-     * @param mixed $value Value of the key
+     * @param mixed  $value Value of the key
      */
     public static function write($vName, $value)
     {
@@ -312,7 +332,11 @@ class Session
 
 
 
-
+    /**
+     * Remove the value from the session
+     * @param  [[Type]] $vName [[Description]]
+     * @return boolean  [[Description]]
+     */
     public static function remove($vName)
     {
         if($vName == 'USER_INFOS' || $vName == 'OBSOLETE' || $vName == 'EXPIRES')
@@ -326,10 +350,3 @@ class Session
         unset($_SESSION[$encName]);
     }
 }
-
-/*header('Content-Type: application/json');
-Session::open();
-Session::remove("TEST");
-echo json_encode(["SESSION" => $_SESSION,
-                  "TEST" => Session::read("TEST")]);*/
-

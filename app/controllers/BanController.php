@@ -8,8 +8,8 @@ interface BanInterface
     public function remove($type);
 
     public function is($type);
-//
-//    public function get($type);
+
+    public function get($type);
 }
 
 
@@ -28,6 +28,10 @@ class BanController implements BanInterface
         $this->emailsModel = new BannedEmailsModel();
     }
 
+    /**
+     * Ban a new element
+     * @param  string   $type What to ban, email ou word
+     */
     public function add($type)
     {
         $rsp = new Response();
@@ -49,7 +53,10 @@ class BanController implements BanInterface
         $rsp->setFailure(400, "Your request couldn't be executed. Check for wrong arguments or missing values.")
             ->send();
     }
-
+    
+    /**
+     * Ban a word
+     */
     private function addWord()
     {
         $word = strtolower($_POST['word']);
@@ -68,6 +75,9 @@ class BanController implements BanInterface
             ->send();
     }
 
+    /**
+     * Ban an email
+     */
     private function addEmail()
     {
         $email = strtolower($_POST['email']);
@@ -94,9 +104,12 @@ class BanController implements BanInterface
             ->send();
     }
 
-
-
-
+    
+    
+    /**
+     * Remove an element from the ban database
+     * @param  string   $type What to remove, word or email
+     */
     public function remove($type)
     {
         $rsp = new Response();
@@ -118,7 +131,10 @@ class BanController implements BanInterface
         $rsp->setFailure(400, "Your request couldn't be executed. Check for wrong arguments or missing values.")
             ->send();
     }
-
+    
+    /**
+     * Remove a word
+     */
     private function removeWord()
     {
         $word = strtolower($_POST['word']);
@@ -130,7 +146,10 @@ class BanController implements BanInterface
         $rsp->setSuccess(200)
             ->send();
     }
-
+    
+    /**
+     * Remove an emil
+     */
     private function removeEmail()
     {
         $email = strtolower($_POST['email']);
@@ -145,7 +164,11 @@ class BanController implements BanInterface
 
 
 
-
+    /**
+     * Tell if the element is banned
+     * @param  string   $type              What to verify
+     * @param  string   [$givenElt         = NULL] The element to verify. Can also be passed as POST
+     */
     public function is($type, $givenElt = NULL)
     {
         $rsp = new Response();
@@ -162,16 +185,19 @@ class BanController implements BanInterface
             return $this->isEmailBan($email);
         }
            
-        $rsp->setFailure(400, "Your request couldn't be executed. Check for wrong arguments or missing values.")
+        $rsp->setFailure(400, "Your request couldn't be executed. Check for wrong argument or missing values.")
             ->send();
     }
 
+    /**
+     * Tell if the given word is ban or not
+     * @param string $word The word to verify
+     */
     private function isWordBan($word)
     {
         $word = strtolower($word);
-
         
-        if($this->wordsModel->exists($email) == 1)
+        if($this->wordsModel->exists($word) == 1)
         {
             $rsp = new Response();
             $rsp->setSuccess(401, "This word is not authorized")
@@ -187,6 +213,10 @@ class BanController implements BanInterface
             ->send();
     }
 
+    /**
+     * Tell if the given email is ban or not
+     * @param string $email The email to verify
+     */
     private function isEmailBan($email)
     {
         $email = strtolower($email);
@@ -211,7 +241,10 @@ class BanController implements BanInterface
 
 
 
-
+    /**
+     * Return all the element for the chosen type
+     * @param  string $type what type to return, email or word
+     */
     public function get($type)
     {
         $rsp = new Response();
@@ -248,8 +281,4 @@ class BanController implements BanInterface
             ->bindValue("nbrEmails", count($list))
             ->send();
     }
-
-
 }
-
-

@@ -37,10 +37,11 @@ export default {
     list () {
       if(this.isEvents) return this.eventDatas
       var newList = []
+      console.log('EventsDatas : ', this.eventDatas)
       this.eventDatas.forEach(item => newList.push({
         type: 'post',
-        profileData: item.data.profileData,
-        postData: item.data
+        profileData: item.profileData,
+        postData: item
       }))
       return newList
     },

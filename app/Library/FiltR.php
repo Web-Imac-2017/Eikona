@@ -3,19 +3,24 @@
 /**
  * FiltR.php
  *
- * Image treatement database based on Imagick
+ * Image treatement based on Imagick
  *
  * @author     Valentin Dufois
- * @version    0.1 - 06 March 2017
+ * @version    0.2 - 13 March 2017
  */
 
 
 class FiltR
 {
-    public static $formatsAllowed = ["jpg", "jpeg", "png", "bmp", "bmp2", "bmp3", "tiff"];
-    public static $availableFilters = ["amaro", "brannan", "clarendon", "earlybird", "hefe", "hudson", "inkwell", "kelvin", "lark", "lofi", "mayfair", "moon", "nashville", "reyes", "rise", "sierra", "sutro", "toaster",  "valencia", "walden", "willow", "xproii"];
-
-
+    public static $formatsAllowed = ["jpg", "jpeg", "png", "bmp", "bmp2", "bmp3", "tiff", "gif"];
+    public static $availableFilters = ["amaro", "brannan",
+                                       "clarendon", "earlybird", "hefe",
+                                       "hudson", "inkwell", "kelvin",
+                                       "lark", "lofi", "mayfair",
+                                       "moon", "nashville", "reyes",
+                                       "rise", "sierra", "sutro",
+                                       "toaster",  "valencia", "walden",
+                                       "willow", "xproii"];
 
     private static $BlackVignetteOverlay = null;
     private static $BlackVignetteOverlayPath = "/Eikona/app/Library/FiltR/BlackVignetteOverlay.png";
@@ -32,8 +37,8 @@ class FiltR
 
     /**
      * Try to get the given image, and silence errors for better handling
-     * @param  [[Type]] $src [[Description]]
-     * @return boolean  This function return the image on success, false on failure
+     * @param  string  $src Path to the image to load
+     * @return mixed This function return the image on success, false on failure
      */
     private static function getImage($src)
     {
@@ -46,38 +51,7 @@ class FiltR
             return false;
         }
 
-        //Make sure rotation is OK
-        self::autoRotateImage($img);
-
         return $img;
-    }
-
-
-
-    /**
-     * Make sure the image is displayed with the right orientation
-     * @param Imagick $image Image to sanitize
-     */
-    private static function autoRotateImage($image)
-    {
-        $orientation = $image->getImageOrientation();
-
-        switch($orientation) {
-            case imagick::ORIENTATION_BOTTOMRIGHT:
-                $image->rotateimage("#000", 180); // rotate 180 degrees
-                break;
-
-            case imagick::ORIENTATION_RIGHTTOP:
-                $image->rotateimage("#000", 90); // rotate 90 degrees CW
-                break;
-
-            case imagick::ORIENTATION_LEFTBOTTOM:
-                $image->rotateimage("#000", -90); // rotate 90 degrees CCW
-                break;
-        }
-
-        // Now that it's auto-rotated, make sure the EXIF data is correct in case the EXIF gets saved with the image!
-        $image->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
     }
 
 
@@ -102,6 +76,9 @@ class FiltR
         //Resize Image
         self::resize($img, 1536, 1536);
 
+        //Make sure rotation is OK
+        self::autoRotateImage($img);
+
         //Remove alpha channel
         $img->setImageBackgroundColor('white');
         $img->setImageAlphaChannel(Imagick::ALPHACHANNEL_REMOVE);
@@ -116,6 +93,43 @@ class FiltR
     /*************************************************/
     /******************* Utilities *******************/
     /*************************************************/
+
+
+
+
+    /**
+     * Make sure the image is displayed with the right orientation
+     * @param Imagick $image Image to sanitize
+     */
+    private static function autoRotateImage($image)
+    {
+        $orientation = $image->getImageOrientation();
+
+        switch($orientation)
+        {
+            case imagick::ORIENTATION_BOTTOMRIGHT:
+
+                $image->rotateimage("#000", 180); // rotate 180 degrees
+
+            break;
+            case imagick::ORIENTATION_RIGHTTOP:
+
+                $image->rotateimage("#000", 90); // rotate 90 degrees CW
+
+            break;
+            case imagick::ORIENTATION_LEFTBOTTOM:
+
+                $image->rotateimage("#000", -90); // rotate 90 degrees CCW
+
+            break;
+        }
+
+        // Now that it's auto-rotated, make sure the EXIF data is correct in case the EXIF gets saved with the image!
+        $image->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
+    }
+
+
+
 
 
     /**
@@ -143,6 +157,10 @@ class FiltR
      */
     private static function getClut($filter, $destWidth, $destHeight)
     {
+        //A smaller clut is used for smaller pictures.
+        //A bigger clut is used for bigger pictures.
+        //Breakpoint at 1024px
+
         if($destWidth >= 1024 || $destHeight >= 1024)
         {
             //echo "CLUT16";
@@ -172,12 +190,10 @@ class FiltR
         if(!$img)
             return false;
 
-
-
+        //Size of each proof
         $sampleSize = 150;
 
-
-
+        //Decrease quality for faster treatment
         $img->setImageCompressionQuality(40);
 
         //Resize image to output size
@@ -285,20 +301,14 @@ class FiltR
         $srcIMG = $args[0];
         $destIMG = $args[1];
 
-
-
         $img = self::getImage($srcIMG);
 
         if(!$img)
             return false;
 
-
-
         ////////////// Speed up testing
         //self::resize($img, 1024, 1024);
         //////////////
-
-
 
         //Apply the filter
         self::$method($img);
@@ -309,7 +319,6 @@ class FiltR
         //Write new image
         return $img->writeImage($destIMG);
     }
-
 
 
 
@@ -816,30 +825,3 @@ class FiltR
         return $img;
     }
 }
-
-//FiltR::amaro("FiltR/src3.jpg", "FiltR/testRun/amaro.jpg");
-//FiltR::brannan("FiltR/src3.jpg", "FiltR/testRun/brannan.jpg");
-//FiltR::clarendon("FiltR/src3.jpg", "FiltR/testRun/clarendon.jpg");
-//FiltR::earlybird("FiltR/src3.jpg", "FiltR/testRun/earlybird.jpg");
-//FiltR::hefe("FiltR/src3.jpg", "FiltR/testRun/hefe.jpg");
-//FiltR::hudson("FiltR/src3.jpg", "FiltR/testRun/hudson.jpg");
-//FiltR::inkwell("FiltR/src3.jpg", "FiltR/testRun/inkwell.jpg");
-//FiltR::kelvin("FiltR/src3.jpg", "FiltR/testRun/kelvin.jpg");
-//FiltR::lark("FiltR/src3.jpg", "FiltR/testRun/lark.jpg");
-//FiltR::lofi("FiltR/Ressources/src3.jpg", "FiltR/testRun/lofi.jpg");
-//FiltR::moon("FiltR/src3.jpg", "FiltR/testRun/moon.jpg");
-//FiltR::mayfair("FiltR/src3.jpg", "FiltR/testRun/mayfair.jpg");
-//FiltR::nashville("FiltR/src3.jpg", "FiltR/testRun/nashville.jpg");
-//FiltR::reyes("FiltR/src3.jpg", "FiltR/testRun/reyes.jpg");
-//FiltR::rise("FiltR/src3.jpg", "FiltR/testRun/rise.jpg");
-//FiltR::sierra("FiltR/src3.jpg", "FiltR/testRun/sierra.jpg");
-//FiltR::sutro("FiltR/src3.jpg", "FiltR/testRun/sutro.jpg");
-//FiltR::toaster("FiltR/src3.jpg", "FiltR/testRun/toaster.jpg");
-//FiltR::valencia("FiltR/src3.jpg", "FiltR/testRun/valencia.jpg");
-//FiltR::walden("FiltR/src3.jpg", "FiltR/testRun/walden.jpg");
-//FiltR::willow("FiltR/src3.jpg", "FiltR/testRun/willow.jpg");
-//FiltR::XProII("FiltR/src3.jpg", "FiltR/testRun/xpro2.jpg");
-
-//FiltR::proof("FiltR/Ressources/src3.jpg");
-
-?>
