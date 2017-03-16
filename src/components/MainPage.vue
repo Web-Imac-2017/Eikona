@@ -87,8 +87,9 @@ export default{
 
 .switchButton {
 	position: fixed;
-	top: 15%;
+	top: 25%;
 	right: 10%;
-  z-index: 1;
+  	z-index: 1;
 }
+
 </style>

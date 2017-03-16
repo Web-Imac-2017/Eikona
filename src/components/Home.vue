@@ -13,19 +13,21 @@
         <h2>Pas encore inscrit(e) ?</h2>
         <a href="#inscriptionForm"><md-icon>keyboard_arrow_down</md-icon></a>
       </div>
-      <md-layout md-flex-xsmall="100" md-flex-medium="50" md-flex-xlarge="25" md-align="center">
+      <!--<md-layout md-flex-xsmall="100" md-flex-medium="50" md-flex-xlarge="25" md-align="center">
         <md-whiteframe id="register">
           <inscription></inscription>
         </md-whiteframe>
-      </md-layout>
+      </md-layout>-->
     </div>
+    <md-whiteframe md-elevation="5" id="formulaire"><inscription></inscription></md-whiteframe>
   </div>
 </template>
 
 <script>
 import connection from './Connection.vue'
 import description from './Home-description.vue'
-import inscription from './InscriptionForm.vue'
+import inscription from './Inscription.vue'
+
 
 export default {
   name: 'home',
@@ -71,6 +73,19 @@ export default {
   position: relative;
   top: 25%;
 }
+
+#formulaire {
+	width: 500px;
+	padding: 40px 40px;
+	margin: 50px auto;
+}
+
+/*.switchButton {
+	position: fixed;
+	top: 25%;
+	right: 10%;
+  	z-index: 1;
+}*/
 
 
 /*********************** ANIMATION CSS ********************/

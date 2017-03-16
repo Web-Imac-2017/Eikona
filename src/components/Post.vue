@@ -34,9 +34,9 @@
 			<md-layout id="post-tagContainer">
 				<md-chip v-for="tag in tags" class="tag" disabled>{{tag}}</md-chip>
 			</md-layout>
-
+			<p>{{nbComments}} commentaires : </p>
 			<md-card-content v-if="post.allowComments == 1">
-				<p>{{this.nbComments}} commentaires : </p>
+				
 				<md-button class="md-icon-button display-more-comments" @click.native="showComments">
 					<md-icon v-if="displayComs">expand_less</md-icon>
 					<md-icon v-else>expand_more</md-icon>
@@ -74,7 +74,7 @@
 				commentsLike: [],
 				like:0,
 				tags:[],
-				nbComments: 0,
+				nbComments: 0
 
 
 			}
@@ -146,7 +146,10 @@
 					this.comments = response.data.data.comments
 					this.comments.forEach(comment => {
 						this.$http.get(apiRoot + 'comment/likes/' + comment.comment_id).then((response)=>{
+
+							console.log('nombre de like commentaire', response)
 							this.commentsLike.push(response.data.data.nbOfLikes)
+
 						},(response)=>{
 							switch (response.status) {
 								case 404 :
