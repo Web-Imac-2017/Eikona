@@ -83,9 +83,7 @@
 		watch : {
 			displayComs: 'getComments'
 		},
-		mounted () {
-			console.log(this.post)
-		},
+		
 		computed: {
 			
 
@@ -93,7 +91,6 @@
 				// Récupérer le nombre de like du post
 
 				this.$http.get(apiRoot + 'post/likes/' + this.post.postID).then((response)=>{
-					console.log(response.data.data)
 					this.like = response.data.data.nbOfLikes
 				},(response)=>{
 					switch (response.status) {
@@ -146,7 +143,6 @@
 				}
 				// Recuperer les commentaires du post
 				this.$http.get(apiRoot + 'post/comments/' + this.post.postID).then((response)=>{
-					console.log(response.data)
 					this.comments = response.data.data.comments
 					this.comments.forEach(comment => {
 						this.$http.get(apiRoot + 'comment/likes/' + comment.comment_id).then((response)=>{
@@ -163,9 +159,7 @@
 						})
 					})
 					
-					},(response)=>{			
-					
-					console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
+					},(response)=>{								
 				})
 					
 			},

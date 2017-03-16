@@ -69,10 +69,7 @@ export default{
 				console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
 			})
 		},
-		/*allowComment(){
-			if(this.comment) return 1
-			return 0
-		},*/
+		
 		imageLink(){
 			
 			if (this.post.editedPicture != null)	return this.post.editedPicture
@@ -136,8 +133,8 @@ export default{
 			this.$http.post(apiRoot + 'post/update/description/' + this.post.postID,{
 				desc : this.post.desc
 			}).then((response)=>{				
-				this.$http.post(apiRoot + 'post/update/geo/' + this.post.postID,{
-					 geo : 'sfdsqdqsdqs'
+				this.$http.post(apiRoot + 'post/update/allowComments/' + this.post.postID,{
+					 allowComments : this.allowComment
 				}).then((response)=>{
 					this.$emit('close', 'dialog4')
 				},(response)=>{

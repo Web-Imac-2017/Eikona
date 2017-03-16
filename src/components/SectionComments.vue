@@ -75,13 +75,12 @@ export default {
 					}
 
 				}) 
-				console.log(this.commentsLike)
+			
 
 			},
 
 			addComment(){
-				console.log('pouet')
-				this.$http.post(apiRoot + 'comment/create/'+ this.post.postID, {
+					this.$http.post(apiRoot + 'comment/create/'+ this.post.postID, {
 					commentText: this.newComment
 
 				}).then((response)=>{
