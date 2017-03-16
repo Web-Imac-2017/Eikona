@@ -216,5 +216,83 @@ Data:
 
   * **Code:** 401 NOT AUTHORIZED <br />
     **Explication** L'user actuel n'est pas un modérateur. 
+
+  OU
+
+  * **Code:** 201 ALREADY REPORTED/FINISHED<br />
+    **Explication** Le signalement est déjà fini/signalé. 
 	
  
+ ## Recherche tous les signalement qu'un modérateur gère. Uniquement posts qui ont une date de modification supérieur à la date de signalement
+
+Pour récupérer seulement les posts cachés qui ont été modifiés depuis qu'ils ont étaient cachés
+
+
+### URL
+```
+/post/waiting/
+```
+
+### Méthode
+
+**GET**
+
+### Variable GET
+
+    **report_result** : Message à envoyer par le modérateur 
+
+### Succès
+
+  * **Code:** 200 OK
+    **Explication** Listes des signalements qui correspondent. Affiche pour chaque report ses informations.
+	
+Data: 
+```json
+{
+  reportID : ID du report,
+  userID : ID du profil,
+  postID : ID du post,
+  reportComment : commentaire de la personne qui avait signalé
+  reportStatus : statut du report, 0 - pas pris par un modo, 1 - pris mais pas géré, 2 - post caché attente d'une modification ou 3 - fini/annulé.
+  reportHandler : ID du modérateur qui gère le signalement
+  reportResult : Résultat final par le modérateur
+  timeStateChange : Moment où le signalement passe de 1 à 2
+}
+```
+
+### Erreurs
+
+  * **Code:** 400 NOT FOUND <br />
+    **Explication** Pas de signalements qui correspondent.
+
+
+ ## Recherche tous les signalement non handle par un modérateur OU tous les signalements du modérateur
+
+
+
+### URL
+```
+/post/reports/
+```
+
+### Méthode
+
+**GET**
+
+### Variable POST
+
+    **my_reports** : Si cette variable existe on veut les reports du modérateur, sinon on veut tous les reports dont le statut est à 0. 
+
+### Succès
+
+  * **Code:** 200 OK
+    **Explication** Listes des signalements qui correspondent. Affiche pour chaque report ses informations.
+	
+Data: 
+```json
+{
+	nbOfReports: nombres de reports retournés
+	Reports: les reports
+
+}
+```
