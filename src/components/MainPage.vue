@@ -12,7 +12,7 @@
 
 			<md-tab md-label="Mon profil" id="thread-profile" class="threads">
 				<div class="threads"></div>
-				<pageProfile :ID="profileID"></pageProfile>
+				<pageProfile :ID="-1" :current="true"></pageProfile>
 			</md-tab>
 		</md-tabs>
 	</md-layout>
@@ -33,11 +33,6 @@ export default{
 		thread,
     	profileSwitch,
     	pageProfile
-	},
-	data () {
-		return {
-			profileID: 258
-		}
 	},
 	computed: {
 		...Vuex.mapGetters({

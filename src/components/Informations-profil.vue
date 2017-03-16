@@ -3,11 +3,11 @@
 		<md-whiteframe class="infos" md-elevation="8">
 			<md-layout md-gutter class="cls_1">
 				<md-avatar class="md-large avatar">
-					<img src="../../assets/Eiko.png"/>
+					<img src="./assets/Eiko.png"/>
 				</md-avatar>
 
 				<md-layout md-flex="50" md-column>
-					<p class="profile-name">{{ currentProfile.profileName }}</p>
+					<p class="profile-name">{{ profile.profileName }}</p>
 
 					<md-layout v-if="!abonne" md-gutter>
 						<md-button  class="md-raised md-primary" @click.native="sabonner">S'abonner</md-button>
@@ -40,42 +40,22 @@
 <script>
 import connection from './Connection.vue'
 import apiRoot from './../config.js'
+import store from './connectionStore.js'
 
 export default {
 	name: 'informationsProfilAutre',
 
 	data () {
 		return {
-			abonne: false,
-			notif: false,
-			connected: false,
-
-			currentProfile: {type:Object},
-			nmbPosts: {type:Object},
-			listFollowers: {type:Object},
-			listFollowings: {type:Object},
-
-			follow: null
+			follow: false,
+			notif: false
 		}
 	},
-	computed: {
-		/*user () {
-			return{
-				nmb_posts: 30,
-				nmb_abonnements: 300,
-				nmb_abonnés: 6000,
-				profileName: 'nom_du_profil',
-				profileDesc: 'Lorem ipsum dolor sit amet. Blablibla blou blabli bloublou.',
-			}
-		},*/
+	props:['profile'],
+	mounted () {
+		this.connection ();
+		//this.follower ();
 	},
-	/*props:{
-		profile: {type:Object},
-		currentProfile: {type:Object},
-		nmbPosts: {type:Object},
-		listFollowers: {type:Object},
-		listFollowings: {type:Object}
-	},*/
 	methods: {
 		connection () {
 			if(this.currentProfile.profileID = '') {this.connected = false;}
@@ -125,7 +105,7 @@ export default {
 				//requete abonnement
 				this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
 					{
-					    
+
 					}
 				},(response)=>{
 					switch (response.status) {
@@ -141,7 +121,7 @@ export default {
 						default:
 							console.log('Unknown error')
 					}
-				})				
+				})
 			}
 		},
 		desabonner () {
@@ -150,7 +130,7 @@ export default {
 
 			this.$http.get(apiRoot + 'profile/follow/' + this.currentProfile.profileID).then((response) => {
 					{
-					    
+
 					}
 				},(response)=>{
 					switch (response.status) {
@@ -171,7 +151,7 @@ export default {
 		notifier () {
 			this.$http.get(apiRoot + 'profile/subscribe/' + this.currentProfile.profileID).then((response) => {
 					{
-					    
+
 					}
 				},(response)=>{
 					switch (response.status) {
@@ -190,10 +170,6 @@ export default {
 				})
 			this.notif=!this.notif
 		}
-	},
-	mounted () {
-		this.connection ();
-		//this.follower ();
 	}
 }
 
