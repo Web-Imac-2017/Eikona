@@ -2,7 +2,7 @@
 	<md-layout md-gutter>
 		<md-layout v-if="current">
 			<infosEditable :profile="profile"</infosEditable>
-			<previewsPostsPerso :profile="profile"></previewsPostsPerso>
+			<previewsPostsPerso :profile="profile" :followings="followings" :followers="followers"></previewsPostsPerso>
 		</md-layout>
 		<md-layout v-else>
 			<informationsProfilAutre :profile="profile"></informationsProfilAutre>
@@ -82,7 +82,7 @@ export default{
 							console.log("OK Data")
 							break
 						case 400:
-							console.log('La variable GET ' + this.ID + ' n\est pas un ID')
+							console.log('La variable GET ' + id + ' n\est pas un ID')
 							break
 						case 404:
 							console.log('Le profil spécifié n\'existe pas')
@@ -107,7 +107,7 @@ export default{
 							console.log("OK Data")
 							break
 						case 400:
-							console.log('La variable GET ' + this.ID + ' n\est pas un ID')
+							console.log('La variable GET ' + id + ' n\est pas un ID')
 							break
 						case 401:
 							console.log('Le profil courant n\'est pas autorisé a voir les posts de ce profil')
