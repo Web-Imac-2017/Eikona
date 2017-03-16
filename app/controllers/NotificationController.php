@@ -36,7 +36,7 @@ class NotificationController implements NotificationControllerInterface
 
 		if(!array_key_exists($code, $this->allowedCodes)){
 			$rsp->setFailure(400, "wrong code")
-			     ->send();
+			    ->send();
 			return;
 		}
 
@@ -49,6 +49,22 @@ class NotificationController implements NotificationControllerInterface
 			->bindValue("profileID", $profileID)
 			->bindValue("profileTargetID", $profileTarget)
 			->bindValue("targetID", $target)
+		    ->send();
+	}
+
+	public function seen($notifID)
+	{
+		$rsp = new Response();
+
+		if(!$this->model->isNotif($notifID)){
+			$rsp->setFailure(404, "not a notif")
+				->send();
+			return;
+		}
+
+		$this->model->setNotificationSeen($notifID);
+		$rsp->setSuccess(200, "notif seen")
+		    ->bindValue("notifID", $notifID)
 		    ->send();
 	}
 }
