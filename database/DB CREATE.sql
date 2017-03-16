@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS `Roger`.`users` (
   `user_code` VARCHAR(20) NULL,
   `user_key` VARCHAR(45) NULL DEFAULT NULL COMMENT '« UUID() »',
   PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `user_email_UNIQUE` (`user_email` ASC),
-  UNIQUE INDEX `userscol_UNIQUE` (`userscol` ASC))
+  UNIQUE INDEX `user_email_UNIQUE` (`user_email` ASC)
+    )
 ENGINE = InnoDB;
 
 
