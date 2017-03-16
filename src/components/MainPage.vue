@@ -78,11 +78,15 @@ export default{
 	background-image: url("./../assets/bg.jpg");
 }
 #thread-feed{
-	background-image: url("./../assets/bg3.jpg");
+	background: url("./../assets/bg3.jpg") 100% 0;
+	background-size: cover;
+	min-height: 100vh;
 }
-/*#thread-profile{
-	background-image: url("./../assets/bg4.jpg");
-}*/
+#thread-profile{
+	background: url("./../assets/bg4.jpg") 100% 0;
+	background-size: cover;
+	min-height: 100vh;
+}
 
 
 .switchButton {
