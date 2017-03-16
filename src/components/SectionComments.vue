@@ -26,7 +26,7 @@ export default {
 	props: [comments, errorMessage, post, commentsLike],
 	data(){
 		newComment:''
-	}
+	},
 
 	methods:{
 		addLikeComment(id){
@@ -67,8 +67,8 @@ export default {
 
 				}).then((response)=>{
 					this.comments.push({
-						 profile_id : response.data.data.profilID
-						 comment_texte : this.newComment,
+						 profile_id : response.data.data.profilID,
+						 comment_texte : this.newComment
 						
 					})
 					this.commentsLike.push(0)

@@ -70,9 +70,10 @@
 
 			return {			
 				comments: [],
-				imageLink: 'assets/testPhoto.jpg',
 				displayComs: false,
-				commentsLike: []
+				commentsLike: [],
+				like:0,
+				tags:[]
 
 			}
 		},
@@ -96,10 +97,12 @@
 						case 400 :
 							console.log('Le post n\'a pas été aimé')
 							this.like = 0
+							break
 					}
+				})
 			},
 			tags () {
-				// Récpérer les tags attachés à ce post
+				// Récupérer les tags attachés à ce post
 
 				this.$http.get(apiRoot + 'post/tags/' + this.post.postID).then((response)=>{
 					this.tags = response.data.data.tags
@@ -108,6 +111,8 @@
 					console.log('Le post spécifié n\'existe pas OU l\'user n\'a pas de profil courant OU vous ne suivez pas le profil')
 				})
 			}
+
+
 		},
 		methods: {
 			getComments () {
@@ -123,12 +128,14 @@
 						this.$http.get(apiRoot + 'comment/likes' + comment.comment_id).then((response)=>{
 							this.commentsLike.push(response.data.data.nbOfLikes)
 						},(response)=>{
-							case 404 :
-								console.log('L\'id du commentaire ne renvoie à aucun commentaire')
-								break
-							case 401 :
-								console.log('Vous ne suivez pas la personne')
-								break
+							switch (response.status) {
+								case 404 :
+									console.log('L\'id du commentaire ne renvoie à aucun commentaire')
+									break
+								case 401 :
+									console.log('Vous ne suivez pas la personne')
+									break
+							}
 						})
 					})
 					
