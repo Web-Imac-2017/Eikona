@@ -84,7 +84,7 @@ export default {
     },
     select (profileId) {
       this.selectProfile(profileId)
-      this.$emit('change')
+      this.$router.push("/user")
     },
     getNotifMessage(notif) {
       switch (notif.notif_type) {
